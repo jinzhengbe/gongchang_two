@@ -1,5 +1,5 @@
 # 构建阶段
-FROM node:18-alpine as build
+FROM node:18-alpine as builder
 
 WORKDIR /app
 
@@ -16,16 +16,16 @@ COPY . .
 RUN npm run build
 
 # 生产阶段
-FROM nginx:1.21-alpine
+FROM nginx:alpine
 
-# 复制构建产物到 Nginx 目录
-COPY --from=build /app/dist /usr/share/nginx/html
+# 从构建阶段复制构建结果到 nginx 目录
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 复制 Nginx 配置
+# 复制 nginx 配置
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 暴露端口
 EXPOSE 80
 
-# 启动 Nginx
+# 启动 nginx
 CMD ["nginx", "-g", "daemon off;"] 

@@ -1,44 +1,34 @@
 # 构建阶段
-FROM golang:1.18-alpine as build
+FROM golang:1.21-alpine AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-# 安装构建工具
-RUN apk add --no-cache gcc musl-dev
-
-# 复制 go.mod
-COPY go.mod ./
-
-# 下载依赖
+# 安装依赖
+COPY go.mod go.sum ./
 RUN go mod download
 
 # 复制源代码
 COPY . .
 
 # 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o app
 
 # 生产阶段
 FROM alpine:latest
 
+RUN apk add --no-cache ca-certificates && \
+    mkdir /app
+
 WORKDIR /app
 
-# 安装运行时依赖
-RUN apk add --no-cache ca-certificates tzdata
+COPY --from=builder /build/app .
+COPY --from=builder /build/.env .
 
-# 从构建阶段复制二进制文件和配置文件
-COPY --from=build /app/main .
-COPY --from=build /app/.env .
-COPY --from=build /app/config ./config
-
-# 创建上传目录
-RUN mkdir -p uploads
-
-# 设置时区
-ENV TZ=Asia/Shanghai
+# 设置权限
+RUN chmod +x ./app
 
 # 暴露端口
-EXPOSE 8080
+EXPOSE 8082
 
-# 启动应用
-CMD ["./main"] 
+# 运行应用
+CMD ["./app"] 

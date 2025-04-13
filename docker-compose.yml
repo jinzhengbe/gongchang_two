@@ -3,97 +3,90 @@ version: '3.8'
 services:
   # 前端服务
   frontend:
-    build:
+    build: 
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: sewingmast-frontend
     ports:
-      - "80:80"
+      - "8088:80"
     environment:
-      - VITE_API_URL=http://backend:8080
-    depends_on:
-      - backend
+      - NODE_ENV=${NODE_ENV:-production}
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8082}
     networks:
-      - app-network
+      - sewingmast-network
 
   # 后端服务
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: sewingmast-backend
     ports:
-      - "8080:8080"
+      - "8082:8082"
+    volumes:
+      - ./backend/src:/app/src
     environment:
+      - GO_ENV=${GO_ENV:-production}
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_USER=sewingmast
-      - DB_PASSWORD=sewingmast123
-      - DB_NAME=sewingmast
+      - DB_USER=${DB_USER:-sewingmast}
+      - DB_PASSWORD=${DB_PASSWORD:-sewingmast123}
+      - DB_NAME=${DB_NAME:-sewingmast}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=your_jwt_secret
-      - UPLOAD_DIR=/app/uploads
-    volumes:
-      - uploads:/app/uploads
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret}
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_started
     networks:
-      - app-network
+      - sewingmast-network
+    restart: unless-stopped
 
   # MySQL 数据库
   mysql:
     image: mysql:8.0
+    container_name: sewingmast-mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=root123
-      - MYSQL_DATABASE=sewingmast
-      - MYSQL_USER=sewingmast
-      - MYSQL_PASSWORD=sewingmast123
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-sewingmast}
+      - MYSQL_USER=${MYSQL_USER:-sewingmast}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-sewingmast123}
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - sewingmast-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - app-network
 
   # Redis 缓存
   redis:
-    image: redis:6.2
+    image: redis:6.2-alpine
+    container_name: sewingmast-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
-      - redis-data:/data
+      - redis_data:/data
+    command: redis-server --appendonly yes
     networks:
-      - app-network
-
-  # Nginx 反向代理
-  nginx:
-    image: nginx:1.21
-    ports:
-      - "8081:80"
-      - "8443:443"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
-      - ./nginx/logs:/var/log/nginx
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - app-network
+      - sewingmast-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  mysql-data:
-  redis-data:
-  uploads:
+  mysql_data:
+  redis_data:
 
 networks:
-  app-network:
+  sewingmast-network:
     driver: bridge 

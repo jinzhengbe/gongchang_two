@@ -3,7 +3,7 @@
     <div class="nav-container">
       <div class="nav-logo">
         <router-link to="/">
-          <img src="@/assets/logo.png" alt="SewingMast" />
+          <img src="@/assets/logo.svg" alt="SewingMast" />
         </router-link>
       </div>
 

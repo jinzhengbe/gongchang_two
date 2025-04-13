@@ -1,17 +1,30 @@
 <template>
-  <div class="app">
-    <Navbar />
-    <router-view />
+  <div id="app">
+    <Navigation />
+    <main class="main-content">
+      <router-view />
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import Navbar from '@/components/common/Navbar.vue'
+import Navigation from '@/components/common/Navigation.vue'
 </script>
 
 <style>
-.app {
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
   min-height: 100vh;
-  background-color: var(--el-bg-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  margin-top: 64px; /* 导航栏高度 */
+  padding: 20px;
 }
 </style> 
