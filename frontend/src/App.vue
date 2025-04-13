@@ -24,7 +24,12 @@ import Navigation from '@/components/common/Navigation.vue'
 
 .main-content {
   flex: 1;
-  margin-top: 64px; /* 导航栏高度 */
   padding: 20px;
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    margin-top: 64px; /* 只在桌面版添加导航栏高度的边距 */
+  }
 }
 </style> 

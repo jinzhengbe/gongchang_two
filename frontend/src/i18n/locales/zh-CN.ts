@@ -9,13 +9,14 @@ export default {
     loading: '加载中...',
     success: '操作成功',
     error: '操作失败',
-    noData: '暂无数据'
+    noData: '暂无数据',
+    showMore: '查看更多'
   },
   nav: {
     home: '首页',
-    orders: '订单',
-    factory: '工厂',
-    fabrics: '布料',
+    orders: '订单管理',
+    factories: '工厂列表',
+    fabrics: '布料市场',
     login: {
       designer: '设计师登录',
       factory: '工厂登录',
