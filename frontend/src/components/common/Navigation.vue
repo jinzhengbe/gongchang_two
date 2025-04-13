@@ -20,39 +20,16 @@
       </el-menu>
 
       <div class="nav-actions">
-        <el-dropdown trigger="click" class="language-dropdown">
-          <span class="language-selector">
-            {{ currentLanguage }}
-            <el-icon><ArrowDown /></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="changeLanguage('zh')">中文</el-dropdown-item>
-              <el-dropdown-item @click="changeLanguage('en')">English</el-dropdown-item>
-              <el-dropdown-item @click="changeLanguage('ko')">한국어</el-dropdown-item>
-              <el-dropdown-item @click="changeLanguage('vi')">Tiếng Việt</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-
-        <div class="login-section">
-          <el-dropdown v-for="role in roles" :key="role.value" class="login-dropdown">
-            <el-button type="primary" :class="role.value">
-              {{ t(`login.${role.label}`) }}
-              <el-icon><ArrowDown /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="handleLogin(role.value)">
-                  {{ t('login.login') }}
-                </el-dropdown-item>
-                <el-dropdown-item @click="handleRegister(role.value)">
-                  {{ t('login.register') }}
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
+        <el-button 
+          v-for="role in roles" 
+          :key="role.value"
+          type="primary"
+          :class="role.value"
+          @click="handleLogin(role.value)"
+        >
+          {{ t(`nav.login.${role.value}`) }}
+        </el-button>
+        <LanguageSelector />
       </div>
 
       <!-- 移动端菜单按钮 -->
@@ -71,17 +48,6 @@
           <el-menu-item index="/fabrics">{{ t('nav.fabrics') }}</el-menu-item>
         </el-menu>
         <div class="mobile-actions">
-          <el-dropdown trigger="click" class="language-dropdown">
-            <el-button>{{ currentLanguage }}</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="changeLanguage('zh')">中文</el-dropdown-item>
-                <el-dropdown-item @click="changeLanguage('en')">English</el-dropdown-item>
-                <el-dropdown-item @click="changeLanguage('ko')">한국어</el-dropdown-item>
-                <el-dropdown-item @click="changeLanguage('vi')">Tiếng Việt</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
           <div class="mobile-login-buttons">
             <el-button 
               v-for="role in roles" 
@@ -90,9 +56,10 @@
               :class="role.value"
               @click="handleLogin(role.value)"
             >
-              {{ t(`login.${role.label}`) }}
+              {{ t(`nav.login.${role.value}`) }}
             </el-button>
           </div>
+          <LanguageSelector />
         </div>
       </div>
     </transition>
@@ -104,6 +71,7 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { ArrowDown, Menu } from '@element-plus/icons-vue'
+import LanguageSelector from './LanguageSelector.vue'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -190,7 +158,21 @@ const toggleMobileMenu = () => {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+
+  .el-button {
+    margin: 0;
+    
+    &.designer {
+      background-color: #409EFF;
+    }
+    &.factory {
+      background-color: #67C23A;
+    }
+    &.supplier {
+      background-color: #E6A23C;
+    }
+  }
 }
 
 .language-dropdown {
@@ -252,7 +234,10 @@ const toggleMobileMenu = () => {
 }
 
 @media (max-width: 768px) {
-  .nav-menu,
+  .nav-menu {
+    display: none;
+  }
+
   .nav-actions {
     display: none;
   }
@@ -263,6 +248,14 @@ const toggleMobileMenu = () => {
 
   .mobile-menu {
     display: block;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 20px;
+    border-top: 1px solid #eee;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     .el-menu {
       border-right: none;
@@ -272,13 +265,14 @@ const toggleMobileMenu = () => {
       margin-top: 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-    }
+      gap: 12px;
+      padding: 0 16px;
 
-    .mobile-login-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      .mobile-login-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
     }
   }
 }

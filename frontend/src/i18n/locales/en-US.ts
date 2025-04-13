@@ -14,8 +14,13 @@ export default {
   nav: {
     home: 'Home',
     orders: 'Orders',
-    factories: 'Factories',
-    login: 'Login',
+    factory: 'Factory',
+    fabrics: 'Fabrics',
+    login: {
+      designer: 'Designer Login',
+      factory: 'Factory Login',
+      supplier: 'Supplier Login'
+    },
     logout: 'Logout',
     profile: 'Profile',
     language: 'Language'
@@ -130,5 +135,24 @@ export default {
     dynamicContent: 'Dynamic Content',
     welcome: 'Welcome, {name}!',
     orderCount: 'You have {count} pending orders'
+  },
+  banner: {
+    title: 'Smart Factory Management System',
+    subtitle: 'Intelligent platform connecting designers, factories and suppliers',
+    features: {
+      designer: 'For Designers',
+      factory: 'Factory Management',
+      supplier: 'Supplier Services'
+    },
+    cta: 'Get Started'
+  },
+  carousel: {
+    hotFabrics: 'Hot Fabrics',
+    hotFabricsDesc: 'Selected high-quality fabrics with guaranteed quality',
+    latestOrders: 'Latest Orders',
+    latestOrdersDesc: 'View the latest published orders',
+    topFactories: 'Top Factories',
+    topFactoriesDesc: 'Recommended quality factory partners',
+    showMore: 'Show More'
   }
 } 

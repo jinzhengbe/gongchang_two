@@ -14,8 +14,13 @@ export default {
   nav: {
     home: '首页',
     orders: '订单',
-    factories: '工厂',
-    login: '登录',
+    factory: '工厂',
+    fabrics: '布料',
+    login: {
+      designer: '设计师登录',
+      factory: '工厂登录',
+      supplier: '供应商登录'
+    },
     logout: '退出',
     profile: '个人中心',
     language: '语言'
@@ -41,9 +46,10 @@ export default {
       latestOrders: '最新订单',
       topFactories: '优质工厂',
       hotFabrics: '热门面料',
-      latestOrdersDesc: '最新发布的订单信息',
-      topFactoriesDesc: '优质合作工厂推荐',
-      hotFabricsDesc: '精选优质面料，品质保证'
+      latestOrdersDesc: '查看最新发布的订单信息',
+      topFactoriesDesc: '合作优质工厂推荐',
+      hotFabricsDesc: '精选优质面料，品质保证',
+      showMore: '查看更多'
     },
     content: {
       designerOrders: '设计师订单',
@@ -143,5 +149,15 @@ export default {
     dynamicContent: '动态内容',
     welcome: '欢迎，{name}！',
     orderCount: '您有 {count} 个订单待处理'
+  },
+  banner: {
+    title: '智能工厂管理系统',
+    subtitle: '连接设计师、工厂和供应商的智能平台',
+    features: {
+      designer: '设计师专属',
+      factory: '工厂管理',
+      supplier: '供应商服务'
+    },
+    cta: '立即开始'
   }
 } 

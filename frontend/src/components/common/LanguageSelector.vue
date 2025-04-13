@@ -1,85 +1,50 @@
 <template>
-  <div class="language-selector">
-    <!-- 下拉菜单形式 -->
-    <el-dropdown @command="handleLanguageChange" trigger="click">
-      <span class="language-trigger">
-        {{ currentLanguage.nativeName }}
-        <el-icon class="el-icon--right"><arrow-down /></el-icon>
-      </span>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item
-            v-for="lang in languages"
-            :key="lang.code"
-            :command="lang.code"
-            :class="{ active: lang.code === current }"
-          >
-            {{ lang.nativeName }}
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-  </div>
+  <el-dropdown trigger="click" class="language-selector">
+    <el-button>
+      {{ currentLanguage }}
+      <el-icon class="el-icon--right"><arrow-down /></el-icon>
+    </el-button>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item @click="changeLanguage('zh-CN')">中文</el-dropdown-item>
+        <el-dropdown-item @click="changeLanguage('en-US')">English</el-dropdown-item>
+        <el-dropdown-item @click="changeLanguage('ko-KR')">한국어</el-dropdown-item>
+        <el-dropdown-item @click="changeLanguage('vi-VN')">Tiếng Việt</el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ArrowDown } from '@element-plus/icons-vue'
-import { getCurrentLanguage, getSupportedLanguages, setLanguage } from '@/i18n'
-import type { SupportedLocale } from '@/i18n'
 
-// 获取支持的语言列表
-const languages = getSupportedLanguages()
+const { locale } = useI18n()
 
-// 当前语言代码
-const current = ref<SupportedLocale>(getCurrentLanguage())
-
-// 当前语言完整信息
 const currentLanguage = computed(() => {
-  return languages.find(lang => lang.code === current.value) || languages[0]
+  const languages = {
+    'zh-CN': '中文',
+    'en-US': 'English',
+    'ko-KR': '한국어',
+    'vi-VN': 'Tiếng Việt'
+  }
+  return languages[locale.value] || languages['en-US']
 })
 
-// 处理语言切换
-const handleLanguageChange = (lang: SupportedLocale) => {
-  current.value = lang
-  setLanguage(lang)
+const changeLanguage = (lang: string) => {
+  locale.value = lang
 }
-
-// 监听语言变更事件
-onMounted(() => {
-  window.addEventListener('language-changed', ((event: CustomEvent) => {
-    current.value = event.detail as SupportedLocale
-  }) as EventListener)
-})
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .language-selector {
-  display: inline-flex;
-  align-items: center;
-}
-
-.language-trigger {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.language-trigger:hover {
-  background-color: var(--el-fill-color-light);
-}
-
-.active {
-  color: var(--el-color-primary);
-  font-weight: bold;
-}
-
-:deep(.el-dropdown-menu__item) {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
+  margin-left: 16px;
+  
+  .el-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
 }
 </style> 
