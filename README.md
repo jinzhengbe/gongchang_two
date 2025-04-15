@@ -1,179 +1,468 @@
-# SewingMast - 智能工厂管理系统
-
-## 最新更新
-- 2024-03-xx
-  - 优化移动端导航栏布局
-    - 移除冗余导航链接
-    - 优化菜单交互逻辑
-    - 改进登录按钮的显示位置和样式
-  - 改进响应式设计
-    - 优化移动端和桌面端的显示效果
-    - 添加平滑的过渡动画
-  - 多语言支持优化
-    - 支持中文、英文、韩文和越南语
-    - 优化语言切换按钮的样式和位置
+# SewingMast Backend API
 
 ## 项目简介
-SewingMast 是一个专注于服装制造业的智能工厂管理系统。系统连接设计师、工厂和供应商，提供全流程的数字化解决方案。
-
-### 主要功能
-- 设计师订单管理
-- 工厂资源配置
-- 面料供应链管理
-- 多语言支持
-- 响应式设计，支持移动端和桌面端
+SewingMast 是一个基于 Go 语言的后端 API 服务，提供用户管理、产品管理、订单管理等功能。系统采用现代化的技术栈，提供高性能、可扩展的 API 服务。
 
 ## 技术栈
-- 前端：Vue 3 + TypeScript + Element Plus
-- 后端：Node.js + Express
-- 数据库：MySQL
-- 缓存：Redis
-- 容器化：Docker + Docker Compose
+- 后端: Go (Gin 框架)
+- 数据库: MySQL
+- 认证: JWT
+- 部署: Docker
+- 日志: Zap
+- 配置: Viper
+- HTTPS: Let's Encrypt
+
+## 环境要求
+- Go 1.16+
+- MySQL 5.7+
+- Docker (可选)
+- SSL 证书 (生产环境)
+
+## HTTPS 配置说明
+
+### 1. 证书获取
+#### 使用 Let's Encrypt
+```bash
+# 安装 certbot
+sudo apt-get update
+sudo apt-get install certbot
+
+# 获取证书
+sudo certbot certonly --standalone -d your-domain.com
+```
+
+#### 证书文件位置
+```bash
+/etc/letsencrypt/live/your-domain.com/
+├── cert.pem      # 证书文件
+├── chain.pem     # 中间证书
+├── fullchain.pem # 完整证书链
+└── privkey.pem   # 私钥文件
+```
+
+### 2. 后端 HTTPS 配置
+```go
+// main.go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "log"
+    "net/http"
+)
+
+func main() {
+    router := gin.Default()
+    
+    // 配置 HTTPS
+    certFile := "/etc/letsencrypt/live/your-domain.com/fullchain.pem"
+    keyFile := "/etc/letsencrypt/live/your-domain.com/privkey.pem"
+    
+    // 启动 HTTPS 服务
+    log.Fatal(http.ListenAndServeTLS(":443", certFile, keyFile, router))
+}
+```
+
+### 3. Nginx 反向代理配置
+```nginx
+# /etc/nginx/sites-available/your-domain.com
+server {
+    listen 80;
+    server_name your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    
+    # SSL 配置
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_tickets off;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    
+    # HSTS
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### 4. Docker 配置
+```yaml
+# docker-compose.yml
+version: '3'
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SSL_CERT_FILE=/etc/letsencrypt/live/your-domain.com/fullchain.pem
+      - SSL_KEY_FILE=/etc/letsencrypt/live/your-domain.com/privkey.pem
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+```
+
+### 5. 证书自动续期
+```bash
+# 创建续期脚本
+sudo nano /etc/cron.d/certbot-renew
+
+# 添加以下内容
+0 0 * * * root certbot renew --quiet --deploy-hook "systemctl reload nginx"
+```
+
+### 6. 安全配置
+```go
+// 强制 HTTPS 重定向
+func forceSSL() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        if c.Request.TLS == nil {
+            url := "https://" + c.Request.Host + c.Request.URL.Path
+            c.Redirect(http.StatusMovedPermanently, url)
+            c.Abort()
+        }
+    }
+}
+
+// 使用中间件
+router.Use(forceSSL())
+```
+
+### 7. 环境变量配置
+```env
+# .env
+SSL_ENABLED=true
+SSL_CERT_FILE=/etc/letsencrypt/live/your-domain.com/fullchain.pem
+SSL_KEY_FILE=/etc/letsencrypt/live/your-domain.com/privkey.pem
+```
+
+### 8. 测试 HTTPS
+```bash
+# 使用 curl 测试
+curl -v https://your-domain.com/api/health
+
+# 使用 openssl 测试
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
+```
+
+## 前端调用说明
+
+### 基础配置
+```typescript
+// api/config.ts
+const API_BASE_URL = process.env.VITE_API_URL || 'https://your-domain.com'
+
+// 请求配置
+const requestConfig = {
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+}
+```
+
+### 认证配置
+```typescript
+// 添加认证头
+const addAuthHeader = (config: AxiosRequestConfig) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+}
+
+// 请求拦截器
+axios.interceptors.request.use(addAuthHeader)
+```
+
+### API 调用示例
+
+#### 1. 用户认证
+```typescript
+// 登录
+const login = async (credentials: LoginCredentials) => {
+  const response = await axios.post('/api/auth/login', credentials)
+  return response.data
+}
+
+// 获取用户信息
+const getUserProfile = async () => {
+  const response = await axios.get('/api/users/profile')
+  return response.data
+}
+```
+
+#### 2. 产品管理
+```typescript
+// 获取产品列表
+const getProducts = async (params: ProductQueryParams) => {
+  const response = await axios.get('/api/products', { params })
+  return response.data
+}
+
+// 创建产品
+const createProduct = async (product: ProductCreateDto) => {
+  const response = await axios.post('/api/products', product)
+  return response.data
+}
+```
+
+#### 3. 订单管理
+```typescript
+// 获取订单列表
+const getOrders = async (params: OrderQueryParams) => {
+  const response = await axios.get('/api/orders', { params })
+  return response.data
+}
+
+// 创建订单
+const createOrder = async (order: OrderCreateDto) => {
+  const response = await axios.post('/api/orders', order)
+  return response.data
+}
+```
+
+### 错误处理
+```typescript
+// 响应拦截器
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          // 处理未授权
+          router.push('/login')
+          break
+        case 403:
+          // 处理权限不足
+          showError('权限不足')
+          break
+        case 404:
+          // 处理资源不存在
+          showError('资源不存在')
+          break
+        case 500:
+          // 处理服务器错误
+          showError('服务器错误')
+          break
+        default:
+          showError(error.response.data.message || '请求失败')
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+```
+
+### 环境变量配置
+```env
+# .env.development
+VITE_API_URL=https://your-domain.com
+
+# .env.production
+VITE_API_URL=https://your-production-domain.com
+```
+
+### 跨域配置
+```typescript
+// vite.config.ts
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://your-domain.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
+})
+```
+
+## 端口使用说明
+
+### 开发环境
+```bash
+# 默认端口配置
+PORT=8080        # API 服务端口
+DB_PORT=3306     # MySQL 数据库端口
+```
+
+### 生产环境
+```bash
+# 生产环境端口配置
+PORT=8082        # API 服务端口（建议使用非默认端口）
+DB_PORT=3306     # MySQL 数据库端口
+```
+
+### 端口映射说明
+1. API 服务端口
+   - 开发环境：8080
+   - 生产环境：8082
+   - 可以通过环境变量 PORT 修改
+   - 确保防火墙开放相应端口
+
+2. 数据库端口
+   - 默认端口：3306
+   - 可以通过环境变量 DB_PORT 修改
+   - 生产环境建议修改默认端口
+
+3. Docker 部署端口映射
+```yaml
+# docker-compose.yml 示例
+services:
+  api:
+    ports:
+      - "8080:8080"  # 开发环境
+      # - "8082:8082"  # 生产环境
+  mysql:
+    ports:
+      - "3306:3306"  # 数据库端口
+```
+
+### 端口冲突解决方案
+1. 修改 API 服务端口
+```bash
+# 方法1：通过环境变量
+export PORT=8082
+
+# 方法2：修改 .env 文件
+PORT=8082
+```
+
+2. 修改数据库端口
+```bash
+# 方法1：通过环境变量
+export DB_PORT=3307
+
+# 方法2：修改 .env 文件
+DB_PORT=3307
+```
+
+3. 检查端口占用
+```bash
+# Linux/Mac
+lsof -i :8080
+
+# Windows
+netstat -ano | findstr :8080
+```
+
+### 安全建议
+1. 生产环境使用非默认端口
+2. 配置防火墙规则
+3. 使用 HTTPS
+4. 定期检查端口使用情况
 
 ## 快速开始
 
-### 开发环境部署
-1. 克隆项目
+### 1. 环境配置
 ```bash
-git clone [项目地址]
-cd sewingmast
+# 复制环境配置文件
+cp backend/.env.example backend/.env
+
+# 修改数据库配置
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=sewingmast
+DB_PASSWORD=your_password
+DB_NAME=sewingmast
 ```
 
-2. 使用 Docker Compose 启动服务
+### 2. 安装依赖
 ```bash
-docker-compose up -d
+cd backend
+go mod download
 ```
 
-3. 访问系统
-- 前端：http://localhost:8088
-- 后端API：http://localhost:3000
-
-### 开发指南
-- 前端开发目录：`/frontend`
-- 后端开发目录：`/backend`
-- 配置文件：`docker-compose.yml`
-
-## 系统架构
-- 采用前后端分离架构
-- 使用 Docker 容器化部署
-- 支持横向扩展
-
-## 更新日志
-### v1.x
-- v1.1.0
-  - 优化移动端导航栏
-  - 改进响应式设计
-  - 增强多语言支持
-- v1.0.0
-  - 初始版本发布
-  - 基础功能实现
-
-## 国际化支持
-- 支持语言：
-  - 中文 (zh-CN)
-  - 英文 (en-US)
-  - 韩文 (ko-KR)
-  - 越南语 (vi-VN)
-
-## 许可证
-MIT License
-
-## 联系方式
-- 项目维护团队：[团队名称]
-- 邮箱：[联系邮箱]
-
-## 项目概述
-SewingMast 是一个基于 Vue 3 + Go 的智能工厂管理系统，支持多角色（设计师、工厂、布料供应商）的订单管理和布料管理。系统采用最新的技术栈，提供现代化的用户界面和完善的功能模块。
-
-项目地址：
-- GitHub: https://github.com/jinzhengbe/gongchang_two.git
-- 网址：https://aneworder.com
-
-## 主要特性
-
-### 多角色支持
-- **设计师**：创建和管理服装设计订单
-- **工厂**：管理生产订单和进度
-- **布料供应商**：管理布料库存和供应
-
-### 系统功能
-- 智能角色选择和登录系统
-- 多语言支持（中文/英文/韩文/越南语）
-- 响应式设计，支持移动端
-- 实时订单状态追踪
-- 库存管理系统
-- 生产进度监控
-- 数据统计和报表
-- 暗色/亮色主题切换
-- 完整的页脚信息（版权、联系方式等）
-
-## 技术栈
-
-### 前端
-- 框架：Vue 3 + TypeScript
-- 构建工具：Vite 5.4.17
-- UI 组件库：Element Plus
-- 状态管理：Pinia + 持久化存储
-- 路由：Vue Router
-- 国际化：Vue I18n
-- HTTP 客户端：Axios
-- 图表库：ECharts
-- 日期处理：date-fns
-
-### 后端
-- 框架：Go
-- Web 框架：Gin
-- ORM：GORM
-- 数据库：MySQL 8.0
-- 缓存：Redis
-- 认证：JWT
-- 日志：Zap
-- 配置：Viper
-
-## 快速开始
-
-### 环境要求
-- Node.js 16+
-- Go 1.18+
-- MySQL 8.0+
-- Redis 6.0+
-- Docker & Docker Compose
-
-### 开发环境部署
+### 3. 运行服务
 ```bash
-# 克隆项目
-git clone https://github.com/jinzhengbe/gongchang_two.git
-cd gongchang_two
+go run main.go
+```
 
-# 启动所有服务
+### 4. 测试 API
+```bash
+# 测试健康检查接口
+curl http://localhost:8080/api/health | jq
+
+# 预期响应
+{
+  "message": "API is running",
+  "status": "ok"
+}
+```
+
+## API 文档
+
+### 基础 URL
+- 本地开发: `http://localhost:8080`
+- 生产环境: `https://<服务器IP>:8080`
+
+### 健康检查
+- 端点: `GET /api/health`
+- 响应: 
+```json
+{
+  "status": "ok",
+  "message": "API is running"
+}
+```
+
+## 数据库配置
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=sewingmast
+DB_PASSWORD=your_password
+DB_NAME=sewingmast
+```
+
+## 部署说明
+
+### 1. 环境变量配置
+```env
+PORT=8080
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=sewingmast
+DB_PASSWORD=your_password
+DB_NAME=sewingmast
+JWT_SECRET=your-secret-key
+```
+
+### 2. Docker 部署
+```bash
+# 构建镜像
+docker-compose build
+
+# 启动服务
 docker-compose up -d
 
-# 访问应用
-前端：http://localhost:8088
-后端：http://localhost:8082
-```
-
-### 生产环境部署
-```bash
-# 设置环境变量
-cp .env.example .env
-# 编辑 .env 文件，配置生产环境参数
-
-# 构建并启动服务
-docker-compose -f docker-compose.prod.yml up -d
+# 查看日志
+docker-compose logs -f
 ```
 
 ## 系统架构
-
-### 前端架构
-- 基于 Vue 3 Composition API
-- 采用 TypeScript 确保类型安全
-- 使用 Pinia 进行状态管理和持久化
-- 模块化路由设计
-- 组件化开发
-- 响应式布局
-- 多语言国际化支持
-- 主题切换系统
 
 ### 后端架构
 - RESTful API 设计
@@ -183,85 +472,23 @@ docker-compose -f docker-compose.prod.yml up -d
 - 数据验证
 - 日志系统
 
+## 安全说明
+1. 生产环境请修改默认的 JWT_SECRET
+2. 确保数据库密码强度足够
+3. 使用 HTTPS
+4. 定期备份数据库
+
 ## 更新日志
 
-### v1.4.1 (2024-04-13)
-- 优化导航栏布局和样式
-- 添加语言选择器组件
-- 完善国际化支持（中文、英文、韩文、越南语）
-- 改进移动端适配
-- 优化登录按钮样式和交互
-
-### v1.4.0 (2024-04-13)
-- 优化导航栏组件
-- 完善多语言支持
-- 改进移动端适配
-- 优化构建流程
-
-### v1.3.0 (2024-04-11)
-- 优化数据展示效果
-- 完善国际化支持
-- 增强用户体验
-
-### v1.2.0 (2024-04-13)
-- 添加完整的页脚信息
-- 优化移动端响应式布局
-- 完善国际化支持
-- 添加主题切换功能
-
-### v1.1.0 (2024-04-12)
-- 新增多角色登录系统
-- 实现角色特定的后台界面
-- 优化用户体验
-
-### v1.0.0 (2024-04-07)
+### v1.0.0 (2024-04-15)
 - 项目初始化
 - 基础功能实现
-- 核心模块开发
+- 健康检查接口
 - 基础架构搭建
-
-## 国际化支持
-
-支持以下语言：
-- 中文 (zh-CN)：简体中文、繁体中文
-- 英文 (en-US)
-- 韩文 (ko-KR)
-- 越南语 (vi-VN)
 
 ## 许可证
 MIT License
 
 ## 联系方式
-- 官网：https://sewingmast.com
 - 邮箱：support@sewingmast.com
 - 电话：+86-XXX-XXXX-XXXX
-
-## 致谢
-感谢所有为本项目做出贡献的开发者！
-
-## 移动端设计规范
-
-### 1. 顶部导航布局
-- 采用简洁的单行布局
-- 左侧：品牌名称 "Sewing Mast"
-- 中间：语言切换按钮
-- 右侧：九宫格菜单图标（保留交互效果）
-
-### 2. 主要内容区域
-- 仅显示三个登录按钮
-- 按钮垂直排列
-- 保持布局简洁明了
-
-### 3. 登录按钮规范
-- 按钮样式简单直观
-- 文字内容：
-  - "设计师登录"
-  - "工厂登录"
-  - "供应商登录"
-- 去除多余的动画和渐变效果
-
-### 4. 设计原则
-- 遵循简约原则
-- 确保良好的可点击区域
-- 保持视觉层次清晰
-- 优化移动端交互体验 
