@@ -1,157 +1,136 @@
 <template>
-  <el-card class="order-card" :body-style="{ padding: '0' }">
-    <div class="order-header">
-      <span class="order-number">{{ $t('order.number') }}: {{ order.orderNumber }}</span>
-      <el-tag :type="getStatusType(order.status)">
-        {{ $t(`order.status.${order.status}`) }}
-      </el-tag>
+  <div class="order-card" @click="$emit('click', order)">
+    <div class="order-status" :class="getStatusType(order.status)">
+      {{ $t(`orders.status.${order.status}`) }}
     </div>
-    
-    <div class="order-content">
-      <div class="order-info">
-        <p class="info-item">
-          <span class="label">{{ $t('order.date') }}:</span>
-          <span class="value">{{ formatDate(order.orderDate) }}</span>
-        </p>
-        <p class="info-item">
-          <span class="label">{{ $t('order.quantity') }}:</span>
-          <span class="value">{{ formatNumber(order.quantity) }}</span>
-        </p>
-        <p class="info-item">
-          <span class="label">{{ $t('order.price') }}:</span>
-          <span class="value">{{ formatCurrency(order.price) }}</span>
-        </p>
+    <div class="order-title">{{ order.title }}</div>
+    <div class="order-info">
+      <div class="info-item">
+        <span class="label">{{ $t('order.quantity') }}:</span>
+        <span class="value">{{ order.quantity }} {{ $t('orders.pieces') }}</span>
       </div>
-      
-      <div class="order-progress">
-        <span class="progress-label">{{ $t('order.progress') }}</span>
-        <el-progress 
-          :percentage="order.progress" 
-          :status="getProgressStatus(order.progress)"
-        />
+      <div class="info-item">
+        <span class="label">{{ $t('order.price') }}:</span>
+        <span class="value">¥{{ order.price }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">{{ $t('orders.deadline') }}:</span>
+        <span class="value">{{ order.deadline }}</span>
       </div>
     </div>
-
-    <div class="order-footer">
-      <el-button type="text" @click="$emit('view', order)">
-        {{ $t('order.detail') }}
-      </el-button>
-      <el-button 
-        v-if="order.status === 'pending'" 
-        type="primary" 
-        size="small"
-        @click="$emit('process', order)"
-      >
-        {{ $t('common.edit') }}
-      </el-button>
+    <div class="progress-section" v-if="order.progress !== undefined">
+      <div class="progress-bar">
+        <div class="progress" :style="{ width: `${order.progress}%` }"></div>
+      </div>
+      <span class="progress-text">{{ $t('orders.progress', { percentage: order.progress }) }}</span>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { formatDate, formatNumber, formatCurrency } from '@/i18n'
+import { Goods, Money, Timer } from '@element-plus/icons-vue'
 
-interface OrderProps {
-  orderNumber: string
+interface Order {
+  id: string | number
+  title: string
   status: 'pending' | 'processing' | 'completed' | 'cancelled'
-  orderDate: string | Date
   quantity: number
   price: number
+  deadline: string
   progress: number
 }
 
-const props = defineProps<{
-  order: OrderProps
+defineProps<{
+  order: Order
 }>()
 
-const emit = defineEmits<{
-  (e: 'view', order: OrderProps): void
-  (e: 'process', order: OrderProps): void
-}>()
-
-// 获取状态对应的类型
 const getStatusType = (status: string): string => {
   const types: Record<string, string> = {
-    pending: 'warning',
-    processing: 'primary',
-    completed: 'success',
-    cancelled: 'danger'
+    'pending': 'warning',
+    'processing': 'primary',
+    'completed': 'success',
+    'cancelled': 'danger'
   }
   return types[status] || 'info'
 }
-
-// 获取进度条状态
-const getProgressStatus = (progress: number): 'success' | 'exception' | undefined => {
-  if (progress >= 100) return 'success'
-  if (progress < 0) return 'exception'
-  return undefined
-}
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .order-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.order-header {
-  padding: 16px;
-  background-color: var(--el-fill-color-light);
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+
+  .order-status {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .order-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0.5rem 0;
+    color: var(--el-text-color-primary);
+  }
+
+  .order-info {
+    color: var(--el-text-color-regular);
+    font-size: 0.9rem;
+
+    .info-item {
+      margin: 0.3rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .label {
+        color: var(--el-text-color-secondary);
+      }
+
+      .value {
+        color: var(--el-text-color-primary);
+      }
+    }
+  }
+
+  .progress-section {
+    margin-top: 1rem;
+    
+    .progress-bar {
+      height: 0.5rem;
+      background-color: var(--el-bg-color-base);
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: var(--el-color-primary);
+    }
+
+    .progress-text {
+      font-size: 0.9rem;
+      color: var(--el-text-color-secondary);
+      margin-top: 0.3rem;
+      display: block;
+    }
+  }
 }
 
-.order-number {
-  font-weight: bold;
-  color: var(--el-text-color-primary);
-}
+@media (max-width: 768px) {
+  .order-card {
+    .order-title {
+      font-size: 1rem;
+    }
 
-.order-content {
-  padding: 16px;
-}
+    .order-info {
+      font-size: 0.85rem;
+    }
 
-.order-info {
-  margin-bottom: 16px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  color: var(--el-text-color-regular);
-}
-
-.info-item:last-child {
-  margin-bottom: 0;
-}
-
-.label {
-  color: var(--el-text-color-secondary);
-}
-
-.value {
-  font-family: var(--el-font-family-monospace);
-  color: var(--el-text-color-primary);
-}
-
-.order-progress {
-  margin-top: 16px;
-}
-
-.progress-label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--el-text-color-secondary);
-}
-
-.order-footer {
-  padding: 12px 16px;
-  border-top: 1px solid var(--el-border-color-lighter);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    .progress-text {
+      font-size: 0.85rem;
+    }
+  }
 }
 </style> 

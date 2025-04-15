@@ -143,4 +143,28 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, orders)
+}
+
+// GetLatestOrders 获取最新订单列表
+func (c *OrderController) GetLatestOrders(ctx *gin.Context) {
+	limit := 4 // 默认返回4个最新订单
+	orders, err := c.orderService.GetLatestOrders(limit)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orders)
+}
+
+// GetHotOrders 获取热门订单列表
+func (c *OrderController) GetHotOrders(ctx *gin.Context) {
+	limit := 4 // 默认返回4个热门订单
+	orders, err := c.orderService.GetHotOrders(limit)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orders)
 } 

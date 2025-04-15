@@ -36,5 +36,11 @@ func SetupOrderRoutes(router *gin.Engine, orderController *controllers.OrderCont
 		
 		// 获取最近订单
 		orderGroup.GET("/recent", orderController.GetRecentOrders)
+		
+		// 获取最新订单
+		orderGroup.GET("/latest", orderController.GetLatestOrders)
+		
+		// 获取热门订单
+		orderGroup.GET("/hot", orderController.GetHotOrders)
 	}
 } 

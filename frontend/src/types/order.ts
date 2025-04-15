@@ -1,8 +1,8 @@
 export enum OrderStatus {
-  PENDING = 'PENDING',
-  PROCESSING = 'PROCESSING',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
 }
 
 export interface Order {
@@ -10,15 +10,17 @@ export interface Order {
   title: string
   description: string
   status: OrderStatus
-  createdAt: string
-  updatedAt: string
-  designerId: string
+  createdAt?: string
+  updatedAt?: string
+  designerId?: string
   factoryId?: string
   fabricId?: string
   quantity: number
   price: number
   deadline: string
   files?: File[]
+  imageUrl: string
+  progress: number
 }
 
 export interface File {

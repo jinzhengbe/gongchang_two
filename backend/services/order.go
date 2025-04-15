@@ -114,4 +114,31 @@ func (s *OrderService) GetOrderStatistics(userID uint) (*models.OrderStatistics,
 	stats.TrendData = trendData
 
 	return &stats, nil
+}
+
+// GetLatestOrders 获取最新订单列表
+func (s *OrderService) GetLatestOrders(limit int) ([]models.Order, error) {
+	var orders []models.Order
+	err := s.db.Order("created_at desc").
+		Limit(limit).
+		Preload("Designer").
+		Preload("Customer").
+		Preload("Product").
+		Find(&orders).Error
+	return orders, err
+}
+
+// GetHotOrders 获取热门订单列表
+func (s *OrderService) GetHotOrders(limit int) ([]models.Order, error) {
+	var orders []models.Order
+	// 这里可以根据实际需求定义"热门"的标准
+	// 例如：根据订单金额、浏览次数等
+	err := s.db.Order("total_price desc").
+		Where("status != ?", "cancelled").
+		Limit(limit).
+		Preload("Designer").
+		Preload("Customer").
+		Preload("Product").
+		Find(&orders).Error
+	return orders, err
 } 

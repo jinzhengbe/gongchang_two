@@ -5,7 +5,7 @@
     <div class="nav-header">
       <div class="brand">
         <router-link to="/">
-          <span class="brand-text">Sewing Mast</span>
+          <span class="brand-text">{{ t('nav.brand') }}</span>
         </router-link>
       </div>
       
@@ -23,21 +23,14 @@
       <!-- 登录按钮，仅在点击九宫格后显示 -->
       <div v-if="showLoginButtons" class="login-buttons">
         <button class="login-btn designer" @click="handleLogin('designer')">
-          设计师登录
+          {{ t('nav.login.designer') }}
         </button>
         <button class="login-btn factory" @click="handleLogin('factory')">
-          工厂登录
+          {{ t('nav.login.factory') }}
         </button>
         <button class="login-btn supplier" @click="handleLogin('supplier')">
-          供应商登录
+          {{ t('nav.login.supplier') }}
         </button>
-      </div>
-
-      <!-- Latest Orders 卡片，始终显示 -->
-      <div class="latest-orders">
-        <h2>Latest Orders</h2>
-        <p>View the latest published orders</p>
-        <button class="view-more">查看更多</button>
       </div>
     </div>
   </nav>
@@ -48,35 +41,21 @@
       <div class="nav-left">
         <div class="nav-logo">
           <router-link to="/">
-            <img src="@/assets/logo.svg" alt="SewingMast" />
+            <span class="brand-text">{{ t('nav.brand') }}</span>
           </router-link>
         </div>
-        <ul class="nav-menu">
-          <li class="nav-menu-item" :class="{ active: isActive('/') }">
-            <router-link to="/">{{ t('nav.home') }}</router-link>
-          </li>
-          <li class="nav-menu-item" :class="{ active: isActive('/orders') }">
-            <router-link to="/orders">{{ t('nav.orders') }}</router-link>
-          </li>
-          <li class="nav-menu-item" :class="{ active: isActive('/factories') }">
-            <router-link to="/factories">{{ t('nav.factories') }}</router-link>
-          </li>
-          <li class="nav-menu-item" :class="{ active: isActive('/fabrics') }">
-            <router-link to="/fabrics">{{ t('nav.fabrics') }}</router-link>
-          </li>
-        </ul>
       </div>
 
       <div class="nav-right">
         <div class="nav-actions">
           <el-button class="designer" @click="handleLogin('designer')">
-            {{ t('login.designer') }}
+            {{ t('nav.login.designer') }}
           </el-button>
           <el-button class="factory" @click="handleLogin('factory')">
-            {{ t('login.factory') }}
+            {{ t('nav.login.factory') }}
           </el-button>
           <el-button class="supplier" @click="handleLogin('supplier')">
-            {{ t('login.supplier') }}
+            {{ t('nav.login.supplier') }}
           </el-button>
         </div>
         
@@ -103,24 +82,23 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ArrowDown, Grid } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { getSupportedLanguages, setLanguage, getCurrentLanguage } from '@/i18n'
 
 const router = useRouter()
-const route = useRoute()
 const { t, locale } = useI18n()
 
-const isMobile = ref(false)
+const isMobile = ref(window.innerWidth < 768)
 const showLoginButtons = ref(false)
+const languages = getSupportedLanguages()
 
 const handleResize = () => {
   isMobile.value = window.innerWidth < 768
 }
 
 onMounted(() => {
-  handleResize()
   window.addEventListener('resize', handleResize)
 })
 
@@ -138,16 +116,21 @@ const currentLanguage = computed(() => {
   return languages[locale.value] || '中文'
 })
 
-const isActive = (path: string) => {
-  return route.path === path
-}
+const currentLanguageLabel = computed(() => {
+  const currentLang = languages.find(lang => lang.code === getCurrentLanguage())
+  return currentLang?.nativeName || 'Language'
+})
 
 const handleLogin = (role: string) => {
   router.push(`/login/${role}`)
 }
 
-const handleLanguageChange = () => {
-  locale.value = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
+const handleLanguageChange = (lang?: string) => {
+  if (lang) {
+    locale.value = lang
+  } else {
+    locale.value = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
+  }
 }
 
 const toggleMenu = () => {
@@ -156,237 +139,156 @@ const toggleMenu = () => {
 </script>
 
 <style scoped lang="scss">
-/* 移动端样式 */
 .navigation-mobile {
   width: 100%;
   background-color: #fff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
 .nav-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 50px;
-  padding: 0;
+  padding: 0 16px;
   border-bottom: 1px solid #eee;
+  background-color: #fff;
 }
 
 .brand {
-  flex: 1;
+  flex: 0 0 auto;
   text-align: left;
-  padding-left: 16px;
-}
 
-.brand-text {
-  font-size: 18px;
-  color: #000;
-  text-decoration: none;
-  border-bottom: 1px solid #000;
+  a {
+    text-decoration: none;
+  }
+
+  .brand-text {
+    font-size: 18px;
+    font-weight: 500;
+
+    &::before {
+      content: "Sewing";
+      color: #409EFF;
+    }
+
+    &::after {
+      content: " Mast";
+      color: #333;
+    }
+  }
 }
 
 .current-lang {
-  flex: 1;
-  text-align: center;
-  font-size: 16px;
-  color: #333;
-  cursor: pointer;
+  flex: 0 0 auto;
+  margin: 0 10px;
+  padding: 4px 12px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
-  padding: 4px 12px;
-  display: inline-block;
-  margin: 0 auto;
-  background-color: #fff;
-  transition: all 0.2s;
-}
-
-.current-lang:hover {
-  border-color: #c0c4cc;
-  background-color: #f5f7fa;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
 }
 
 .menu-grid {
-  flex: 1;
-  text-align: right;
-  padding-right: 16px;
+  flex: 0 0 auto;
   cursor: pointer;
+  padding: 8px;
 }
 
 .main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  gap: 20px;
+  background-color: #fff;
 }
 
 .login-buttons {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  padding: 16px;
 }
 
 .login-btn {
   width: 100%;
-  height: 44px;
-  font-size: 16px;
+  padding: 12px;
   border: none;
   border-radius: 4px;
-  color: #fff;
-}
-
-.login-btn.designer {
-  background-color: #409EFF;
-}
-
-.login-btn.factory {
-  background-color: #67C23A;
-}
-
-.login-btn.supplier {
-  background-color: #E6A23C;
-}
-
-.latest-orders {
-  background-color: #67C23A;
-  color: white;
-  padding: 24px;
-  border-radius: 8px;
-}
-
-.latest-orders h2 {
-  font-size: 24px;
-  margin: 0 0 8px 0;
-}
-
-.latest-orders p {
   font-size: 16px;
-  margin: 0 0 20px 0;
-  opacity: 0.9;
-}
-
-.latest-orders .view-more {
-  background-color: #fff;
-  color: #67C23A;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
+
+  &.designer {
+    background-color: #409eff;
+    color: white;
+    &:hover {
+      background-color: #66b1ff;
+    }
+  }
+
+  &.factory {
+    background-color: #67c23a;
+    color: white;
+    &:hover {
+      background-color: #85ce61;
+    }
+  }
+
+  &.supplier {
+    background-color: #e6a23c;
+    color: white;
+    &:hover {
+      background-color: #ebb563;
+    }
+  }
 }
 
-/* 桌面端样式 */
 .navigation-desktop {
+  height: 64px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
-.navigation-desktop .nav-container {
+.nav-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 64px;
+  height: 100%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
 }
 
-.navigation-desktop .nav-left {
-  display: flex;
-  align-items: center;
-  gap: 48px;
-}
-
-.navigation-desktop .nav-logo {
-  display: flex;
-  align-items: center;
-  
+.nav-logo {
   img {
-    height: 32px;
-    object-fit: contain;
+    height: 40px;
   }
 }
 
-.navigation-desktop .nav-menu {
-  display: flex;
-  gap: 32px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.navigation-desktop .nav-menu-item {
-  font-size: 15px;
-  color: #606266;
-  cursor: pointer;
-  transition: color 0.3s;
-
-  &:hover, &.active {
-    color: var(--el-color-primary);
-  }
-}
-
-.navigation-desktop .nav-right {
+.nav-right {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
-.navigation-desktop .nav-actions {
+.nav-actions {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
 
-  .el-button {
-    margin: 0;
-    height: 36px;
-    min-width: 100px;
-    padding: 0 16px;
-    font-size: 14px;
-    font-weight: 500;
-    display: inline-flex;
+.language-selector {
+  .language-text {
+    cursor: pointer;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    
-    &.designer {
-      background-color: var(--el-color-primary);
-      &:hover {
-        background-color: var(--el-color-primary-light-3);
-      }
-    }
-    &.factory {
-      background-color: var(--el-color-success);
-      &:hover {
-        background-color: var(--el-color-success-light-3);
-      }
-    }
-    &.supplier {
-      background-color: var(--el-color-warning);
-      &:hover {
-        background-color: var(--el-color-warning-light-3);
-      }
-    }
-  }
-}
-
-.navigation-desktop .language-selector {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: 4px;
-  background-color: #f5f7fa;
-  cursor: pointer;
-  transition: all 0.3s;
-
-  &:hover {
-    background-color: #e6e8eb;
+    gap: 4px;
   }
 }
 </style> 

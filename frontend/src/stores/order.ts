@@ -34,6 +34,21 @@ export const useOrderStore = defineStore('order', () => {
     }
   }
 
+  // 获取热门订单
+  const fetchHotOrders = async (limit: number = 6) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.get('/orders/hot', { params: { limit } })
+      return response.data
+    } catch (err) {
+      error.value = '获取热门订单失败'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 获取订单详情
   const getOrderById = async (id: string) => {
     loading.value = true
@@ -160,6 +175,7 @@ export const useOrderStore = defineStore('order', () => {
     loading,
     error,
     fetchOrders,
+    fetchHotOrders,
     getOrderById,
     createOrder,
     updateOrderStatus,

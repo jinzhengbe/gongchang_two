@@ -1,0 +1,1 @@
+import{_ as s,c as r,o,a as t}from"./index-CP6BfJf4.js";const n={},a={class:"designer-orders"};function c(d,e){return o(),r("div",a,e[0]||(e[0]=[t("h1",null,"设计师订单",-1)]))}const f=s(n,[["render",c],["__scopeId","data-v-929197fb"]]);export{f as default};

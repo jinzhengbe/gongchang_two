@@ -1,153 +1,128 @@
 <template>
-  <el-card class="factory-card">
-    <template #header>
-      <div class="factory-header">
-        <h3 class="factory-name">{{ factory.name }}</h3>
-        <el-tag :type="getFactoryType(factory.type)">
-          {{ $t(`factory.type.${factory.type}`) }}
-        </el-tag>
-      </div>
-    </template>
-
+  <el-card class="factory-card" shadow="hover">
+    <div class="factory-image">
+      <img :src="factory.imageUrl" :alt="factory.name">
+    </div>
     <div class="factory-info">
-      <div class="info-row">
-        <span class="info-label">{{ $t('factory.capacity') }}</span>
-        <span class="info-value">{{ formatNumber(factory.capacity) }}</span>
-      </div>
-
-      <div class="info-row">
-        <span class="info-label">{{ $t('factory.rating') }}</span>
-        <el-rate
-          v-model="factory.rating"
-          disabled
-          show-score
-          text-color="#ff9900"
-        />
-      </div>
-
-      <div class="info-row">
-        <span class="info-label">{{ $t('factory.location') }}</span>
-        <span class="info-value">{{ factory.location }}</span>
-      </div>
-
-      <div class="certifications">
-        <h4>{{ $t('factory.certification') }}</h4>
-        <div class="cert-tags">
-          <el-tag
-            v-for="cert in factory.certifications"
-            :key="cert"
-            size="small"
-            class="cert-tag"
-          >
-            {{ cert }}
-          </el-tag>
+      <h3 class="factory-name">{{ factory.name }}</h3>
+      <p class="factory-desc">{{ factory.description }}</p>
+      <div class="factory-meta">
+        <div class="rating">
+          <el-rate
+            v-model="factory.rating"
+            disabled
+            show-score
+            text-color="#ff9900"
+            score-template="{value}"
+          />
+        </div>
+        <div class="location">
+          <i class="el-icon-location"></i>
+          <span>{{ factory.location }}</span>
         </div>
       </div>
-    </div>
-
-    <div class="factory-footer">
-      <el-button type="text" @click="$emit('view', factory)">
-        {{ $t('factory.info') }}
-      </el-button>
-      <el-button type="primary" size="small" @click="$emit('contact', factory)">
-        {{ $t('factory.contact') }}
-      </el-button>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { formatNumber } from '@/i18n'
-
-interface FactoryProps {
+interface Factory {
+  id: number | string
   name: string
-  type: 'premium' | 'standard'
-  capacity: number
+  description: string
   rating: number
   location: string
-  certifications: string[]
+  imageUrl: string
 }
 
-const props = defineProps<{
-  factory: FactoryProps
+defineProps<{
+  factory: Factory
 }>()
-
-const emit = defineEmits<{
-  (e: 'view', factory: FactoryProps): void
-  (e: 'contact', factory: FactoryProps): void
-}>()
-
-const getFactoryType = (type: string): string => {
-  return type === 'premium' ? 'success' : 'info'
-}
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .factory-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-}
-
-.factory-header {
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+
+  .factory-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .factory-info {
+    padding: 1rem;
+
+    .factory-name {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin: 0 0 0.5rem;
+      color: var(--el-text-color-primary);
+    }
+
+    .factory-desc {
+      font-size: 0.9rem;
+      color: var(--el-text-color-secondary);
+      margin: 0 0 1rem;
+      line-height: 1.4;
+    }
+
+    .factory-meta {
+      .rating {
+        margin-bottom: 0.5rem;
+      }
+
+      .location {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--el-text-color-secondary);
+
+        i {
+          color: var(--el-color-primary);
+        }
+      }
+    }
+  }
 }
 
-.factory-name {
-  margin: 0;
-  font-size: 18px;
-  color: var(--el-text-color-primary);
-}
+@media (max-width: 768px) {
+  .factory-card {
+    .factory-image {
+      height: 160px;
+    }
 
-.factory-info {
-  padding: 8px 0;
-}
+    .factory-info {
+      padding: 0.75rem;
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
+      .factory-name {
+        font-size: 1rem;
+      }
 
-.info-label {
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-}
+      .factory-desc {
+        font-size: 0.85rem;
+      }
 
-.info-value {
-  color: var(--el-text-color-primary);
-  font-family: var(--el-font-family-monospace);
-}
-
-.certifications {
-  margin-top: 20px;
-}
-
-.certifications h4 {
-  margin: 0 0 12px;
-  color: var(--el-text-color-primary);
-  font-size: 14px;
-}
-
-.cert-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.cert-tag {
-  margin-right: 8px;
-  margin-bottom: 8px;
-}
-
-.factory-footer {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--el-border-color-lighter);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+      .factory-meta {
+        .location {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
 }
 </style> 

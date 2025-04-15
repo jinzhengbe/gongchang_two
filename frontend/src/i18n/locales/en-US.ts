@@ -9,7 +9,8 @@ export default {
     loading: 'Loading...',
     success: 'Operation Successful',
     error: 'Operation Failed',
-    noData: 'No Data Available'
+    noData: 'No Data Available',
+    viewMore: 'View More'
   },
   nav: {
     home: 'Home',
@@ -154,5 +155,20 @@ export default {
     topFactories: 'Top Factories',
     topFactoriesDesc: 'Recommended quality factory partners',
     showMore: 'Show More'
+  },
+  orders: {
+    latestOrders: 'Latest Orders',
+    latestOrdersDesc: 'View the latest published order requirements',
+    hotOrders: 'Hot Orders',
+    hotOrdersDesc: 'Most popular orders showcase',
+    status: {
+      pending: 'Pending',
+      processing: 'In Production',
+      completed: 'Completed'
+    },
+    pieces: 'pcs',
+    deadline: 'Deadline',
+    progress: '{percentage}% Complete',
+    viewAll: 'View All Orders'
   }
 } 

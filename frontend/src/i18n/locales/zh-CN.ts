@@ -10,7 +10,8 @@ export default {
     success: '操作成功',
     error: '操作失败',
     noData: '暂无数据',
-    showMore: '查看更多'
+    showMore: '查看更多',
+    viewMore: '查看更多'
   },
   nav: {
     home: '首页',
@@ -24,7 +25,8 @@ export default {
     },
     logout: '退出',
     profile: '个人中心',
-    language: '语言'
+    language: '语言',
+    brand: 'Sewing Mast'
   },
   auth: {
     designer: '设计师',
@@ -40,16 +42,38 @@ export default {
     fabrics: '面料列表',
     capacity: '产能',
     welcome: '欢迎使用智能工厂管理系统',
-    latestOrders: '最新订单',
+    latestOrders: {
+      title: '最新订单',
+      viewMore: '查看更多',
+      status: {
+        pending: '待接单',
+        processing: '生产中'
+      }
+    },
     popularFactories: '热门工厂',
-    newFabrics: '新品面料',
+    newFabric: {
+      title: '新品面料',
+      desc: '浏览最新面料系列',
+      action: '去看看'
+    },
+    hotFactories: {
+      title: '热门工厂',
+      viewMore: '查看更多'
+    },
+    newFabrics: {
+      title: '最新面料',
+      viewMore: '查看更多',
+      unit: '米'
+    },
     carousel: {
-      latestOrders: '最新订单',
-      topFactories: '优质工厂',
       hotFabrics: '热门面料',
-      latestOrdersDesc: '查看最新发布的订单信息',
-      topFactoriesDesc: '合作优质工厂推荐',
       hotFabricsDesc: '精选优质面料，品质保证',
+      hotOrders: '热门订单',
+      hotOrdersDesc: '最受欢迎的订单展示',
+      latestOrders: '最新订单',
+      latestOrdersDesc: '查看最新发布的订单',
+      topFactories: '优质工厂',
+      topFactoriesDesc: '推荐优质工厂合作伙伴',
       showMore: '查看更多'
     },
     content: {
@@ -160,5 +184,20 @@ export default {
       supplier: '供应商服务'
     },
     cta: '立即开始'
+  },
+  orders: {
+    latestOrders: '最新订单',
+    latestOrdersDesc: '查看最新发布的订单信息',
+    hotOrders: '热门订单',
+    hotOrdersDesc: '最受欢迎的订单展示',
+    status: {
+      pending: '待处理',
+      processing: '进行中',
+      completed: '已完成'
+    },
+    pieces: '件',
+    deadline: '截止日期',
+    progress: '{percentage}% 已完成',
+    viewAll: '查看全部订单'
   }
 } 

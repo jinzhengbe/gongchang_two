@@ -1,0 +1,1 @@
+import{_ as s,c as a,o,a as t}from"./index-CP6BfJf4.js";const c={},r={class:"fabric-categories"};function n(_,e){return o(),a("div",r,e[0]||(e[0]=[t("h1",null,"面料类别",-1)]))}const i=s(c,[["render",n],["__scopeId","data-v-29e390d9"]]);export{i as default};

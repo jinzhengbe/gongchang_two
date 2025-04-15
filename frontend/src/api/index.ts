@@ -60,19 +60,24 @@ export const homeApi = {
     return api.get('/home/carousel')
   },
 
-  // 获取最新订单
-  getLatestOrders(): Promise<ApiResponse<Order[]>> {
-    return api.get('/home/orders/latest')
-  },
-
-  // 获取推荐工厂
-  getRecommendedFactories(): Promise<ApiResponse<Factory[]>> {
-    return api.get('/home/factories/recommended')
+  // 获取新品面料
+  getNewFabrics(): Promise<ApiResponse<Fabric[]>> {
+    return api.get('/fabrics/new')
   },
 
   // 获取热门面料
   getHotFabrics(): Promise<ApiResponse<Fabric[]>> {
-    return api.get('/home/fabrics/hot')
+    return api.get('/fabrics/hot')
+  },
+
+  // 获取推荐工厂
+  getRecommendedFactories(): Promise<ApiResponse<Factory[]>> {
+    return api.get('/factories/recommended')
+  },
+
+  // 获取最新订单
+  getLatestOrders(): Promise<ApiResponse<Order[]>> {
+    return api.get('/orders/latest')
   }
 }
 
