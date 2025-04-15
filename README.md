@@ -389,18 +389,32 @@ DB_PASSWORD=your_password
 DB_NAME=sewingmast
 ```
 
-### 2. 安装依赖
+### 2. 数据库设置
+```sql
+# 创建数据库和用户
+CREATE DATABASE sewingmast;
+CREATE USER 'sewingmast'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON sewingmast.* TO 'sewingmast'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+### 3. 安装依赖
 ```bash
 cd backend
 go mod download
 ```
 
-### 3. 运行服务
+### 4. 运行服务
 ```bash
+# 开发模式
+go run main.go
+
+# 生产模式
+export GIN_MODE=release
 go run main.go
 ```
 
-### 4. 测试 API
+### 5. 测试 API
 ```bash
 # 测试健康检查接口
 curl http://localhost:8080/api/health | jq
@@ -410,6 +424,49 @@ curl http://localhost:8080/api/health | jq
   "message": "API is running",
   "status": "ok"
 }
+```
+
+## 故障排除
+
+### 1. 数据库连接错误
+错误信息：
+```
+Error 1045 (28000): Access denied for user 'sewingmast'@'localhost'
+```
+解决方案：
+1. 检查数据库用户是否存在
+2. 验证密码是否正确
+3. 确保用户有正确的权限
+4. 检查 MySQL 服务是否运行
+
+### 2. 端口占用
+错误信息：
+```
+Error starting server: listen tcp :8080: bind: address already in use
+```
+解决方案：
+1. 查找占用端口的进程：
+```bash
+lsof -i :8080
+```
+2. 终止占用进程：
+```bash
+kill -9 <PID>
+```
+3. 或修改服务端口：
+```bash
+export PORT=8081
+```
+
+### 3. 代理警告
+警告信息：
+```
+[WARNING] You trusted all proxies, this is NOT safe.
+```
+解决方案：
+在生产环境中设置可信代理：
+```go
+router.SetTrustedProxies([]string{"127.0.0.1"})
 ```
 
 ## API 文档
@@ -426,6 +483,21 @@ curl http://localhost:8080/api/health | jq
   "status": "ok",
   "message": "API is running"
 }
+```
+
+## 日志说明
+
+### 开发模式日志
+```
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+[GIN-debug] GET    /api/health               --> backend/routes.SetupRouter.func1 (3 handlers)
+[GIN] 2025/04/15 - 19:18:42 | 200 | 21.952µs | ::1 | GET "/api/health"
+```
+
+### 生产模式日志
+```bash
+# 设置生产模式
+export GIN_MODE=release
 ```
 
 ## 数据库配置
@@ -477,8 +549,16 @@ docker-compose logs -f
 2. 确保数据库密码强度足够
 3. 使用 HTTPS
 4. 定期备份数据库
+5. 设置可信代理
+6. 使用生产模式运行
 
 ## 更新日志
+
+### v1.0.1 (2024-04-15)
+- 添加故障排除指南
+- 更新日志说明
+- 添加安全配置说明
+- 优化数据库配置
 
 ### v1.0.0 (2024-04-15)
 - 项目初始化
