@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"backend/config"
+	"aneworder.com/backend/config"
 	"net/http"
 	"strings"
 	"time"

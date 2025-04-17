@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"backend/controllers"
-	"backend/middleware"
+	"aneworder.com/backend/controllers"
+	"aneworder.com/backend/middleware"
 
 	"github.com/gin-gonic/gin"
 )

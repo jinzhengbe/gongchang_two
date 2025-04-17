@@ -1,12 +1,13 @@
 server:
-  port: "8080"
+  host: "aneworders.com"
+  port: "443"
 
 database:
-  host: "localhost"
+  host: "mysql"
   port: "3306"
   user: "root"
-  password: "password"
-  dbname: "sewingmast"
+  password: "123456"
+  dbname: "gongchang"
 
 redis:
   host: "localhost"

@@ -1,39 +1,27 @@
-# 构建阶段
-FROM golang:1.21-alpine AS builder
-
-WORKDIR /build
-
-# 安装依赖
-COPY go.mod go.sum ./
-RUN go mod download
-
-# 复制源代码和证书文件
-COPY . .
-
-# 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -o app
-
-# 生产阶段
-FROM alpine:latest
-
-RUN apk add --no-cache ca-certificates && \
-    mkdir /app && \
-    mkdir /ssl
+FROM golang:1.20-alpine
 
 WORKDIR /app
 
-COPY --from=builder /build/app .
-COPY --from=builder /build/.env .
-COPY --from=builder /build/ssl/cert.pem /ssl/cert.pem
-COPY --from=builder /build/ssl/key.pem /ssl/key.pem
+# 安装必要的依赖
+RUN apk add --no-cache gcc musl-dev
 
-# 设置权限
-RUN chmod +x ./app && \
-    chmod 644 /ssl/cert.pem && \
-    chmod 600 /ssl/key.pem
+# 复制 Go 模块文件
+COPY go.mod go.sum ./
+
+# 下载依赖
+RUN go mod download
+
+# 复制项目文件
+COPY . .
+
+# 创建 SSL 目录并复制证书
+RUN mkdir -p /app/ssl && \
+    chmod 600 /app/ssl/cert.pem /app/ssl/key.pem
+
+# 构建应用
+RUN go build -o app .
 
 # 暴露端口
-EXPOSE 8080
 EXPOSE 443
 
 # 运行应用

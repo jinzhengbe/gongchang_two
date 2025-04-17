@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"backend/models"
-	"backend/services"
+	"aneworder.com/backend/models"
+	"aneworder.com/backend/services"
 	"net/http"
 	"strconv"
 

@@ -55,11 +55,12 @@ type OrderAttachment struct {
 }
 
 type OrderStatistics struct {
-	TotalOrders    int64            `json:"totalOrders"`
-	ActiveOrders   int64            `json:"activeOrders"`
+	TotalOrders     int64            `json:"totalOrders"`
+	ActiveOrders    int64            `json:"activeOrders"`
 	CompletedOrders int64           `json:"completedOrders"`
-	StatusCounts   map[string]int64 `json:"statusCounts"`
-	TrendData      []struct {
+	PendingOrders   int64           `json:"pendingOrders"`
+	StatusCounts    map[string]int64 `json:"statusCounts"`
+	TrendData       []struct {
 		Date  string `json:"date"`
 		Count int64  `json:"count"`
 	} `json:"trendData"`

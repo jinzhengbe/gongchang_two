@@ -1,7 +1,7 @@
 package services
 
 import (
-	"backend/models"
+	"aneworder.com/backend/models"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -19,20 +19,11 @@ func NewUserService(db *gorm.DB) *UserService {
 
 func (s *UserService) Register(user *models.User) error {
 	// 检查用户名是否已存在
-	var count int64
-	if err := s.db.Model(&models.User{}).Where("username = ?", user.Username).Count(&count).Error; err != nil {
-		return err
-	}
-	if count > 0 {
+	var existingUser models.User
+	if err := s.db.Where("username = ?", user.Username).First(&existingUser).Error; err == nil {
 		return errors.New("username already exists")
-	}
-
-	// 检查邮箱是否已存在
-	if err := s.db.Model(&models.User{}).Where("email = ?", user.Email).Count(&count).Error; err != nil {
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
-	}
-	if count > 0 {
-		return errors.New("email already exists")
 	}
 
 	// 加密密码
@@ -49,45 +40,76 @@ func (s *UserService) Register(user *models.User) error {
 func (s *UserService) Login(username, password string) (*models.LoginResponse, error) {
 	var user models.User
 	if err := s.db.Where("username = ?", username).First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, err
-	}
-
-	// TODO: 生成 JWT token
-	token := "JWT认证令牌" // 这里需要实现实际的 JWT 生成逻辑
-
-	response := &models.LoginResponse{
-		Success: true,
-		Data: struct {
-			Token string      `json:"token"`
-			User  models.User `json:"user"`
-		}{
-			Token: token,
-			User:  user,
-		},
-	}
-
-	return response, nil
-}
-
-func (s *UserService) GetUserByID(id string) (*models.User, error) {
-	var user models.User
-	if err := s.db.First(&user, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
 		}
+		return nil, err
+	}
+
+	// 验证密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, errors.New("invalid password")
+	}
+
+	// 根据用户角色获取相应的档案信息
+	var profile interface{}
+	switch user.Role {
+	case string(models.RoleDesigner):
+		var designerProfile models.DesignerProfile
+		if err := s.db.Where("user_id = ?", user.ID).First(&designerProfile).Error; err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+		} else {
+			profile = designerProfile
+		}
+	case string(models.RoleFactory):
+		var factoryProfile models.FactoryProfile
+		if err := s.db.Where("user_id = ?", user.ID).First(&factoryProfile).Error; err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+		} else {
+			profile = factoryProfile
+		}
+	case string(models.RoleSupplier):
+		var supplierProfile models.SupplierProfile
+		if err := s.db.Where("user_id = ?", user.ID).First(&supplierProfile).Error; err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, err
+			}
+		} else {
+			profile = supplierProfile
+		}
+	}
+
+	return &models.LoginResponse{
+		Data: models.LoginData{
+			User:    user,
+			Profile: profile,
+		},
+	}, nil
+}
+
+func (s *UserService) GetUserByID(userID string) (*models.User, error) {
+	var user models.User
+	if err := s.db.First(&user, userID).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
 func (s *UserService) UpdateUser(user *models.User) error {
-	return s.db.Save(user).Error
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashedPassword)
+	}
+	return s.db.Model(user).Updates(user).Error
 }
 
-func (s *UserService) DeleteUser(id string) error {
-	return s.db.Delete(&models.User{}, "id = ?", id).Error
+func (s *UserService) DeleteUser(userID string) error {
+	return s.db.Delete(&models.User{}, userID).Error
 } 

@@ -57,12 +57,13 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type LoginData struct {
+	User    User        `json:"user"`
+	Profile interface{} `json:"profile"`
+}
+
 type LoginResponse struct {
-	Success bool   `json:"success"`
-	Data    struct {
-		Token string `json:"token"`
-		User  User   `json:"user"`
-	} `json:"data"`
+	Data LoginData `json:"data"`
 }
 
 type RegisterRequest struct {

@@ -53,13 +53,21 @@ go mod download
 ```bash
 # 创建数据库和用户
 mysql -u root -p
-CREATE DATABASE sewingmast;
-CREATE USER 'sewingmast'@'localhost' IDENTIFIED BY 'sewingmast123';
-GRANT ALL PRIVILEGES ON sewingmast.* TO 'sewingmast'@'localhost';
+CREATE DATABASE gongchang;
+GRANT ALL PRIVILEGES ON gongchang.* TO 'root'@'%' IDENTIFIED BY '123456';
 FLUSH PRIVILEGES;
 ```
 
-4. 运行服务
+4. 配置环境变量
+```bash
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_USER=root
+export DB_PASSWORD=123456
+export DB_NAME=gongchang
+```
+
+5. 运行服务
 ```bash
 go run main.go
 ```
@@ -81,8 +89,9 @@ docker-compose logs -f
 ### 认证接口
 
 #### 登录
-- 路径: `/api/auth/login`
+- 路径: `http://aneworders.com:8080/api/users/login` 或 `https://aneworders.com/api/users/login`
 - 方法: `POST`
+- 请求头: `Content-Type: application/json`
 - 请求体:
 ```json
 {
@@ -93,22 +102,39 @@ docker-compose logs -f
 - 响应:
 ```json
 {
-  "success": true,
-  "data": {
-    "token": "string",
-    "user": {
-      "id": "string",
-      "username": "string",
-      "role": "string"
-    }
+  "token": "string",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "role": "string",
+    "email": "string"
   }
 }
 ```
 
+### 测试账号
+
+系统初始化时会自动创建以下测试账号：
+
+1. 设计师账号
+   - 用户名: `designer1`
+   - 密码: `test123`
+   - 角色: `designer`
+
+2. 工厂账号
+   - 用户名: `factory1`
+   - 密码: `test123`
+   - 角色: `factory`
+
+3. 供应商账号
+   - 用户名: `supplier1`
+   - 密码: `test123`
+   - 角色: `supplier`
+
 ### 用户接口
 
 #### 注册用户
-- 路径: `/api/auth/register`
+- 路径: `http://aneworders.com:8080/api/users/register` 或 `https://aneworders.com/api/users/register`
 - 方法: `POST`
 - 请求体:
 ```json
@@ -121,7 +147,7 @@ docker-compose logs -f
 ```
 
 #### 获取用户信息
-- 路径: `/api/users/:id`
+- 路径: `http://aneworders.com:8080/api/users/:id` 或 `https://aneworders.com/api/users/:id`
 - 方法: `GET`
 - 需要认证: 是
 
@@ -129,12 +155,14 @@ docker-compose logs -f
 
 ### 环境变量
 
-- `DB_HOST`: 数据库主机地址
-- `DB_PORT`: 数据库端口
-- `DB_USER`: 数据库用户名
-- `DB_PASSWORD`: 数据库密码
-- `DB_NAME`: 数据库名称
+- `DB_HOST`: 数据库主机地址（Docker 环境下为 "mysql"，本地开发为 "localhost"）
+- `DB_PORT`: 数据库端口（默认: 3306）
+- `DB_USER`: 数据库用户名（默认: root）
+- `DB_PASSWORD`: 数据库密码（默认: 123456）
+- `DB_NAME`: 数据库名称（默认: gongchang）
 - `JWT_SECRET`: JWT 密钥
+- `SERVER_PORT`: HTTP 服务器端口 (默认: 8080)
+- `SERVER_PORT_HTTPS`: HTTPS 服务器端口 (默认: 443)
 
 ## 开发说明
 
@@ -162,12 +190,12 @@ go test ./...
 
 1. 构建镜像：
 ```bash
-docker build -t sewingmast-backend .
+docker build -t gongchang-backend .
 ```
 
 2. 运行容器：
 ```bash
-docker run -p 8080:8080 sewingmast-backend
+docker run -p 8080:8080 -p 443:443 gongchang-backend
 ```
 
 ### 使用 Docker Compose
@@ -178,28 +206,33 @@ docker-compose up -d
 
 ## 端口使用说明
 
-- 后端服务端口：8080
+- HTTP 服务端口：8080
+- HTTPS 服务端口：443
 - MySQL 端口：3306
 
 ### 端口配置
 
 1. 开发环境
-   - 后端服务默认使用 8080 端口
+   - HTTP 服务默认使用 8080 端口
+   - HTTPS 服务默认使用 443 端口
    - MySQL 默认使用 3306 端口
 
 2. Docker 环境
    - 可以通过修改 docker-compose.yml 中的端口映射来更改端口
+   - MySQL 容器端口映射：3307:3306
 
 ### 端口冲突解决
 
 如果遇到端口冲突，可以：
 
-1. 修改 main.go 中的服务端口
-2. 修改 docker-compose.yml 中的端口映射
+1. 修改 docker-compose.yml 中的端口映射
+2. 修改环境变量中的端口配置
 3. 确保没有其他服务占用相同端口
 
 ### 安全建议
 
-1. 在生产环境中使用非默认端口
+1. 在生产环境中使用 HTTPS
 2. 配置防火墙只允许必要的端口访问
 3. 使用反向代理（如 Nginx）来管理端口转发
+4. 定期更新密码和 JWT 密钥
+5. 启用 SSL/TLS 证书

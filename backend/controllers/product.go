@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"backend/models"
-	"backend/services"
+	"aneworder.com/backend/models"
+	"aneworder.com/backend/services"
 	"net/http"
 	"strconv"
 
@@ -117,7 +117,7 @@ func (c *ProductController) GetProducts(ctx *gin.Context) {
 	} else if category != "" {
 		products, total, err = c.productService.GetProductsByCategory(category, page, pageSize)
 	} else {
-		products, total, err = c.productService.GetProducts(page, pageSize)
+		products, total, err = c.productService.GetProducts(page, pageSize, category)
 	}
 
 	if err != nil {

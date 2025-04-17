@@ -2,8 +2,6 @@ package config
 
 import (
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -14,22 +12,19 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	JWTSecret  string
+	ServerHost string
 }
 
 func LoadConfig() (*Config, error) {
-	// 加载.env文件
-	if err := godotenv.Load(); err != nil {
-		return nil, err
-	}
-
 	return &Config{
-		Port:       getEnv("PORT", "8080"),
-		DBHost:     getEnv("DB_HOST", "localhost"),
+		Port:       getEnv("PORT", "443"),
+		DBHost:     getEnv("DB_HOST", "mysql"),
 		DBPort:     getEnv("DB_PORT", "3306"),
 		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", "password"),
-		DBName:     getEnv("DB_NAME", "sewingmast"),
+		DBPassword: getEnv("DB_PASSWORD", "123456"),
+		DBName:     getEnv("DB_NAME", "gongchang"),
 		JWTSecret:  getEnv("JWT_SECRET", "your-secret-key"),
+		ServerHost: getEnv("SERVER_HOST", "aneworder.com"),
 	}, nil
 }
 

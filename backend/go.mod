@@ -1,4 +1,4 @@
-module backend
+module aneworder.com/backend
 
 go 1.18
 

@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"backend/controllers"
+	"aneworder.com/backend/controllers"
 )
 
 func RegisterFileRoutes(r *gin.Engine, fileController *controllers.FileController) {
