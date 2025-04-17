@@ -151,165 +151,203 @@ docker-compose logs -f
 - 方法: `GET`
 - 需要认证: 是
 
-## 客户端开发指南
+## 开发指南
 
-### CORS 配置
+### 开发环境设置
 
-服务器已配置支持跨域请求，包括：
-
-1. 允许的请求头：
-   - Content-Type
-   - Authorization
-   - Accept
-   - Origin
-   - 其他自定义头部
-
-2. 允许的请求方法：
-   - GET
-   - POST
-   - PUT
-   - DELETE
-   - PATCH
-   - OPTIONS
-
-3. 预检请求缓存时间：24小时
-
-### Flutter Web 开发建议
-
-1. 使用 http 或 dio 包发送请求：
-```dart
-// 使用 http 包
-final response = await http.post(
-  Uri.parse('http://aneworders.com:8080/api/users/login'),
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-  body: jsonEncode({
-    'username': 'designer1',
-    'password': 'test123',
-  }),
-);
-
-// 或使用 dio 包
-final dio = Dio();
-dio.options.headers['Content-Type'] = 'application/json';
-dio.options.headers['Accept'] = 'application/json';
-```
-
-2. 开发环境临时解决方案：
-   - 使用 Chrome 的 CORS 插件
-   - 或使用代理服务器转发请求
-
-3. 生产环境建议：
-   - 使用 Nginx 反向代理
-   - 配置 SSL 证书
-   - 使用同一域名下的 API 网关
-
-### Nginx 配置示例
-
-```nginx
-server {
-    listen 80;
-    server_name aneworders.com;
-
-    location /api/ {
-        proxy_pass http://localhost:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        
-        # CORS headers
-        add_header 'Access-Control-Allow-Origin' '*';
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
-        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
-        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
-    }
-}
-```
-
-## 配置说明
-
-### 环境变量
-
-- `DB_HOST`: 数据库主机地址（Docker 环境下为 "mysql"，本地开发为 "localhost"）
-- `DB_PORT`: 数据库端口（默认: 3306）
-- `DB_USER`: 数据库用户名（默认: root）
-- `DB_PASSWORD`: 数据库密码（默认: 123456）
-- `DB_NAME`: 数据库名称（默认: gongchang）
-- `JWT_SECRET`: JWT 密钥
-- `SERVER_PORT`: HTTP 服务器端口 (默认: 8080)
-- `SERVER_PORT_HTTPS`: HTTPS 服务器端口 (默认: 443)
-
-## 开发说明
-
-### 添加新的 API 接口
-
-1. 在 `models` 目录下定义数据模型
-2. 在 `services` 目录下实现业务逻辑
-3. 在 `controllers` 目录下创建控制器
-4. 在 `routes` 目录下注册路由
-
-### 数据库迁移
-
-项目使用 GORM 自动迁移功能，在启动时会自动创建/更新数据库表结构。
-
-## 测试
-
-运行单元测试：
+1. 安装开发工具
 ```bash
+# 安装 Go
+brew install go  # macOS
+sudo apt install golang-go  # Ubuntu
+
+# 安装 MySQL
+brew install mysql  # macOS
+sudo apt install mysql-server  # Ubuntu
+
+# 安装 Docker
+brew install docker docker-compose  # macOS
+sudo apt install docker.io docker-compose  # Ubuntu
+```
+
+2. 配置开发环境
+```bash
+# 设置 Go 环境变量
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
+# 安装开发依赖
+go install github.com/cosmtrek/air@latest  # 热重载工具
+go install github.com/swaggo/swag/cmd/swag@latest  # API 文档生成
+```
+
+3. 启动开发服务器
+```bash
+# 使用 air 进行热重载开发
+air
+
+# 或直接运行
+go run main.go
+```
+
+### 代码规范
+
+1. 命名规范
+   - 包名：小写字母，不使用下划线
+   - 文件名：小写字母，使用下划线分隔
+   - 结构体：大驼峰命名
+   - 变量和函数：小驼峰命名
+
+2. 注释规范
+   - 包注释：说明包的功能
+   - 函数注释：说明功能、参数和返回值
+   - 关键代码注释：说明实现逻辑
+
+3. 错误处理
+   - 使用 errors.New 创建简单错误
+   - 使用 fmt.Errorf 包装错误
+   - 记录关键错误日志
+
+### 测试规范
+
+1. 单元测试
+```bash
+# 运行所有测试
 go test ./...
+
+# 运行特定包的测试
+go test ./controllers
+
+# 显示测试覆盖率
+go test -cover ./...
 ```
 
-## 部署
-
-### 使用 Docker
-
-1. 构建镜像：
+2. 集成测试
 ```bash
-docker build -t gongchang-backend .
+# 使用 Docker Compose 运行测试环境
+docker-compose -f docker-compose.test.yml up -d
+
+# 运行集成测试
+go test -tags=integration ./...
 ```
 
-2. 运行容器：
-```bash
-docker run -p 8080:8080 -p 443:443 gongchang-backend
-```
-
-### 使用 Docker Compose
-
-```bash
-docker-compose up -d
-```
-
-## 端口使用说明
-
-- HTTP 服务端口：8080
-- HTTPS 服务端口：443
-- MySQL 端口：3306
-
-### 端口配置
+### 部署流程
 
 1. 开发环境
-   - HTTP 服务默认使用 8080 端口
-   - HTTPS 服务默认使用 443 端口
-   - MySQL 默认使用 3306 端口
+```bash
+# 构建开发镜像
+docker build -t gongchang-backend:dev .
 
-2. Docker 环境
-   - 可以通过修改 docker-compose.yml 中的端口映射来更改端口
-   - MySQL 容器端口映射：3307:3306
+# 运行开发环境
+docker-compose -f docker-compose.dev.yml up -d
+```
 
-### 端口冲突解决
+2. 测试环境
+```bash
+# 构建测试镜像
+docker build -t gongchang-backend:test .
 
-如果遇到端口冲突，可以：
+# 运行测试环境
+docker-compose -f docker-compose.test.yml up -d
+```
 
-1. 修改 docker-compose.yml 中的端口映射
-2. 修改环境变量中的端口配置
-3. 确保没有其他服务占用相同端口
+3. 生产环境
+```bash
+# 构建生产镜像
+docker build -t gongchang-backend:prod .
 
-### 安全建议
+# 运行生产环境
+docker-compose -f docker-compose.prod.yml up -d
+```
 
-1. 在生产环境中使用 HTTPS
-2. 配置防火墙只允许必要的端口访问
-3. 使用反向代理（如 Nginx）来管理端口转发
-4. 定期更新密码和 JWT 密钥
-5. 启用 SSL/TLS 证书
+### 监控和日志
+
+1. 日志配置
+```yaml
+# config/logging.yaml
+level: info
+format: json
+output: file
+file:
+  path: /var/log/gongchang
+  maxSize: 100
+  maxBackups: 10
+  maxAge: 30
+```
+
+2. 监控指标
+   - API 请求数
+   - 响应时间
+   - 错误率
+   - 数据库连接数
+   - 内存使用率
+
+### 安全最佳实践
+
+1. 认证和授权
+   - 使用 JWT 进行身份验证
+   - 实现基于角色的访问控制
+   - 定期轮换密钥
+
+2. 数据安全
+   - 使用 HTTPS
+   - 加密敏感数据
+   - 实现数据备份
+
+3. 代码安全
+   - 定期更新依赖
+   - 进行安全扫描
+   - 实现输入验证
+
+## 故障排除
+
+### 常见问题
+
+1. 数据库连接失败
+   - 检查数据库服务是否运行
+   - 验证连接参数
+   - 检查网络连接
+
+2. API 请求失败
+   - 检查服务是否运行
+   - 验证请求参数
+   - 查看错误日志
+
+3. 性能问题
+   - 检查数据库索引
+   - 优化查询语句
+   - 增加缓存
+
+### 日志分析
+
+1. 错误日志
+```bash
+# 查看最近错误
+tail -f /var/log/gongchang/error.log
+
+# 搜索特定错误
+grep "ERROR" /var/log/gongchang/error.log
+```
+
+2. 访问日志
+```bash
+# 查看访问统计
+awk '{print $1}' /var/log/gongchang/access.log | sort | uniq -c | sort -nr
+```
+
+## 贡献指南
+
+1. 提交 Issue
+   - 描述问题
+   - 提供复现步骤
+   - 添加相关日志
+
+2. 提交 Pull Request
+   - 遵循代码规范
+   - 添加测试用例
+   - 更新文档
+
+3. 代码审查
+   - 检查代码质量
+   - 验证功能正确性
+   - 确保文档更新
