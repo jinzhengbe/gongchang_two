@@ -1,1 +1,0 @@
-import{_ as t,c as s,o,a}from"./index-CP6BfJf4.js";const c={},r={class:"factory-list"};function n(_,e){return o(),s("div",r,e[0]||(e[0]=[a("h1",null,"工厂列表",-1)]))}const l=t(c,[["render",n],["__scopeId","data-v-3e339ab9"]]);export{l as default};

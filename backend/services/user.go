@@ -46,26 +46,36 @@ func (s *UserService) Register(user *models.User) error {
 	return s.db.Create(user).Error
 }
 
-func (s *UserService) Login(username, password string) (*models.User, error) {
+func (s *UserService) Login(username, password string) (*models.LoginResponse, error) {
 	var user models.User
 	if err := s.db.Where("username = ?", username).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
-		}
 		return nil, err
 	}
 
-	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, errors.New("invalid password")
+		return nil, err
 	}
 
-	return &user, nil
+	// TODO: 生成 JWT token
+	token := "JWT认证令牌" // 这里需要实现实际的 JWT 生成逻辑
+
+	response := &models.LoginResponse{
+		Success: true,
+		Data: struct {
+			Token string      `json:"token"`
+			User  models.User `json:"user"`
+		}{
+			Token: token,
+			User:  user,
+		},
+	}
+
+	return response, nil
 }
 
-func (s *UserService) GetUserByID(id uint) (*models.User, error) {
+func (s *UserService) GetUserByID(id string) (*models.User, error) {
 	var user models.User
-	if err := s.db.First(&user, id).Error; err != nil {
+	if err := s.db.First(&user, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
 		}
@@ -78,6 +88,6 @@ func (s *UserService) UpdateUser(user *models.User) error {
 	return s.db.Save(user).Error
 }
 
-func (s *UserService) DeleteUser(id uint) error {
-	return s.db.Delete(&models.User{}, id).Error
+func (s *UserService) DeleteUser(id string) error {
+	return s.db.Delete(&models.User{}, "id = ?", id).Error
 } 

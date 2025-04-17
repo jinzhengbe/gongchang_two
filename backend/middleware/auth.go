@@ -11,7 +11,7 @@ import (
 )
 
 type Claims struct {
-	UserID uint   `json:"user_id"`
+	UserID string `json:"user_id"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
@@ -54,8 +54,8 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 将用户ID添加到上下文中
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if userID, ok := claims["user_id"].(float64); ok {
-				c.Set("user_id", uint(userID))
+			if userID, ok := claims["user_id"].(string); ok {
+				c.Set("user_id", userID)
 			}
 		}
 
@@ -63,7 +63,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func GenerateToken(userID uint, role string, secret string) (string, error) {
+func GenerateToken(userID string, role string, secret string) (string, error) {
 	claims := Claims{
 		UserID: userID,
 		Role:   role,

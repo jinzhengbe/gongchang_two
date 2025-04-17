@@ -1,1 +1,0 @@
-import{_ as o,c as s,o as t,a}from"./index-CP6BfJf4.js";const c={},n={class:"login"};function r(_,e){return t(),s("div",n,e[0]||(e[0]=[a("h1",null,"登录",-1)]))}const l=o(c,[["render",r],["__scopeId","data-v-0de3c5ab"]]);export{l as default};

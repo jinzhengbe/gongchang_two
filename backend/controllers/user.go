@@ -6,7 +6,6 @@ import (
 	"backend/models"
 	"backend/services"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -63,7 +62,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.ID, user.Role, cfg.JWTSecret)
+	token, err := middleware.GenerateToken(user.Data.User.ID, user.Data.User.Role, cfg.JWTSecret)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
@@ -72,36 +71,26 @@ func (c *UserController) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"user": gin.H{
-			"id":       user.ID,
-			"username": user.Username,
-			"email":    user.Email,
-			"role":     user.Role,
+			"id":       user.Data.User.ID,
+			"username": user.Data.User.Username,
+			"email":    user.Data.User.Email,
+			"role":     user.Data.User.Role,
 		},
 	})
 }
 
 func (c *UserController) GetUser(ctx *gin.Context) {
-	userID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	userID := ctx.Param("id")
+	user, err := c.userService.GetUserByID(userID)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-
-	user, err := c.userService.GetUserByID(uint(userID))
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
 	ctx.JSON(http.StatusOK, user)
 }
 
 func (c *UserController) UpdateUser(ctx *gin.Context) {
-	userID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
+	userID := ctx.Param("id")
 
 	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -109,7 +98,7 @@ func (c *UserController) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	user.ID = uint(userID)
+	user.ID = userID
 	if err := c.userService.UpdateUser(&user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -119,16 +108,10 @@ func (c *UserController) UpdateUser(ctx *gin.Context) {
 }
 
 func (c *UserController) DeleteUser(ctx *gin.Context) {
-	userID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	if err := c.userService.DeleteUser(uint(userID)); err != nil {
+	userID := ctx.Param("id")
+	if err := c.userService.DeleteUser(userID); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 } 

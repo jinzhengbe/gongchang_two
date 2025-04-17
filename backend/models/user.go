@@ -14,13 +14,14 @@ const (
 )
 
 type User struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	Username  string    `json:"username" gorm:"unique;not null"`
-	Password  string    `json:"-" gorm:"not null"`
-	Email     string    `json:"email" gorm:"unique;not null"`
-	Role      string    `json:"role" gorm:"not null"` // designer, factory, supplier
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        string         `json:"id" gorm:"primaryKey"`
+	Username  string         `json:"username" gorm:"unique;not null"`
+	Password  string         `json:"-" gorm:"not null"`
+	Email     string         `json:"email" gorm:"unique;not null"`
+	Role      string         `json:"role" gorm:"default:'user'"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type DesignerProfile struct {
@@ -54,6 +55,14 @@ type SupplierProfile struct {
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponse struct {
+	Success bool   `json:"success"`
+	Data    struct {
+		Token string `json:"token"`
+		User  User   `json:"user"`
+	} `json:"data"`
 }
 
 type RegisterRequest struct {
