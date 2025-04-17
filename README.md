@@ -151,6 +151,83 @@ docker-compose logs -f
 - 方法: `GET`
 - 需要认证: 是
 
+## 客户端开发指南
+
+### CORS 配置
+
+服务器已配置支持跨域请求，包括：
+
+1. 允许的请求头：
+   - Content-Type
+   - Authorization
+   - Accept
+   - Origin
+   - 其他自定义头部
+
+2. 允许的请求方法：
+   - GET
+   - POST
+   - PUT
+   - DELETE
+   - PATCH
+   - OPTIONS
+
+3. 预检请求缓存时间：24小时
+
+### Flutter Web 开发建议
+
+1. 使用 http 或 dio 包发送请求：
+```dart
+// 使用 http 包
+final response = await http.post(
+  Uri.parse('http://aneworders.com:8080/api/users/login'),
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  body: jsonEncode({
+    'username': 'designer1',
+    'password': 'test123',
+  }),
+);
+
+// 或使用 dio 包
+final dio = Dio();
+dio.options.headers['Content-Type'] = 'application/json';
+dio.options.headers['Accept'] = 'application/json';
+```
+
+2. 开发环境临时解决方案：
+   - 使用 Chrome 的 CORS 插件
+   - 或使用代理服务器转发请求
+
+3. 生产环境建议：
+   - 使用 Nginx 反向代理
+   - 配置 SSL 证书
+   - 使用同一域名下的 API 网关
+
+### Nginx 配置示例
+
+```nginx
+server {
+    listen 80;
+    server_name aneworders.com;
+
+    location /api/ {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        # CORS headers
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+    }
+}
+```
+
 ## 配置说明
 
 ### 环境变量
