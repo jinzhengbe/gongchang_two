@@ -13,6 +13,9 @@ func SetupOrderRoutes(router *gin.Engine, orderController *controllers.OrderCont
 		// 所有订单路由都需要认证
 		orderGroup.Use(middleware.AuthMiddleware())
 		
+		// 获取所有订单（管理员专用）
+		orderGroup.GET("/all", orderController.GetAllOrders)
+		
 		// 创建订单
 		orderGroup.POST("/", orderController.CreateOrder)
 		
@@ -42,5 +45,17 @@ func SetupOrderRoutes(router *gin.Engine, orderController *controllers.OrderCont
 		
 		// 获取热门订单
 		orderGroup.GET("/hot", orderController.GetHotOrders)
+
+		// 上传模型文件
+		orderGroup.POST("/:id/model-files", orderController.UploadModelFiles)
+		
+		// 上传详情图片
+		orderGroup.POST("/:id/detail-images", orderController.UploadDetailImages)
+		
+		// 更新订单信息
+		orderGroup.PUT("/:id", orderController.UpdateOrder)
+		
+		// 删除订单
+		orderGroup.DELETE("/:id", orderController.DeleteOrder)
 	}
 } 

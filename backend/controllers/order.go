@@ -11,11 +11,13 @@ import (
 
 type OrderController struct {
 	orderService *services.OrderService
+	fileService  *services.FileService
 }
 
-func NewOrderController(orderService *services.OrderService) *OrderController {
+func NewOrderController(orderService *services.OrderService, fileService *services.FileService) *OrderController {
 	return &OrderController{
 		orderService: orderService,
+		fileService:  fileService,
 	}
 }
 
@@ -161,6 +163,151 @@ func (c *OrderController) GetLatestOrders(ctx *gin.Context) {
 func (c *OrderController) GetHotOrders(ctx *gin.Context) {
 	limit := 4 // 默认返回4个热门订单
 	orders, err := c.orderService.GetHotOrders(limit)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orders)
+}
+
+// UploadModelFiles handles the upload of model files for an order
+func (c *OrderController) UploadModelFiles(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	files := form.File["files"]
+	if len(files) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No files uploaded"})
+		return
+	}
+
+	// Get user ID from context (set by auth middleware)
+	userID := ctx.GetUint("user_id")
+	if userID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Upload files and associate with order
+	fileIDs, err := c.fileService.UploadFiles(files, uint(orderID), "model", userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Files uploaded successfully",
+		"file_ids": fileIDs,
+	})
+}
+
+// UploadDetailImages handles the upload of detail images for an order
+func (c *OrderController) UploadDetailImages(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	files := form.File["files"]
+	if len(files) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No files uploaded"})
+		return
+	}
+
+	// Get user ID from context (set by auth middleware)
+	userID := ctx.GetUint("user_id")
+	if userID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Upload files and associate with order
+	fileIDs, err := c.fileService.UploadFiles(files, uint(orderID), "detail", userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Images uploaded successfully",
+		"file_ids": fileIDs,
+	})
+}
+
+// UpdateOrder handles updating order information
+func (c *OrderController) UpdateOrder(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	var order models.Order
+	if err := ctx.ShouldBindJSON(&order); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get user ID from context (set by auth middleware)
+	userID := ctx.GetUint("user_id")
+	if userID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Update order
+	if err := c.orderService.UpdateOrder(uint(orderID), &order, userID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Order updated successfully"})
+}
+
+// DeleteOrder handles deleting an order
+func (c *OrderController) DeleteOrder(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	// Get user ID from context (set by auth middleware)
+	userID := ctx.GetUint("user_id")
+	if userID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Delete order
+	if err := c.orderService.DeleteOrder(uint(orderID), userID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully"})
+}
+
+// GetAllOrders 获取所有订单
+func (c *OrderController) GetAllOrders(ctx *gin.Context) {
+	orders, err := c.orderService.GetAllOrders()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

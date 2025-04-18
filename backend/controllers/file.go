@@ -2,107 +2,135 @@ package controllers
 
 import (
 	"aneworder.com/backend/services"
-	"net/http"
-	"os"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
+	"mime/multipart"
+	"net/http"
+	"strconv"
 )
 
 type FileController struct {
 	fileService *services.FileService
-	uploadDir   string
+	uploadPath  string
 }
 
-func NewFileController(fileService *services.FileService, uploadDir string) *FileController {
-	// 确保上传目录存在
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		panic(err)
-	}
+func NewFileController(fileService *services.FileService, uploadPath string) *FileController {
 	return &FileController{
 		fileService: fileService,
-		uploadDir:   uploadDir,
+		uploadPath:  uploadPath,
 	}
 }
 
-// UploadFile 处理文件上传
+// UploadFile handles file upload
 func (c *FileController) UploadFile(ctx *gin.Context) {
-	// 获取订单ID
-	orderID, err := strconv.ParseUint(ctx.PostForm("orderId"), 10, 32)
+	file, err := ctx.FormFile("file")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 获取上传的文件
-	file, header, err := ctx.Request.FormFile("file")
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "获取文件失败"})
+	// Get user ID from context (set by auth middleware)
+	userID := ctx.GetUint("user_id")
+	if userID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	defer file.Close()
 
-	// 保存文件
-	fileRecord, err := c.fileService.SaveFile(file, header.Filename, uint(orderID))
+	// Get order ID from form data
+	orderID, err := strconv.ParseUint(ctx.PostForm("order_id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	// Get file type from form data
+	fileType := ctx.PostForm("file_type")
+	if fileType == "" {
+		fileType = "general" // Default file type
+	}
+
+	// Upload file
+	fileIDs, err := c.fileService.UploadFiles([]*multipart.FileHeader{file}, uint(orderID), fileType, userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, fileRecord)
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "File uploaded successfully",
+		"file_id": fileIDs[0],
+	})
 }
 
-// GetOrderFiles 获取订单的所有文件
+// GetOrderFiles gets all files associated with an order
 func (c *FileController) GetOrderFiles(ctx *gin.Context) {
 	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
 		return
 	}
 
-	files, err := c.fileService.GetOrderFiles(uint(orderID))
+	files, err := c.fileService.GetFilesByOrderID(uint(orderID), "")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"files": files})
+	ctx.JSON(http.StatusOK, files)
 }
 
-// GetFileInfo 获取文件信息
+// GetFileInfo gets information about a specific file
 func (c *FileController) GetFileInfo(ctx *gin.Context) {
-	fileID := ctx.Param("fileId")
-
-	file, err := c.fileService.GetFileByID(fileID)
+	fileID, err := strconv.ParseUint(ctx.Param("fileId"), 10, 32)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+		return
+	}
+
+	file, err := c.fileService.GetFileByID(uint(fileID))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, file)
 }
 
-// DownloadFile 处理文件下载
+// DownloadFile handles file download
 func (c *FileController) DownloadFile(ctx *gin.Context) {
-	fileID := ctx.Param("fileId")
-
-	filePath, err := c.fileService.GetFilePath(fileID)
+	fileID, err := strconv.ParseUint(ctx.Param("fileId"), 10, 32)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
 		return
 	}
 
-	ctx.File(filePath)
-}
-
-// DeleteFile 处理文件删除
-func (c *FileController) DeleteFile(ctx *gin.Context) {
-	fileID := ctx.Param("fileId")
-
-	if err := c.fileService.DeleteFile(fileID); err != nil {
+	file, err := c.fileService.GetFileByID(uint(fileID))
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "文件删除成功"})
+	ctx.File(file.FilePath)
+}
+
+// DeleteFile handles file deletion
+func (c *FileController) DeleteFile(ctx *gin.Context) {
+	fileID, err := strconv.ParseUint(ctx.Param("fileId"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+		return
+	}
+
+	// Get user ID from context (set by auth middleware)
+	userID := ctx.GetUint("user_id")
+	if userID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if err := c.fileService.DeleteFile(uint(fileID), userID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "File deleted successfully"})
 } 

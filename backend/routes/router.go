@@ -16,12 +16,12 @@ func SetupRouter(router *gin.Engine, db *gorm.DB) {
 	userService := services.NewUserService(db)
 	productService := services.NewProductService(db)
 	orderService := services.NewOrderService(db)
-	fileService := services.NewFileService(db, "uploads")
+	fileService := services.NewFileService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
 	productController := controllers.NewProductController(productService)
-	orderController := controllers.NewOrderController(orderService)
+	orderController := controllers.NewOrderController(orderService, fileService)
 	fileController := controllers.NewFileController(fileService, "uploads")
 
 	// 注册路由
