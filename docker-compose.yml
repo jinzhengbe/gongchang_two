@@ -6,6 +6,7 @@ services:
     ports:
       - "443:443"
       - "8080:8080"
+      - "80:80"
     environment:
       - DB_HOST=mysql
       - DB_PORT=3306
@@ -15,10 +16,13 @@ services:
       - JWT_SECRET=your-secret-key
       - SERVER_HOST=aneworders.com
       - SERVER_PORT=443
+    volumes:
+      - ./backend/ssl:/app/ssl
     depends_on:
       - mysql
     networks:
       - gongchang_network
+    command: sh -c "certbot certonly --standalone --non-interactive --agree-tos --email admin@aneworders.com --domains aneworders.com --test-cert && cp /etc/letsencrypt/live/aneworders.com/fullchain.pem /app/ssl/cert.pem && cp /etc/letsencrypt/live/aneworders.com/privkey.pem /app/ssl/key.pem && chmod 600 /app/ssl/cert.pem /app/ssl/key.pem && ./app"
 
   mysql:
     image: mysql:8.0
