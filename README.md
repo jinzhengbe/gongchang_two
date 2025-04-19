@@ -34,131 +34,165 @@ docker-compose up -d
 ## 项目结构
 ```
 .
-├── backend/           # 后端代码
+├── backend/           # 后端服务
 │   ├── controllers/  # 控制器
 │   ├── models/       # 数据模型
-│   ├── routes/       # 路由配置
+│   ├── routes/       # 路由
 │   ├── services/     # 业务逻辑
-│   ├── ssl/          # SSL 证书目录
-│   └── main.go       # 入口文件
-├── docs/             # 文档
-│   └── order_api.md  # 订单 API 文档
-└── docker-compose.yml # Docker 配置
+│   ├── utils/        # 工具函数
+│   ├── main.go       # 主程序
+│   └── Dockerfile    # 后端 Docker 配置
+├── frontend/         # 前端应用
+│   ├── lib/         # 库文件
+│   ├── test/        # 测试文件
+│   └── pubspec.yaml # Flutter 配置
+├── docker-compose.yml # Docker 编排配置
+└── README.md         # 项目文档
 ```
 
-## SSL 配置说明
+## 开发环境配置
 
-### 证书配置
-系统使用 Let's Encrypt 的测试证书，配置如下：
+### 后端服务
 
-1. 证书信息：
-   - 域名：aneworders.com
-   - 有效期：90 天
-   - 类型：测试证书
-   - 自动更新：每 60 天
-
-2. 证书位置：
-   - 证书文件：/app/ssl/cert.pem
-   - 私钥文件：/app/ssl/key.pem
-
-3. 端口配置：
-   - HTTPS：443
-   - HTTP：8080
-   - 证书验证：80
-
-### 客户端配置
-由于使用测试证书，客户端需要特殊配置：
-
-1. 开发环境：
-   ```dart
-   // Flutter/Dart 配置示例
-   final dio = Dio();
-   dio.options.baseUrl = 'https://aneworders.com:443';
-   (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (client) {
-     client.badCertificateCallback = (cert, host, port) => true;
-     return client;
-   };
+1. 安装依赖：
+   ```bash
+   cd backend
+   go mod download
    ```
 
-2. 生产环境：
-   - 使用正式的 Let's Encrypt 证书
-   - 移除测试证书配置
-   - 配置正确的域名解析
+2. 配置环境变量：
+   ```bash
+   cp .env.example .env
+   # 编辑 .env 文件，设置数据库连接信息
+   ```
 
-### 证书更新
-证书会自动更新，但也可以手动更新：
+3. 启动服务：
+   ```bash
+   go run main.go
+   ```
 
-```bash
-# 进入容器
-docker-compose exec backend sh
+### 前端应用
 
-# 手动更新证书
-certbot renew --force-renewal
+1. 安装 Flutter 开发环境
+2. 安装依赖：
+   ```bash
+   cd frontend
+   flutter pub get
+   ```
 
-# 复制新证书
-cp /etc/letsencrypt/live/aneworders.com/fullchain.pem /app/ssl/cert.pem
-cp /etc/letsencrypt/live/aneworders.com/privkey.pem /app/ssl/key.pem
+3. 启动开发服务器：
+   ```bash
+   flutter run
+   ```
 
-# 设置权限
-chmod 600 /app/ssl/cert.pem /app/ssl/key.pem
-```
+## Docker 部署
 
-### 故障排除
+1. 构建镜像：
+   ```bash
+   docker-compose build
+   ```
 
-1. 证书获取失败：
-   - 检查 80 端口是否开放
-   - 确认域名解析正确
-   - 检查防火墙设置
+2. 启动服务：
+   ```bash
+   docker-compose up -d
+   ```
 
-2. HTTPS 连接失败：
-   - 检查证书是否有效
-   - 确认端口映射正确
-   - 验证客户端配置
-
-3. 证书更新失败：
-   - 检查日志：/var/log/letsencrypt/letsencrypt.log
-   - 确认定时任务运行正常
-   - 验证文件权限
+3. 查看日志：
+   ```bash
+   docker-compose logs -f
+   ```
 
 ## API 文档
-- [订单管理 API](./docs/order_api.md)
 
-## 开发指南
+### 用户认证
 
-### 数据库迁移
+- POST `/api/auth/login`
+  - 请求体：
+    ```json
+    {
+      "username": "string",
+      "password": "string"
+    }
+    ```
+  - 响应：
+    ```json
+    {
+      "token": "string",
+      "user": {
+        "id": "string",
+        "username": "string",
+        "role": "string"
+      }
+    }
+    ```
+
+### 用户管理
+
+- GET `/api/users`
+  - 需要认证
+  - 响应：用户列表
+
+- POST `/api/users`
+  - 需要认证
+  - 请求体：
+    ```json
+    {
+      "username": "string",
+      "password": "string",
+      "role": "string"
+    }
+    ```
+
+### 订单管理
+
+- GET `/api/orders`
+  - 需要认证
+  - 响应：订单列表
+
+- POST `/api/orders`
+  - 需要认证
+  - 请求体：
+    ```json
+    {
+      "productId": "string",
+      "quantity": "number",
+      "customer": "string"
+    }
+    ```
+
+## 测试
+
+### 后端测试
+
 ```bash
-# 进入 MySQL 容器
-docker-compose exec mysql mysql -uroot -p123456 gongchang
-
-# 执行 SQL 文件
-source /path/to/schema.sql
+cd backend
+go test ./...
 ```
 
-### 测试数据
-系统启动时会自动创建测试用户：
-- 设计师: designer1
-- 工厂: factory1
-- 供应商: supplier1
+### 前端测试
 
-### 开发流程
-1. 创建新分支
-2. 实现功能
-3. 编写测试
-4. 提交代码
-5. 创建 Pull Request
-
-## 部署说明
-1. 确保服务器已安装 Docker 和 Docker Compose
-2. 配置 SSL 证书（如果需要 HTTPS）
-3. 设置环境变量
-4. 使用 Docker Compose 部署
+```bash
+cd frontend
+flutter test
+```
 
 ## 维护说明
-- 定期备份数据库
-- 监控服务日志
-- 更新依赖包
-- 定期检查安全漏洞
-- 监控证书有效期
+
+1. 数据库备份
+   - 定期备份数据库文件
+   - 使用 `mysqldump` 导出数据
+
+2. 服务监控
+   - 监控服务日志
+   - 检查服务状态
+
+3. 依赖更新
+   - 定期更新 Go 依赖
+   - 更新 Flutter 依赖
+
+4. 安全维护
+   - 定期检查安全漏洞
+   - 更新依赖包修复漏洞
 
 ## 贡献指南
 1. Fork 项目
