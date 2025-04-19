@@ -47,60 +47,96 @@ docker-compose up -d
 │   ├── test/        # 测试文件
 │   └── pubspec.yaml # Flutter 配置
 ├── docker-compose.yml # Docker 编排配置
+├── scripts/          # 脚本目录
+│   ├── backup/      # 备份脚本
+│   └── deploy/      # 部署脚本
 └── README.md         # 项目文档
 ```
 
-## 开发环境配置
+## 认证与授权
 
-### 后端服务
+### JWT Token 认证
+系统使用 JWT (JSON Web Token) 进行身份认证。每个请求都需要在 Authorization 头中携带 token。
 
-1. 安装依赖：
-   ```bash
-   cd backend
-   go mod download
-   ```
+#### Token 格式
+```
+Authorization: Bearer <token>
+```
 
-2. 配置环境变量：
-   ```bash
-   cp .env.example .env
-   # 编辑 .env 文件，设置数据库连接信息
-   ```
+#### Token 结构
+```json
+{
+  "user_id": "string",
+  "role": "string",
+  "exp": "number",  // 过期时间
+  "iat": "number"   // 签发时间
+}
+```
 
-3. 启动服务：
-   ```bash
-   go run main.go
-   ```
+#### 错误处理
+- 401 Unauthorized: token 无效或过期
+- 403 Forbidden: 权限不足
+- 400 Bad Request: 请求格式错误
 
-### 前端应用
+#### 客户端处理
+1. 登录获取 token
+```javascript
+// 登录请求
+POST /api/auth/login
+{
+  "username": "string",
+  "password": "string"
+}
 
-1. 安装 Flutter 开发环境
-2. 安装依赖：
-   ```bash
-   cd frontend
-   flutter pub get
-   ```
+// 响应
+{
+  "token": "string",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "role": "string"
+  }
+}
+```
 
-3. 启动开发服务器：
-   ```bash
-   flutter run
-   ```
+2. 存储 token
+```javascript
+// 保存 token
+localStorage.setItem('token', token);
 
-## Docker 部署
+// 获取 token
+const token = localStorage.getItem('token');
+```
 
-1. 构建镜像：
-   ```bash
-   docker-compose build
-   ```
+3. 请求拦截器
+```javascript
+// 添加请求头
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-2. 启动服务：
-   ```bash
-   docker-compose up -d
-   ```
+// 处理 401 错误
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // 清除 token 并重定向到登录页
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+```
 
-3. 查看日志：
-   ```bash
-   docker-compose logs -f
-   ```
+### 角色权限
+- designer: 设计师，可以创建订单
+- factory: 工厂，可以处理订单
+- supplier: 供应商，可以查看相关订单
 
 ## API 文档
 
@@ -160,31 +196,72 @@ docker-compose up -d
     }
     ```
 
-## 测试
+## 开发指南
 
-### 后端测试
+### 后端开发
 
+1. 环境配置
 ```bash
 cd backend
+go mod download
+```
+
+2. 运行测试
+```bash
 go test ./...
 ```
 
-### 前端测试
+3. 启动服务
+```bash
+go run main.go
+```
 
+### 前端开发
+
+1. 环境配置
 ```bash
 cd frontend
+flutter pub get
+```
+
+2. 运行测试
+```bash
 flutter test
+```
+
+3. 启动开发服务器
+```bash
+flutter run
+```
+
+## 部署指南
+
+1. 构建镜像
+```bash
+docker-compose build
+```
+
+2. 启动服务
+```bash
+docker-compose up -d
+```
+
+3. 查看日志
+```bash
+docker-compose logs -f
 ```
 
 ## 维护说明
 
 1. 数据库备份
-   - 定期备份数据库文件
-   - 使用 `mysqldump` 导出数据
+   - 自动备份：每天凌晨 2 点执行
+   - 手动备份：执行 `./scripts/backup/backup.sh`
+   - 主从复制：实时同步数据
 
 2. 服务监控
    - 监控服务日志
    - 检查服务状态
+   - 监控主从同步状态
 
 3. 依赖更新
    - 定期更新 Go 依赖
@@ -193,6 +270,26 @@ flutter test
 4. 安全维护
    - 定期检查安全漏洞
    - 更新依赖包修复漏洞
+   - 定期更换数据库密码
+   - 定期更新 JWT secret
+
+## 故障排除
+
+### Token 验证失败
+1. 检查 token 格式是否正确
+2. 确认 token 未过期
+3. 验证 JWT secret 是否正确
+4. 检查服务器日志获取详细错误信息
+
+### 数据库连接问题
+1. 检查数据库服务是否运行
+2. 验证连接信息是否正确
+3. 检查网络连接
+
+### 文件上传问题
+1. 检查文件大小限制
+2. 验证文件类型是否允许
+3. 检查存储空间是否充足
 
 ## 贡献指南
 1. Fork 项目
