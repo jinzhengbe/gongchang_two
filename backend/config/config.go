@@ -17,12 +17,12 @@ type Config struct {
 
 func LoadConfig() (*Config, error) {
 	return &Config{
-		Port:       getEnv("PORT", "443"),
-		DBHost:     getEnv("DB_HOST", "mysql"),
-		DBPort:     getEnv("DB_PORT", "3306"),
-		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", "123456"),
-		DBName:     getEnv("DB_NAME", "gongchang"),
+		Port:       getEnv("PORT", "8080"),
+		DBHost:     getEnv("MYSQL_HOST", "mysql"),
+		DBPort:     getEnv("MYSQL_PORT", "3306"),
+		DBUser:     getEnv("MYSQL_USER", "gongchang"),
+		DBPassword: getEnv("MYSQL_PASSWORD", "gongchang"),
+		DBName:     getEnv("MYSQL_DATABASE", "gongchang"),
 		JWTSecret:  getEnv("JWT_SECRET", "your-secret-key"),
 		ServerHost: getEnv("SERVER_HOST", "aneworder.com"),
 	}, nil

@@ -6,9 +6,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"aneworder.com/backend/models"
+	"aneworder.com/backend/services"
 )
 
-type AuthController struct{}
+type AuthController struct {
+	userService *services.UserService
+}
+
+func NewAuthController(userService *services.UserService) *AuthController {
+	return &AuthController{
+		userService: userService,
+	}
+}
 
 type LoginRequest struct {
 	Username string `json:"username" binding:"required,min=3,max=20"`
@@ -17,13 +27,7 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	Token string `json:"token"`
-	User  User   `json:"user"`
-}
-
-type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	Data  models.LoginData `json:"data"`
 }
 
 func (c *AuthController) Login(ctx *gin.Context) {
@@ -33,17 +37,17 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: 验证用户名和密码
-	// 这里暂时使用模拟数据
-	if req.Username != "admin" || req.Password != "password" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+	// 使用用户服务验证登录
+	loginResponse, err := c.userService.Login(req.Username, req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	// 生成 JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": 1,
-		"role":    "admin",
+		"user_id": loginResponse.Data.User.ID,
+		"role":    loginResponse.Data.User.Role,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
@@ -55,10 +59,6 @@ func (c *AuthController) Login(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, LoginResponse{
 		Token: tokenString,
-		User: User{
-			ID:       1,
-			Username: req.Username,
-			Role:     "admin",
-		},
+		Data:  loginResponse.Data,
 	})
 } 

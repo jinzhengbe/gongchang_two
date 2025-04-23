@@ -2,18 +2,22 @@ package api
 
 import (
 	"sewingmast-backend/config"
+	"sewingmast-backend/routes"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Server struct {
 	config *config.Config
 	router *gin.Engine
+	db     *gorm.DB
 }
 
-func NewServer(cfg *config.Config) *Server {
+func NewServer(cfg *config.Config, db *gorm.DB) *Server {
 	server := &Server{
 		config: cfg,
 		router: gin.Default(),
+		db:     db,
 	}
 
 	server.setupRoutes()
@@ -21,12 +25,8 @@ func NewServer(cfg *config.Config) *Server {
 }
 
 func (s *Server) setupRoutes() {
-	// Public routes
-	public := s.router.Group("/api")
-	{
-		public.POST("/login", s.handleLogin)
-		public.POST("/register", s.handleRegister)
-	}
+	// Register auth routes
+	routes.RegisterAuthRoutes(s.router, s.db)
 
 	// Protected routes
 	protected := s.router.Group("/api")

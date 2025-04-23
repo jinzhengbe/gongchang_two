@@ -37,19 +37,8 @@ func main() {
 	routes.SetupRouter(router, db)
 
 	// 启动 HTTP 服务器
-	go func() {
-		log.Printf("HTTP Server starting on port 8080")
-		if err := router.Run(":8080"); err != nil {
-			log.Printf("Error starting HTTP server: %v", err)
-		}
-	}()
-
-	// 启动 HTTPS 服务器
-	certFile := "/app/ssl/cert.pem"
-	keyFile := "/app/ssl/key.pem"
-
-	log.Printf("HTTPS Server starting on port 443")
-	if err := router.RunTLS(":443", certFile, keyFile); err != nil {
-		log.Printf("Error starting HTTPS server: %v", err)
+	log.Printf("HTTP Server starting on port %s", cfg.Port)
+	if err := router.Run(":" + cfg.Port); err != nil {
+		log.Fatalf("Error starting HTTP server: %v", err)
 	}
 } 
