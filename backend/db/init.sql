@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS orders (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     factory_id BIGINT NOT NULL,
+    designer_id VARCHAR(64) NOT NULL,
+    customer_id VARCHAR(64) NOT NULL,
     status ENUM('pending', 'accepted', 'in_progress', 'completed', 'cancelled') NOT NULL,
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

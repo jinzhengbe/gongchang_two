@@ -3,8 +3,10 @@ package controllers
 import (
 	"aneworder.com/backend/models"
 	"aneworder.com/backend/services"
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,9 +22,35 @@ func NewOrderController(orderService *services.OrderService) *OrderController {
 }
 
 func (c *OrderController) CreateOrder(ctx *gin.Context) {
+	// 从 JWT token 中获取用户 ID
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
 	var order models.Order
 	if err := ctx.ShouldBindJSON(&order); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 设置客户 ID
+	order.CustomerID = userID
+	// 设置设计师 ID
+	order.DesignerID = userID
+	// 设置订单日期为当前时间
+	order.OrderDate = time.Now().UTC()
+	log.Printf("Setting order date to: %v", order.OrderDate)
+
+	// 验证必要字段
+	if order.Quantity <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "数量必须大于 0"})
+		return
+	}
+
+	if order.ShippingAddress == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "收货地址不能为空"})
 		return
 	}
 

@@ -17,19 +17,19 @@ const (
 
 type Order struct {
 	gorm.Model
-	DesignerID    uint      `json:"designer_id" gorm:"not null"`
-	CustomerID    uint      `json:"customer_id" gorm:"not null"`
-	ProductID     uint      `json:"product_id" gorm:"not null"`
-	Quantity      int       `json:"quantity" gorm:"not null"`
-	UnitPrice     float64   `json:"unit_price" gorm:"not null"`
-	TotalPrice    float64   `json:"total_price" gorm:"not null"`
-	Status        string    `json:"status" gorm:"not null;default:'pending'"`
-	PaymentStatus string    `json:"payment_status" gorm:"not null;default:'unpaid'"`
-	ShippingAddress string  `json:"shipping_address" gorm:"not null"`
-	OrderDate     time.Time `json:"order_date" gorm:"not null"`
-	Designer      User      `json:"designer" gorm:"foreignKey:DesignerID"`
-	Customer      User      `json:"customer" gorm:"foreignKey:CustomerID"`
-	Product       Product   `json:"product" gorm:"foreignKey:ProductID"`
+	DesignerID      string    `json:"designer_id" gorm:"type:varchar(64);not null;index"`
+	CustomerID      string    `json:"customer_id" gorm:"type:varchar(64);not null;index"`
+	ProductID       *uint     `json:"product_id" gorm:"index"`
+	Quantity        int       `json:"quantity" gorm:"not null"`
+	UnitPrice       float64   `json:"unit_price" gorm:"not null"`
+	TotalPrice      float64   `json:"total_price" gorm:"not null"`
+	Status          string    `json:"status" gorm:"not null;default:'pending'"`
+	PaymentStatus   string    `json:"payment_status" gorm:"not null;default:'unpaid'"`
+	ShippingAddress string    `json:"shipping_address" gorm:"type:longtext;not null"`
+	OrderDate       time.Time `json:"order_date" gorm:"not null"`
+	Designer        User      `json:"designer" gorm:"foreignKey:DesignerID;references:ID"`
+	Customer        User      `json:"customer" gorm:"foreignKey:CustomerID;references:ID"`
+	Product         *Product  `json:"product" gorm:"foreignKey:ProductID"`
 }
 
 type OrderProgress struct {

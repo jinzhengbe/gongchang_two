@@ -21,13 +21,15 @@ func (s *OrderService) CreateOrder(order *models.Order) error {
 
 func (s *OrderService) GetOrdersByUserID(userID uint) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Where("user_id = ?", userID).Find(&orders).Error
+	err := s.db.Preload("Designer").Preload("Customer").Preload("Product").
+		Where("user_id = ?", userID).Find(&orders).Error
 	return orders, err
 }
 
 func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 	var order models.Order
-	err := s.db.First(&order, orderID).Error
+	err := s.db.Preload("Designer").Preload("Customer").Preload("Product").
+		First(&order, orderID).Error
 	return &order, err
 }
 

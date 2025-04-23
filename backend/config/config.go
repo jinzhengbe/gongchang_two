@@ -18,7 +18,7 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	return &Config{
 		Port:       getEnv("PORT", "8080"),
-		DBHost:     getEnv("MYSQL_HOST", "mysql"),
+		DBHost:     getEnv("MYSQL_HOST", "localhost"),
 		DBPort:     getEnv("MYSQL_PORT", "3306"),
 		DBUser:     getEnv("MYSQL_USER", "gongchang"),
 		DBPassword: getEnv("MYSQL_PASSWORD", "gongchang"),
