@@ -19,7 +19,7 @@ type Order struct {
 	gorm.Model
 	DesignerID      string    `json:"designer_id" gorm:"type:varchar(64);not null;index"`
 	CustomerID      string    `json:"customer_id" gorm:"type:varchar(64);not null;index"`
-	ProductID       *uint     `json:"product_id" gorm:"index"`
+	ProductID       *uint     `json:"product_id" gorm:"index;constraint:OnDelete:SET NULL"`
 	Quantity        int       `json:"quantity" gorm:"not null"`
 	UnitPrice       float64   `json:"unit_price" gorm:"not null"`
 	TotalPrice      float64   `json:"total_price" gorm:"not null"`

@@ -3,12 +3,19 @@
 ## 最近更新
 
 ### 2024-04-23
+- 修改了订单模型，支持设计师订单
+  - 将 `ProductID` 字段改为可空
+  - 更新了相关的验证逻辑
+  - 支持创建没有产品 ID 的设计师订单
 - 修复了健康检查配置问题
   - 将健康检查从 wget 改为 curl
   - 确保健康检查使用 GET 请求而不是 HEAD 请求
 - 修复了设计师登录功能
   - 确认测试用户密码为 "test123"
   - 验证了 JWT token 生成功能
+- 更新了项目结构
+  - 将后端代码移动到 backend 目录
+  - 优化了目录结构
 
 ## 开发环境设置
 
@@ -33,12 +40,31 @@ docker-compose up --build
 3. 测试服务
 ```bash
 # 测试健康检查
-curl http://localhost:8080/health
+curl http://localhost:8080/api/health
 
 # 测试设计师登录
 curl -X POST -H "Content-Type: application/json" \
   -d '{"username":"designer1","password":"test123"}' \
-  http://localhost:8080/api/users/login
+  http://localhost:8080/api/auth/login
+```
+
+## 项目结构
+
+```
+gongChang/
+├── backend/           # 后端代码
+│   ├── api/          # API 定义
+│   ├── config/       # 配置文件
+│   ├── controllers/  # 控制器
+│   ├── database/     # 数据库相关
+│   ├── middleware/   # 中间件
+│   ├── models/       # 数据模型
+│   ├── routes/       # 路由定义
+│   ├── services/     # 业务逻辑
+│   └── utils/        # 工具函数
+├── docs/             # 文档
+├── scripts/          # 脚本文件
+└── ssl/              # SSL 证书
 ```
 
 ## 测试用户
@@ -65,7 +91,7 @@ curl -X POST -H "Content-Type: application/json" \
 ### 用户认证
 
 #### 登录
-- 请求: POST `/api/users/login`
+- 请求: POST `/api/auth/login`
 - 请求体:
 ```json
 {
@@ -88,7 +114,7 @@ curl -X POST -H "Content-Type: application/json" \
 
 ### 健康检查
 
-- 请求: GET `/health`
+- 请求: GET `/api/health`
 - 响应:
 ```json
 {
