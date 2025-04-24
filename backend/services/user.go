@@ -5,6 +5,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"github.com/google/uuid"
 )
 
 // Custom error types
@@ -30,6 +31,9 @@ func (s *UserService) Register(user *models.User) error {
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
+
+	// 生成唯一 ID
+	user.ID = uuid.New().String()
 
 	// 加密密码
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -98,7 +102,7 @@ func (s *UserService) Login(username, password string) (*models.LoginResponse, e
 
 func (s *UserService) GetUserByID(userID string) (*models.User, error) {
 	var user models.User
-	if err := s.db.First(&user, userID).Error; err != nil {
+	if err := s.db.Where("id = ?", userID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

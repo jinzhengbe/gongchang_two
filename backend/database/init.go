@@ -27,7 +27,9 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	retryInterval := time.Second * 5
 
 	for i := 0; i < maxRetries; i++ {
-		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			DisableForeignKeyConstraintWhenMigrating: true,
+		})
 		if err == nil {
 			break
 		}
