@@ -1,8 +1,13 @@
-# 开发文档
+# 开发指南
 
 ## 最近更新
 
 ### 2024-04-24
+- 移除了邮箱唯一约束
+  - 移除了 User 模型中的邮箱唯一标签
+  - 移除了数据库中的邮箱唯一索引
+  - 支持使用同一邮箱注册不同角色账号
+  - 添加了数据库迁移脚本
 - 将数据库从 MySQL 改为 MariaDB
   - 更新了 docker-compose.yml 配置
   - 使用 MariaDB 10.11 版本
@@ -28,6 +33,43 @@
   - 优化了目录结构
 
 ## 开发环境设置
+
+### 1. 使用 Docker Compose 启动开发环境
+
+本项目使用 Docker Compose 管理开发环境，所有服务（包括数据库）都运行在容器中。
+
+#### 启动服务
+```bash
+docker-compose up -d
+```
+
+#### 停止服务
+```bash
+docker-compose down
+```
+
+#### 查看服务状态
+```bash
+docker-compose ps
+```
+
+#### 查看服务日志
+```bash
+docker-compose logs -f
+```
+
+### 数据库配置
+- 数据库服务运行在 Docker 容器中
+- 主机名：mysql
+- 端口：3306
+- 用户名：gongchang
+- 密码：gongchang
+- 数据库名：gongchang
+
+### 注意事项
+- 所有数据库操作都应该通过 Docker 容器进行
+- 不要使用本地安装的 MySQL
+- 数据库迁移和初始化脚本会自动在容器启动时执行
 
 ### 依赖要求
 - Docker & Docker Compose
