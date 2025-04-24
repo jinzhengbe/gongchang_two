@@ -7,6 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// Custom error types
+var (
+	ErrUsernameExists = errors.New("username already exists")
+)
+
 type UserService struct {
 	db *gorm.DB
 }
@@ -21,7 +26,7 @@ func (s *UserService) Register(user *models.User) error {
 	// 检查用户名是否已存在
 	var existingUser models.User
 	if err := s.db.Where("username = ?", user.Username).First(&existingUser).Error; err == nil {
-		return errors.New("username already exists")
+		return ErrUsernameExists
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}

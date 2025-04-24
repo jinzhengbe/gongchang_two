@@ -33,12 +33,14 @@ CREATE TABLE IF NOT EXISTS orders (
     factory_id BIGINT NOT NULL,
     designer_id VARCHAR(64) NOT NULL,
     customer_id VARCHAR(64) NOT NULL,
+    product_id BIGINT,
     status ENUM('pending', 'accepted', 'in_progress', 'completed', 'cancelled') NOT NULL,
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (factory_id) REFERENCES factories(id)
+    FOREIGN KEY (factory_id) REFERENCES factories(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 -- Create sample admin user

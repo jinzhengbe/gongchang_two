@@ -2,6 +2,16 @@
 
 ## 最近更新
 
+### 2024-04-24
+- 将数据库从 MySQL 改为 MariaDB
+  - 更新了 docker-compose.yml 配置
+  - 使用 MariaDB 10.11 版本
+  - 优化了数据库连接配置
+- 修复了用户注册功能
+  - 修改了用户模型，使用 gorm.Model 管理通用字段
+  - 修复了重复用户名错误处理，返回 409 状态码
+  - 优化了数据库表结构
+
 ### 2024-04-23
 - 修改了订单模型，支持设计师订单
   - 将 `ProductID` 字段改为可空
@@ -21,7 +31,7 @@
 
 ### 依赖要求
 - Docker & Docker Compose
-- MySQL 8.0+
+- MariaDB 10.11+
 - Go 1.20+
 
 ### 本地开发步骤
@@ -41,6 +51,11 @@ docker-compose up --build
 ```bash
 # 测试健康检查
 curl http://localhost:8080/api/health
+
+# 测试用户注册
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"test123","email":"test@test.com","role":"designer"}' \
+  http://localhost:8080/api/users/register
 
 # 测试设计师登录
 curl -X POST -H "Content-Type: application/json" \
@@ -89,6 +104,31 @@ gongChang/
 ## API 文档
 
 ### 用户认证
+
+#### 注册
+- 请求: POST `/api/users/register`
+- 请求体:
+```json
+{
+  "username": "string",
+  "password": "string",
+  "email": "string",
+  "role": "string"
+}
+```
+- 响应:
+  - 成功 (201 Created):
+  ```json
+  {
+    "message": "User registered successfully"
+  }
+  ```
+  - 用户名已存在 (409 Conflict):
+  ```json
+  {
+    "error": "Username already exists"
+  }
+  ```
 
 #### 登录
 - 请求: POST `/api/auth/login`

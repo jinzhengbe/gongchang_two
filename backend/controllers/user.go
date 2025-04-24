@@ -5,6 +5,7 @@ import (
 	"aneworder.com/backend/middleware"
 	"aneworder.com/backend/models"
 	"aneworder.com/backend/services"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,11 @@ func (c *UserController) Register(ctx *gin.Context) {
 	}
 
 	if err := c.userService.Register(user); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if errors.Is(err, services.ErrUsernameExists) {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

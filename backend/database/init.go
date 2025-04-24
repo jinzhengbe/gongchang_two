@@ -73,21 +73,18 @@ func InitTestData(db *gorm.DB) error {
 	// 测试用户数据
 	testUsers := []models.User{
 		{
-			ID:       "1",
 			Username: "designer1",
 			Password: string(hashedPassword),
 			Email:    "designer1@test.com",
 			Role:     string(models.RoleDesigner),
 		},
 		{
-			ID:       "2",
 			Username: "factory1",
 			Password: string(hashedPassword),
 			Email:    "factory1@test.com",
 			Role:     string(models.RoleFactory),
 		},
 		{
-			ID:       "3",
 			Username: "supplier1",
 			Password: string(hashedPassword),
 			Email:    "supplier1@test.com",
@@ -98,7 +95,7 @@ func InitTestData(db *gorm.DB) error {
 	// 创建用户
 	for _, user := range testUsers {
 		var existingUser models.User
-		if err := db.First(&existingUser, "id = ?", user.ID).Error; err != nil {
+		if err := db.First(&existingUser, "username = ?", user.Username).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				if err := db.Create(&user).Error; err != nil {
 					log.Printf("Error creating test user %s: %v", user.Username, err)
