@@ -67,7 +67,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.Data.User.ID, user.Data.User.Role, cfg.JWTSecret)
+	token, err := middleware.GenerateToken(user.Data.User.ID, user.Data.User.Role, cfg.JWT.Secret)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return

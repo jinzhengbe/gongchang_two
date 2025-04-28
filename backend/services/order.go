@@ -19,13 +19,6 @@ func (s *OrderService) CreateOrder(order *models.Order) error {
 	return s.db.Create(order).Error
 }
 
-func (s *OrderService) GetOrdersByUserID(userID uint) ([]models.Order, error) {
-	var orders []models.Order
-	err := s.db.Preload("Designer").Preload("Customer").Preload("Product").
-		Where("user_id = ?", userID).Find(&orders).Error
-	return orders, err
-}
-
 func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 	var order models.Order
 	err := s.db.Preload("Designer").Preload("Customer").Preload("Product").
@@ -85,4 +78,31 @@ func (s *OrderService) GetHotOrders(limit int) ([]models.Order, error) {
 	var orders []models.Order
 	err := s.db.Order("views desc").Limit(limit).Find(&orders).Error
 	return orders, err
+}
+
+func (s *OrderService) GetOrdersByUserID(userID string, status string, page int, pageSize int) ([]models.Order, error) {
+	var orders []models.Order
+	query := s.db.Model(&models.Order{}).Where("designer_id = ? OR customer_id = ?", userID, userID)
+	
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	err := query.Preload("Designer").Preload("Customer").Preload("Product").
+		Offset((page - 1) * pageSize).Limit(pageSize).
+		Order("created_at desc").
+		Find(&orders).Error
+	return orders, err
+}
+
+func (s *OrderService) GetOrdersCount(userID string, status string) (int64, error) {
+	var total int64
+	query := s.db.Model(&models.Order{}).Where("designer_id = ? OR customer_id = ?", userID, userID)
+	
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	err := query.Count(&total).Error
+	return total, err
 } 

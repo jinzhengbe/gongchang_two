@@ -26,7 +26,7 @@ type User struct {
 
 type DesignerProfile struct {
 	gorm.Model
-	UserID      uint   `gorm:"uniqueIndex"`
+	UserID      string `gorm:"uniqueIndex;type:varchar(191)"`
 	CompanyName string
 	Address     string
 	Website     string
@@ -35,7 +35,7 @@ type DesignerProfile struct {
 
 type FactoryProfile struct {
 	gorm.Model
-	UserID      uint   `gorm:"uniqueIndex"`
+	UserID      string `gorm:"uniqueIndex;type:varchar(191)"`
 	CompanyName string
 	Address     string
 	Capacity    int
@@ -45,7 +45,7 @@ type FactoryProfile struct {
 
 type SupplierProfile struct {
 	gorm.Model
-	UserID      uint   `gorm:"uniqueIndex"`
+	UserID      string `gorm:"uniqueIndex;type:varchar(191)"`
 	CompanyName string
 	Address     string
 	MainProducts string

@@ -3,7 +3,6 @@ package controllers
 import (
 	"aneworder.com/backend/models"
 	"aneworder.com/backend/services"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,13 +34,12 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
-	// 设置客户 ID
+	// 设置客户 ID 和设计师 ID
 	order.CustomerID = userID
-	// 设置设计师 ID
 	order.DesignerID = userID
+
 	// 设置订单日期为当前时间
 	order.OrderDate = time.Now().UTC()
-	log.Printf("Setting order date to: %v", order.OrderDate)
 
 	// 验证必要字段
 	if order.Quantity <= 0 {
@@ -54,6 +52,35 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
+	if order.Title == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "订单标题不能为空"})
+		return
+	}
+
+	if order.OrderType == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "订单类型不能为空"})
+		return
+	}
+
+	if order.DeliveryDate.IsZero() {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "交货日期不能为空"})
+		return
+	}
+
+	// 设置默认值
+	if order.Status == "" {
+		order.Status = "pending"
+	}
+	if order.PaymentStatus == "" {
+		order.PaymentStatus = "unpaid"
+	}
+	if order.UnitPrice == 0 {
+		order.UnitPrice = 0
+	}
+	if order.TotalPrice == 0 {
+		order.TotalPrice = 0
+	}
+
 	if err := c.orderService.CreateOrder(&order); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -63,19 +90,48 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 }
 
 func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
-	userID, err := strconv.ParseUint(ctx.Param("userID"), 10, 32)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+	// 从 JWT token 中获取用户 ID
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
 		return
 	}
 
-	orders, err := c.orderService.GetOrdersByUserID(uint(userID))
+	// 获取查询参数
+	status := ctx.Query("status")
+	pageStr := ctx.DefaultQuery("page", "1")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "10")
+
+	// 转换分页参数
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	// 获取订单列表
+	orders, err := c.orderService.GetOrdersByUserID(userID, status, page, pageSize)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, orders)
+	// 获取总数
+	total, err := c.orderService.GetOrdersCount(userID, status)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"total": total,
+		"page": page,
+		"pageSize": pageSize,
+		"orders": orders,
+	})
 }
 
 func (c *OrderController) GetOrderByID(ctx *gin.Context) {

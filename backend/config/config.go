@@ -2,35 +2,63 @@ package config
 
 import (
 	"os"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
+	"strings"
 )
 
 type Config struct {
-	Port       string
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	JWTSecret  string
-	ServerHost string
+	Server struct {
+		Host           string   `yaml:"host"`
+		Port           string   `yaml:"port"`
+		TrustedProxies []string `yaml:"trusted_proxies"`
+	} `yaml:"server"`
+	Database struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		DBName   string `yaml:"dbname"`
+	} `yaml:"database"`
+	Redis struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Password string `yaml:"password"`
+		DB       int    `yaml:"db"`
+	} `yaml:"redis"`
+	JWT struct {
+		Secret string `yaml:"secret"`
+		Expire int    `yaml:"expire"`
+	} `yaml:"jwt"`
 }
 
 func LoadConfig() (*Config, error) {
-	return &Config{
-		Port:       getEnv("PORT", "8080"),
-		DBHost:     getEnv("MYSQL_HOST", "localhost"),
-		DBPort:     getEnv("MYSQL_PORT", "3306"),
-		DBUser:     getEnv("MYSQL_USER", "gongchang"),
-		DBPassword: getEnv("MYSQL_PASSWORD", "gongchang"),
-		DBName:     getEnv("MYSQL_DATABASE", "gongchang"),
-		JWTSecret:  getEnv("JWT_SECRET", "your-secret-key"),
-		ServerHost: getEnv("SERVER_HOST", "aneworder.com"),
-	}, nil
+	config := &Config{}
+	
+	// 读取配置文件
+	data, err := ioutil.ReadFile("config/config.yaml")
+	if err != nil {
+		return nil, err
+	}
+	
+	// 解析 YAML
+	err = yaml.Unmarshal(data, config)
+	if err != nil {
+		return nil, err
+	}
+
+	// 处理环境变量
+	config.JWT.Secret = getEnvValue(config.JWT.Secret)
+	
+	return config, nil
 }
 
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
+func getEnvValue(value string) string {
+	if strings.HasPrefix(value, "${") && strings.HasSuffix(value, "}") {
+		envVar := strings.TrimSuffix(strings.TrimPrefix(value, "${"), "}")
+		if envValue, exists := os.LookupEnv(envVar); exists {
+			return envValue
+		}
 	}
-	return defaultValue
+	return value
 } 

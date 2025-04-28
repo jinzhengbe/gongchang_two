@@ -9,16 +9,17 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"time"
+	"github.com/google/uuid"
 )
 
 // InitDB 初始化数据库连接
 func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
-		cfg.DBUser,
-		cfg.DBPassword,
-		cfg.DBHost,
-		cfg.DBPort,
-		cfg.DBName,
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.DBName,
 	)
 
 	var db *gorm.DB
@@ -60,10 +61,15 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
+	// 初始化测试数据
+	if err := InitTestData(db); err != nil {
+		log.Printf("Warning: Failed to initialize test data: %v", err)
+	}
+
 	return db, nil
 }
 
-// 初始化测试数据
+// InitTestData 初始化测试数据
 func InitTestData(db *gorm.DB) error {
 	// 创建测试用户密码
 	password := "test123"
@@ -75,18 +81,21 @@ func InitTestData(db *gorm.DB) error {
 	// 测试用户数据
 	testUsers := []models.User{
 		{
+			ID:       uuid.New().String(),
 			Username: "designer1",
 			Password: string(hashedPassword),
 			Email:    "designer1@test.com",
 			Role:     string(models.RoleDesigner),
 		},
 		{
+			ID:       uuid.New().String(),
 			Username: "factory1",
 			Password: string(hashedPassword),
 			Email:    "factory1@test.com",
 			Role:     string(models.RoleFactory),
 		},
 		{
+			ID:       uuid.New().String(),
 			Username: "supplier1",
 			Password: string(hashedPassword),
 			Email:    "supplier1@test.com",
@@ -115,7 +124,7 @@ func InitTestData(db *gorm.DB) error {
 
 	// 创建用户档案
 	designerProfile := models.DesignerProfile{
-		UserID:      1,
+		UserID:      "1",
 		CompanyName: "设计工作室1",
 		Address:     "北京市朝阳区",
 		Website:     "http://designer1.com",
@@ -123,7 +132,7 @@ func InitTestData(db *gorm.DB) error {
 	}
 
 	factoryProfile := models.FactoryProfile{
-		UserID:       2,
+		UserID:       "2",
 		CompanyName:  "服装厂1",
 		Address:      "广东省深圳市",
 		Capacity:     1000,
@@ -132,7 +141,7 @@ func InitTestData(db *gorm.DB) error {
 	}
 
 	supplierProfile := models.SupplierProfile{
-		UserID:       3,
+		UserID:       "3",
 		CompanyName:  "面料供应商1",
 		Address:      "浙江省绍兴市",
 		MainProducts: "棉料,丝绸,化纤",
@@ -146,11 +155,11 @@ func InitTestData(db *gorm.DB) error {
 			if err := db.Create(&designerProfile).Error; err != nil {
 				log.Printf("Error creating designer profile: %v", err)
 			} else {
-				log.Printf("Created designer profile for user ID: %d", designerProfile.UserID)
+				log.Printf("Created designer profile for user ID: %s", designerProfile.UserID)
 			}
 		}
 	} else {
-		log.Printf("Designer profile already exists for user ID: %d", designerProfile.UserID)
+		log.Printf("Designer profile already exists for user ID: %s", designerProfile.UserID)
 	}
 
 	var existingFactoryProfile models.FactoryProfile
@@ -159,11 +168,11 @@ func InitTestData(db *gorm.DB) error {
 			if err := db.Create(&factoryProfile).Error; err != nil {
 				log.Printf("Error creating factory profile: %v", err)
 			} else {
-				log.Printf("Created factory profile for user ID: %d", factoryProfile.UserID)
+				log.Printf("Created factory profile for user ID: %s", factoryProfile.UserID)
 			}
 		}
 	} else {
-		log.Printf("Factory profile already exists for user ID: %d", factoryProfile.UserID)
+		log.Printf("Factory profile already exists for user ID: %s", factoryProfile.UserID)
 	}
 
 	var existingSupplierProfile models.SupplierProfile
@@ -172,11 +181,11 @@ func InitTestData(db *gorm.DB) error {
 			if err := db.Create(&supplierProfile).Error; err != nil {
 				log.Printf("Error creating supplier profile: %v", err)
 			} else {
-				log.Printf("Created supplier profile for user ID: %d", supplierProfile.UserID)
+				log.Printf("Created supplier profile for user ID: %s", supplierProfile.UserID)
 			}
 		}
 	} else {
-		log.Printf("Supplier profile already exists for user ID: %d", supplierProfile.UserID)
+		log.Printf("Supplier profile already exists for user ID: %s", supplierProfile.UserID)
 	}
 
 	log.Println("Test data initialization completed")

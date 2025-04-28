@@ -17,19 +17,25 @@ const (
 
 type Order struct {
 	gorm.Model
-	DesignerID      string    `json:"designer_id" gorm:"type:varchar(64);not null;index"`
-	CustomerID      string    `json:"customer_id" gorm:"type:varchar(64);not null;index"`
-	ProductID       *uint     `json:"product_id" gorm:"index;constraint:OnDelete:SET NULL"`
-	Quantity        int       `json:"quantity" gorm:"not null"`
-	UnitPrice       float64   `json:"unit_price" gorm:"not null"`
-	TotalPrice      float64   `json:"total_price" gorm:"not null"`
-	Status          string    `json:"status" gorm:"not null;default:'pending'"`
-	PaymentStatus   string    `json:"payment_status" gorm:"not null;default:'unpaid'"`
-	ShippingAddress string    `json:"shipping_address" gorm:"type:longtext;not null"`
-	OrderDate       time.Time `json:"order_date" gorm:"not null"`
-	Designer        User      `json:"designer" gorm:"foreignKey:DesignerID;references:ID"`
-	Customer        User      `json:"customer" gorm:"foreignKey:CustomerID;references:ID"`
-	Product         *Product  `json:"product" gorm:"foreignKey:ProductID"`
+	DesignerID         string    `json:"designer_id" gorm:"type:varchar(64);not null;index"`
+	CustomerID         string    `json:"customer_id" gorm:"type:varchar(64);not null;index"`
+	ProductID          *uint     `json:"product_id" gorm:"index;constraint:OnDelete:SET NULL"`
+	Quantity           int       `json:"quantity" gorm:"not null"`
+	UnitPrice          float64   `json:"unit_price" gorm:"not null;default:0"`
+	TotalPrice         float64   `json:"total_price" gorm:"not null;default:0"`
+	Status             string    `json:"status" gorm:"not null;default:'pending'"`
+	PaymentStatus      string    `json:"payment_status" gorm:"not null;default:'unpaid'"`
+	ShippingAddress    string    `json:"shipping_address" gorm:"type:longtext;not null"`
+	OrderDate          time.Time `json:"order_date" gorm:"not null"`
+	Title              string    `json:"title" gorm:"type:varchar(255);not null"`
+	Description        string    `json:"description" gorm:"type:text"`
+	OrderType          string    `json:"orderType" gorm:"type:varchar(50);not null"`
+	Fabrics            string    `json:"fabrics" gorm:"type:text"`
+	DeliveryDate       time.Time `json:"deliveryDate" gorm:"not null"`
+	SpecialRequirements string    `json:"specialRequirements" gorm:"type:text"`
+	Designer           User      `json:"designer" gorm:"foreignKey:DesignerID;references:ID"`
+	Customer           User      `json:"customer" gorm:"foreignKey:CustomerID;references:ID"`
+	Product            *Product  `json:"product" gorm:"foreignKey:ProductID"`
 }
 
 type OrderProgress struct {
