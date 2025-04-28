@@ -4,7 +4,7 @@
 
 ### 2024-04-28
 - 更新了数据库配置
-  - 将数据库从 MariaDB 改回 MySQL 8.0
+  - 使用 MySQL 8.0 作为数据库
   - 更新了 docker-compose.yml 配置
   - 优化了数据库连接配置
 - 修复了后端服务启动问题
@@ -91,22 +91,54 @@ docker-compose ps
 docker-compose logs -f
 ```
 
-### 数据库配置
-- 数据库服务运行在 Docker 容器中
+### 2. 数据库配置
+
+#### 数据库服务
+- 类型：MySQL 8.0
+- 容器名称：gongchang-mysql
 - 主机名：mysql
 - 端口：3306
+- 数据卷：gongchang_mysql_data
+
+#### 数据库连接信息
+- 数据库名：gongchang
 - 用户名：gongchang
 - 密码：gongchang
-- 数据库名：gongchang
+- 字符集：utf8mb4
+- 时区：Asia/Shanghai
 
-### 注意事项
-- 所有数据库操作都应该通过 Docker 容器进行
-- 不要使用本地安装的 MySQL
-- 数据库迁移和初始化脚本会自动在容器启动时执行
+#### 数据库初始化
+数据库会在容器首次启动时自动创建，并包含以下系统数据库：
+- information_schema
+- performance_schema
+
+#### 数据持久化
+- 数据存储在 Docker 数据卷 `gongchang_mysql_data` 中
+- 即使容器重启，数据也会保留
+- 要完全重置数据库，需要删除数据卷：
+  ```bash
+  docker-compose down -v
+  ```
+
+#### 数据库管理
+- 使用 MySQL 客户端连接：
+  ```bash
+  docker exec -it gongchang-mysql mysql -ugongchang -pgongchang
+  ```
+- 查看数据库列表：
+  ```bash
+  docker exec -it gongchang-mysql mysql -ugongchang -pgongchang -e "SHOW DATABASES;"
+  ```
+
+#### 注意事项
+1. 数据库配置在 docker-compose.yml 中定义，请勿随意修改
+2. 如需修改配置，请先备份数据
+3. 确保使用正确的数据卷名称
+4. 数据库服务会在容器重启时自动恢复
 
 ### 依赖要求
 - Docker & Docker Compose
-- MariaDB 10.11+
+- MySQL 8.0+
 - Go 1.20+
 
 ### 本地开发步骤
