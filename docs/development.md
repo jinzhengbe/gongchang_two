@@ -2,6 +2,21 @@
 
 ## 最近更新
 
+### 2024-04-28
+- 更新了数据库配置
+  - 将数据库从 MariaDB 改回 MySQL 8.0
+  - 更新了 docker-compose.yml 配置
+  - 优化了数据库连接配置
+- 修复了后端服务启动问题
+  - 修复了数据库连接配置
+  - 更新了配置文件中的数据库主机名
+  - 验证了服务健康检查功能
+- 更新了测试用户
+  - 用户名: test
+  - 邮箱: test@test.com
+  - 角色: designer
+  - 密码: test123
+
 ### 2024-04-27
 - 添加了新的测试用户
   - 用户名: testuser1
@@ -39,6 +54,16 @@
 - 更新了项目结构
   - 将后端代码移动到 backend 目录
   - 优化了目录结构
+
+### 2024-04-28
+- 更新了订单接口
+  - 添加了分页和状态筛选功能
+  - 修复了重复的 GetOrdersByUserID 方法
+  - 优化了路由顺序
+  - 配置了正确的 JWT 密钥
+- 更新了服务器配置
+  - 修改为监听 0.0.0.0:8080
+  - 优化了错误处理
 
 ## 开发环境设置
 
@@ -211,6 +236,111 @@ gongChang/
   "status": "ok"
 }
 ```
+
+### 订单管理
+
+#### 获取订单列表
+- 请求: GET `/api/orders`
+- 查询参数:
+  - `status`: 订单状态 (可选)
+  - `page`: 页码 (可选，默认 1)
+  - `pageSize`: 每页大小 (可选，默认 10)
+- 请求头:
+  - `Authorization: Bearer <token>`
+- 响应:
+```json
+{
+  "total": 0,
+  "page": 1,
+  "pageSize": 10,
+  "orders": [
+    {
+      "id": 1,
+      "title": "string",
+      "description": "string",
+      "designer_id": "string",
+      "customer_id": "string",
+      "quantity": 0,
+      "unit_price": 0,
+      "total_price": 0,
+      "status": "string",
+      "payment_status": "string",
+      "shipping_address": "string",
+      "order_date": "string",
+      "order_type": "string",
+      "fabrics": "string",
+      "delivery_date": "string",
+      "special_requirements": "string",
+      "designer": {
+        "id": "string",
+        "username": "string",
+        "email": "string",
+        "role": "string"
+      },
+      "customer": {
+        "id": "string",
+        "username": "string",
+        "email": "string",
+        "role": "string"
+      }
+    }
+  ]
+}
+```
+
+#### 创建订单
+- 请求: POST `/api/orders`
+- 请求头:
+  - `Authorization: Bearer <token>`
+  - `Content-Type: application/json`
+- 请求体:
+```json
+{
+  "title": "string",
+  "description": "string",
+  "quantity": 0,
+  "shipping_address": "string",
+  "order_type": "string",
+  "fabrics": "string",
+  "delivery_date": "string",
+  "special_requirements": "string"
+}
+```
+
+#### 获取订单详情
+- 请求: GET `/api/orders/:id`
+- 请求头:
+  - `Authorization: Bearer <token>`
+- 响应: 返回单个订单的详细信息
+
+#### 更新订单状态
+- 请求: PUT `/api/orders/:id/status`
+- 请求头:
+  - `Authorization: Bearer <token>`
+  - `Content-Type: application/json`
+- 请求体:
+```json
+{
+  "status": "string"
+}
+```
+
+#### 获取最近订单
+- 请求: GET `/api/orders/recent`
+- 查询参数:
+  - `limit`: 返回数量 (可选，默认 5)
+- 请求头:
+  - `Authorization: Bearer <token>`
+
+#### 获取最新订单
+- 请求: GET `/api/orders/latest`
+- 请求头:
+  - `Authorization: Bearer <token>`
+
+#### 获取热门订单
+- 请求: GET `/api/orders/hot`
+- 请求头:
+  - `Authorization: Bearer <token>`
 
 ## 常见问题
 
