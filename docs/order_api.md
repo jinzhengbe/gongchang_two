@@ -59,6 +59,7 @@ Authorization: Bearer <token>
 | 401 | 未授权 |
 | 403 | 禁止访问 |
 | 404 | 资源不存在 |
+| 409 | 资源冲突 |
 | 500 | 服务器错误 |
 
 ## 接口详情
@@ -372,6 +373,8 @@ Authorization: Bearer <token>
 | in_progress | 进行中 |
 | completed | 已完成 |
 | cancelled | 已取消 |
+| rejected | 已拒绝 |
+| on_hold | 暂停中 |
 
 ## 支付状态说明
 
@@ -380,4 +383,6 @@ Authorization: Bearer <token>
 | unpaid | 未支付 |
 | paid | 已支付 |
 | refunded | 已退款 |
-| failed | 支付失败 | 
+| failed | 支付失败 |
+| processing | 处理中 |
+| partially_paid | 部分支付 | 
