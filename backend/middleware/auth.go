@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"aneworder.com/backend/config"
+	"aneworder.com/backend/models"
 	"log"
 	"net/http"
 	"strings"
@@ -12,8 +13,8 @@ import (
 )
 
 type Claims struct {
-	UserID string `json:"user_id"`
-	Role   string `json:"role"`
+	UserID string      `json:"user_id"`
+	Role   models.UserRole `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -89,7 +90,7 @@ func AuthMiddleware() gin.HandlerFunc {
 func GenerateToken(userID string, role string, secret string) (string, error) {
 	claims := Claims{
 		UserID: userID,
-		Role:   role,
+		Role:   models.UserRole(role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

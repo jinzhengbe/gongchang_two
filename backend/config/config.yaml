@@ -6,8 +6,8 @@ server:
 database:
   host: "mysql"
   port: "3306"
-  user: "gongchang"
-  password: "gongchang"
+  user: "root"
+  password: "root"
   dbname: "gongchang"
 
 redis:

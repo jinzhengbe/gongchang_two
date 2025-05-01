@@ -26,21 +26,12 @@ func SetupOrderRoutes(router *gin.Engine, orderController *controllers.OrderCont
 		orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
 		
 		// 搜索订单
-		orderGroup.GET("/user/:userID/search", orderController.SearchOrders)
-		
-		// 获取订单统计信息
-		orderGroup.GET("/user/:userID/statistics", orderController.GetOrderStatistics)
+		orderGroup.GET("/search", orderController.SearchOrders)
 		
 		// 获取订单统计信息
 		orderGroup.GET("/statistics", orderController.GetOrderStatistics)
 		
 		// 获取最近订单
 		orderGroup.GET("/recent", orderController.GetRecentOrders)
-		
-		// 获取最新订单
-		orderGroup.GET("/latest", orderController.GetLatestOrders)
-		
-		// 获取热门订单
-		orderGroup.GET("/hot", orderController.GetHotOrders)
 	}
 } 

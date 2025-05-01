@@ -21,42 +21,59 @@ func (s *OrderService) CreateOrder(order *models.Order) error {
 
 func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 	var order models.Order
-	err := s.db.Preload("Designer").Preload("Customer").Preload("Product").
-		First(&order, orderID).Error
+	err := s.db.Preload("Factory").First(&order, orderID).Error
 	return &order, err
 }
 
-func (s *OrderService) UpdateOrderStatus(orderID uint, status string) error {
+func (s *OrderService) UpdateOrderStatus(orderID uint, status models.OrderStatus) error {
 	return s.db.Model(&models.Order{}).Where("id = ?", orderID).Update("status", status).Error
 }
 
-func (s *OrderService) SearchOrders(query string, userID uint) ([]models.Order, error) {
+func (s *OrderService) SearchOrders(query string, factoryID string) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Where("user_id = ? AND (description LIKE ? OR status LIKE ?)", 
-		userID, "%"+query+"%", "%"+query+"%").
+	err := s.db.Where("factory_id = ? AND (description LIKE ? OR title LIKE ?)", 
+		factoryID, "%"+query+"%", "%"+query+"%").
+		Preload("Factory").
 		Find(&orders).Error
 	return orders, err
 }
 
-func (s *OrderService) GetOrderStatistics(userID uint) (*models.OrderStatistics, error) {
+func (s *OrderService) GetOrderStatistics(factoryID string) (*models.OrderStatistics, error) {
 	var stats models.OrderStatistics
 	
 	// 获取总订单数
-	err := s.db.Model(&models.Order{}).Where("user_id = ?", userID).Count(&stats.TotalOrders).Error
+	err := s.db.Model(&models.Order{}).Where("factory_id = ?", factoryID).Count(&stats.TotalOrders).Error
 	if err != nil {
 		return nil, err
 	}
 	
-	// 获取待处理订单数
-	err = s.db.Model(&models.Order{}).Where("user_id = ? AND status = ?", userID, "pending").Count(&stats.PendingOrders).Error
+	// 获取活跃订单数（已发布状态）
+	err = s.db.Model(&models.Order{}).Where("factory_id = ? AND status = ?", factoryID, models.OrderStatusPublished).Count(&stats.ActiveOrders).Error
 	if err != nil {
 		return nil, err
 	}
 	
 	// 获取已完成订单数
-	err = s.db.Model(&models.Order{}).Where("user_id = ? AND status = ?", userID, "completed").Count(&stats.CompletedOrders).Error
+	err = s.db.Model(&models.Order{}).Where("factory_id = ? AND status = ?", factoryID, models.OrderStatusCompleted).Count(&stats.CompletedOrders).Error
 	if err != nil {
 		return nil, err
+	}
+
+	// 获取待处理订单数
+	err = s.db.Model(&models.Order{}).Where("factory_id = ? AND status = ?", factoryID, models.OrderStatusDraft).Count(&stats.PendingOrders).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取各状态订单数量
+	stats.StatusCounts = make(map[string]int64)
+	for _, status := range []models.OrderStatus{models.OrderStatusDraft, models.OrderStatusPublished, models.OrderStatusCompleted, models.OrderStatusCancelled} {
+		var count int64
+		err = s.db.Model(&models.Order{}).Where("factory_id = ? AND status = ?", factoryID, status).Count(&count).Error
+		if err != nil {
+			return nil, err
+		}
+		stats.StatusCounts[string(status)] = count
 	}
 	
 	return &stats, nil
@@ -64,40 +81,28 @@ func (s *OrderService) GetOrderStatistics(userID uint) (*models.OrderStatistics,
 
 func (s *OrderService) GetRecentOrders(limit int) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Order("created_at desc").Limit(limit).Find(&orders).Error
+	err := s.db.Preload("Factory").Order("created_at desc").Limit(limit).Find(&orders).Error
 	return orders, err
 }
 
-func (s *OrderService) GetLatestOrders(limit int) ([]models.Order, error) {
+func (s *OrderService) GetOrdersByUserID(factoryID string, status string, page int, pageSize int) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Order("created_at desc").Limit(limit).Find(&orders).Error
-	return orders, err
-}
-
-func (s *OrderService) GetHotOrders(limit int) ([]models.Order, error) {
-	var orders []models.Order
-	err := s.db.Order("views desc").Limit(limit).Find(&orders).Error
-	return orders, err
-}
-
-func (s *OrderService) GetOrdersByUserID(userID string, status string, page int, pageSize int) ([]models.Order, error) {
-	var orders []models.Order
-	query := s.db.Model(&models.Order{}).Where("designer_id = ? OR customer_id = ?", userID, userID)
+	query := s.db.Model(&models.Order{}).Where("factory_id = ?", factoryID)
 	
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
 
-	err := query.Preload("Designer").Preload("Customer").Preload("Product").
+	err := query.Preload("Factory").
 		Offset((page - 1) * pageSize).Limit(pageSize).
 		Order("created_at desc").
 		Find(&orders).Error
 	return orders, err
 }
 
-func (s *OrderService) GetOrdersCount(userID string, status string) (int64, error) {
+func (s *OrderService) GetOrdersCount(factoryID string, status string) (int64, error) {
 	var total int64
-	query := s.db.Model(&models.Order{}).Where("designer_id = ? OR customer_id = ?", userID, userID)
+	query := s.db.Model(&models.Order{}).Where("factory_id = ?", factoryID)
 	
 	if status != "" {
 		query = query.Where("status = ?", status)

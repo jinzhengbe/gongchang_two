@@ -34,6 +34,9 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	productController := controllers.NewProductController(productService)
 	orderController := controllers.NewOrderController(orderService)
 
+	// 注册公开订单路由
+	RegisterPublicRoutes(r, db)
+
 	// API 路由组
 	api := r.Group("/api")
 	{
@@ -54,11 +57,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		// 订单相关路由
 		api.POST("/orders", middleware.AuthMiddleware(), orderController.CreateOrder)
 		api.GET("/orders/recent", middleware.AuthMiddleware(), orderController.GetRecentOrders)
-		api.GET("/orders/latest", middleware.AuthMiddleware(), orderController.GetLatestOrders)
-		api.GET("/orders/hot", middleware.AuthMiddleware(), orderController.GetHotOrders)
 		api.GET("/orders/:id", middleware.AuthMiddleware(), orderController.GetOrderByID)
 		api.PUT("/orders/:id/status", middleware.AuthMiddleware(), orderController.UpdateOrderStatus)
 		api.GET("/orders", middleware.AuthMiddleware(), orderController.GetOrdersByUserID)
+		api.GET("/orders/search", middleware.AuthMiddleware(), orderController.SearchOrders)
+		api.GET("/orders/statistics", middleware.AuthMiddleware(), orderController.GetOrderStatistics)
 	}
 
 	// 临时兼容层：支持旧的 API 路径
@@ -67,11 +70,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		// 订单相关路由
 		v1.POST("/orders", middleware.AuthMiddleware(), orderController.CreateOrder)
 		v1.GET("/orders/recent", middleware.AuthMiddleware(), orderController.GetRecentOrders)
-		v1.GET("/orders/latest", middleware.AuthMiddleware(), orderController.GetLatestOrders)
-		v1.GET("/orders/hot", middleware.AuthMiddleware(), orderController.GetHotOrders)
 		v1.GET("/orders/:id", middleware.AuthMiddleware(), orderController.GetOrderByID)
 		v1.PUT("/orders/:id/status", middleware.AuthMiddleware(), orderController.UpdateOrderStatus)
 		v1.GET("/orders", middleware.AuthMiddleware(), orderController.GetOrdersByUserID)
+		v1.GET("/orders/search", middleware.AuthMiddleware(), orderController.SearchOrders)
+		v1.GET("/orders/statistics", middleware.AuthMiddleware(), orderController.GetOrderStatistics)
 	}
 
 	return r

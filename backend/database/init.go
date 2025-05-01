@@ -85,21 +85,21 @@ func InitTestData(db *gorm.DB) error {
 			Username: "designer1",
 			Password: string(hashedPassword),
 			Email:    "designer1@test.com",
-			Role:     string(models.RoleDesigner),
+			Role:     models.RoleDesigner,
 		},
 		{
 			ID:       uuid.New().String(),
 			Username: "factory1",
 			Password: string(hashedPassword),
 			Email:    "factory1@test.com",
-			Role:     string(models.RoleFactory),
+			Role:     models.RoleFactory,
 		},
 		{
 			ID:       uuid.New().String(),
 			Username: "supplier1",
 			Password: string(hashedPassword),
 			Email:    "supplier1@test.com",
-			Role:     string(models.RoleSupplier),
+			Role:     models.RoleSupplier,
 		},
 	}
 

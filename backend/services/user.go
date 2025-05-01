@@ -63,7 +63,7 @@ func (s *UserService) Login(username, password string) (*models.LoginResponse, e
 	// 根据用户角色获取相应的档案信息
 	var profile interface{}
 	switch user.Role {
-	case string(models.RoleDesigner):
+	case models.RoleDesigner:
 		var designerProfile models.DesignerProfile
 		if err := s.db.Where("user_id = ?", user.ID).First(&designerProfile).Error; err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -72,7 +72,7 @@ func (s *UserService) Login(username, password string) (*models.LoginResponse, e
 		} else {
 			profile = designerProfile
 		}
-	case string(models.RoleFactory):
+	case models.RoleFactory:
 		var factoryProfile models.FactoryProfile
 		if err := s.db.Where("user_id = ?", user.ID).First(&factoryProfile).Error; err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -81,7 +81,7 @@ func (s *UserService) Login(username, password string) (*models.LoginResponse, e
 		} else {
 			profile = factoryProfile
 		}
-	case string(models.RoleSupplier):
+	case models.RoleSupplier:
 		var supplierProfile models.SupplierProfile
 		if err := s.db.Where("user_id = ?", user.ID).First(&supplierProfile).Error; err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {

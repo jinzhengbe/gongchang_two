@@ -32,7 +32,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		Username: req.Username,
 		Password: req.Password,
 		Email:    req.Email,
-		Role:     req.Role,
+		Role:     models.UserRole(req.Role),
 	}
 
 	if err := c.userService.Register(user); err != nil {
@@ -67,7 +67,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.Data.User.ID, user.Data.User.Role, cfg.JWT.Secret)
+	token, err := middleware.GenerateToken(user.Data.User.ID, string(user.Data.User.Role), cfg.JWT.Secret)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
