@@ -430,4 +430,109 @@ gongChang/
 ### 备份策略
 - 数据库每日备份
 - 配置文件定期备份
-- 日志文件定期归档 
+- 日志文件定期归档
+
+# 开发文档
+
+## API 接口说明
+
+### 公开订单接口
+
+#### 获取公开订单列表
+- 接口：`GET /public/orders`
+- 描述：获取所有公开的订单列表，无需认证
+- 请求参数：
+  - page: 页码（可选，默认1）
+  - pageSize: 每页数量（可选，默认10）
+- 响应示例：
+```json
+{
+  "orders": [
+    {
+      "id": "订单ID",
+      "title": "订单标题",
+      "description": "订单描述",
+      "quantity": 100,
+      "status": "订单状态",
+      "createTime": "创建时间"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "totalPages": 1
+}
+```
+
+### 用户认证接口
+
+#### 用户注册
+- 接口：`POST /api/users/register`
+- 描述：注册新用户
+- 请求体：
+```json
+{
+  "username": "用户名",
+  "password": "密码",
+  "email": "邮箱",
+  "role": "用户角色" // designer, factory, supplier
+}
+```
+
+#### 用户登录
+- 接口：`POST /api/users/login`
+- 描述：用户登录获取token
+- 请求体：
+```json
+{
+  "username": "用户名",
+  "password": "密码"
+}
+```
+
+## 类型定义
+
+### UserRole 类型
+```go
+type UserRole string
+
+const (
+    RoleDesigner UserRole = "designer"
+    RoleFactory  UserRole = "factory"
+    RoleSupplier UserRole = "supplier"
+)
+```
+
+### User 结构体
+```go
+type User struct {
+    ID        string         `json:"id" gorm:"primaryKey;type:varchar(191)"`
+    Username  string         `json:"username" gorm:"unique;not null"`
+    Password  string         `json:"-" gorm:"not null"`
+    Email     string         `json:"email" gorm:"not null"`
+    Role      UserRole       `json:"role" gorm:"type:varchar(191);default:'user'"`
+    CreatedAt time.Time      `json:"created_at"`
+    UpdatedAt time.Time      `json:"updated_at"`
+    DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+}
+```
+
+## 开发环境配置
+
+### 数据库配置
+- 主机：mysql
+- 端口：3306
+- 数据库名：gongchang
+- 用户名：root
+- 密码：123456
+
+### 服务配置
+- 端口：8080
+- 运行环境：development
+- JWT密钥：your-secret-key
+
+## 开发注意事项
+
+1. 用户角色类型使用 `UserRole` 而不是字符串
+2. 注册时角色字段需要是有效的 `UserRole` 值
+3. 数据库迁移时确保使用正确的类型定义
+4. 测试数据初始化时使用正确的角色常量 
