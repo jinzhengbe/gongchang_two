@@ -1,5 +1,12 @@
 # 订单管理API文档
 
+## 重要更新
+- 自 2024-05-01 起，API 路径已统一更新
+  - 旧路径: `/api/v1/orders`
+  - 新路径: `/api/orders`
+  - 变更原因: 统一 API 路径格式，简化路由配置
+  - 兼容性: 临时支持旧路径，建议尽快迁移到新路径
+
 ## 目录
 1. [接口说明](#接口说明)
 2. [认证说明](#认证说明)
@@ -383,6 +390,6 @@ Authorization: Bearer <token>
 | unpaid | 未支付 |
 | paid | 已支付 |
 | refunded | 已退款 |
-| failed | 支付失败 |
+| failed | 支付失败 | 
 | processing | 处理中 |
 | partially_paid | 部分支付 | 

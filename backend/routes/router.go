@@ -61,5 +61,18 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		api.GET("/orders", middleware.AuthMiddleware(), orderController.GetOrdersByUserID)
 	}
 
+	// 临时兼容层：支持旧的 API 路径
+	v1 := r.Group("/api/v1")
+	{
+		// 订单相关路由
+		v1.POST("/orders", middleware.AuthMiddleware(), orderController.CreateOrder)
+		v1.GET("/orders/recent", middleware.AuthMiddleware(), orderController.GetRecentOrders)
+		v1.GET("/orders/latest", middleware.AuthMiddleware(), orderController.GetLatestOrders)
+		v1.GET("/orders/hot", middleware.AuthMiddleware(), orderController.GetHotOrders)
+		v1.GET("/orders/:id", middleware.AuthMiddleware(), orderController.GetOrderByID)
+		v1.PUT("/orders/:id/status", middleware.AuthMiddleware(), orderController.UpdateOrderStatus)
+		v1.GET("/orders", middleware.AuthMiddleware(), orderController.GetOrdersByUserID)
+	}
+
 	return r
 } 
