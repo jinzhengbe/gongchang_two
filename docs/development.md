@@ -1,8 +1,20 @@
 # 开发指南
 
+## 重要说明
+
+### 数据库存储位置
+- 数据库数据存储在容器外，具体位置：`/runData/gongChang/mysql_data`
+- 数据持久化：即使容器被删除，数据也不会丢失
+- 数据备份：可以直接备份主机上的目录
+- 数据迁移：可以轻松地将数据迁移到其他主机
+
 ## 最近更新
 
 ### 2024-05-01
+- 数据库存储配置说明
+  - 确认数据库数据存储在容器外
+  - 添加了数据库存储位置说明文档
+  - 验证了数据持久化功能
 - API 路径变更
   - 统一 API 路径格式，从 `/api/v1/xxx` 改为 `/api/xxx`
   - 影响范围：订单管理相关接口
@@ -536,3 +548,105 @@ type User struct {
 2. 注册时角色字段需要是有效的 `UserRole` 值
 3. 数据库迁移时确保使用正确的类型定义
 4. 测试数据初始化时使用正确的角色常量 
+
+## 数据库连接设置和验证
+
+### 1. 数据库连接前的准备工作
+
+在开始任何开发或测试之前，请确保按照以下步骤操作：
+
+1. 检查 Docker 服务状态
+```bash
+# 检查 Docker 是否运行
+systemctl status docker
+
+# 检查 MySQL 容器状态
+docker ps | grep mysql
+```
+
+2. 如果 MySQL 容器未运行，使用以下命令启动：
+```bash
+# 停止所有相关容器
+docker-compose down
+
+# 重新构建并启动服务
+docker-compose up --build
+```
+
+3. 验证数据库连接
+```bash
+# 检查 MySQL 容器是否健康
+docker inspect gongchang-mysql | grep Health
+
+# 测试数据库连接
+docker exec -it gongchang-mysql mysql -ugongchang -pgongchang -e "SELECT 1;"
+```
+
+### 2. 开发环境配置
+
+1. 确保 config.yaml 中的数据库配置正确：
+```yaml
+database:
+  host: "mysql"  # 必须使用容器名称，而不是 localhost
+  port: "3306"
+  user: "gongchang"
+  password: "gongchang"
+  dbname: "gongchang"
+```
+
+2. 后端服务必须通过 Docker 运行：
+```bash
+# 不要直接在主机上运行 go run main.go
+# 必须使用 docker-compose 启动服务
+docker-compose up --build
+```
+
+### 3. 常见问题解决
+
+1. 如果遇到 "cannot connect to database" 错误：
+   - 检查 MySQL 容器是否正在运行
+   - 验证数据库配置是否正确
+   - 确保使用 docker-compose 启动服务
+
+2. 如果遇到端口冲突：
+```bash
+# 检查端口占用
+sudo lsof -i :8080
+
+# 如果端口被占用，停止相关进程
+kill <PID>
+```
+
+3. 如果数据库连接不稳定：
+   - 检查 MySQL 容器的健康状态
+   - 确保网络连接正常
+   - 验证数据库用户权限
+
+### 4. 开发流程
+
+每次开始开发或测试前，请按以下顺序操作：
+
+1. 停止现有服务
+```bash
+docker-compose down
+```
+
+2. 清理环境
+```bash
+# 检查并关闭占用端口的进程
+sudo lsof -i :8080
+```
+
+3. 启动服务
+```bash
+docker-compose up --build
+```
+
+4. 验证服务状态
+```bash
+# 检查容器状态
+docker-compose ps
+
+# 测试数据库连接
+curl http://localhost:8080/api/health
+``` 
