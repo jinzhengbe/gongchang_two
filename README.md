@@ -8,6 +8,30 @@
 - MySQL 8.0+
 - Docker & Docker Compose
 
+## 重要说明：数据库配置
+数据库配置已在 docker-compose.yml 中完成自动化设置：
+- 数据库名称：gongchang（自动创建）
+- 数据存储位置：/runData/gongChang/mysql_data
+- 用户名：gongchang
+- 密码：gongchang
+- 端口：3306
+
+初始化脚本：
+- 位置：./init.sql
+- 内容：
+  ```sql
+  CREATE DATABASE IF NOT EXISTS gongchang;
+  GRANT ALL PRIVILEGES ON gongchang.* TO 'gongchang'@'%';
+  FLUSH PRIVILEGES;
+  ```
+
+注意：如果遇到数据库未创建的问题，可以手动执行以下命令：
+```bash
+docker-compose exec mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS gongchang; GRANT ALL PRIVILEGES ON gongchang.* TO 'gongchang'@'%'; FLUSH PRIVILEGES;"
+```
+
+无需手动创建数据库，首次启动时会自动完成配置。
+
 ## 安装步骤
 
 1. 克隆项目

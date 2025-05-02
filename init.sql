@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS gongchang;
+GRANT ALL PRIVILEGES ON gongchang.* TO 'gongchang'@'%';
+FLUSH PRIVILEGES; 
