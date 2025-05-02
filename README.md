@@ -3,34 +3,135 @@
 ## 项目说明
 这是一个基于 Go 语言开发的工厂订单管理系统，提供订单管理、文件上传、用户认证等功能。
 
-## 环境要求
-- Go 1.16+
-- MySQL 8.0+
-- Docker & Docker Compose
+## 项目结构
+```
+backend/
+├── cmd/                    # 命令行入口
+├── internal/              # 内部包
+│   ├── auth/             # 认证相关
+│   ├── designer/         # 设计师模块
+│   ├── factory/          # 工厂模块
+│   ├── supplier/         # 供应商模块
+│   ├── order/            # 订单模块
+│   ├── file/             # 文件模块
+│   └── common/           # 公共模块
+├── pkg/                  # 可导出的包
+├── scripts/             # 脚本文件
+├── uploads/             # 上传文件目录
+└── docs/                # 文档
+```
 
-## 重要说明：数据库配置
-数据库配置已在 docker-compose.yml 中完成自动化设置：
-- 数据库名称：gongchang（自动创建）
-- 数据存储位置：/runData/gongChang/mysql_data
-- 用户名：gongchang
-- 密码：gongchang
-- 端口：3306
+## 模块说明
+### 设计师模块 (internal/designer)
+- 设计师档案管理
+- 订单创建和管理
+- 文件上传和下载
+- 订单状态跟踪
 
-初始化脚本：
-- 位置：./init.sql
-- 内容：
-  ```sql
-  CREATE DATABASE IF NOT EXISTS gongchang;
-  GRANT ALL PRIVILEGES ON gongchang.* TO 'gongchang'@'%';
-  FLUSH PRIVILEGES;
-  ```
+### 工厂模块 (internal/factory)
+- 工厂档案管理
+- 订单接收和处理
+- 生产进度更新
+- 质量检查记录
 
-注意：如果遇到数据库未创建的问题，可以手动执行以下命令：
+### 供应商模块 (internal/supplier)
+- 供应商档案管理
+- 材料供应管理
+- 订单材料跟踪
+- 库存管理
+
+### 订单模块 (internal/order)
+- 订单创建和编辑
+- 订单状态管理
+- 订单查询和统计
+- 订单进度跟踪
+
+### 文件模块 (internal/file)
+- 文件上传和下载
+- 文件类型验证
+- 文件存储管理
+- 文件访问控制
+
+### 认证模块 (internal/auth)
+- 用户认证
+- 权限管理
+- JWT token 管理
+- 会话管理
+
+## ⚠️ 重要：数据库配置说明
+数据库配置是系统正常运行的关键，请确保以下配置正确：
+
+### 数据库基本信息
+- 数据库名称：`gongchang`
+- 用户名：`gongchang`
+- 密码：`gongchang`
+- 端口：`3306`
+- 主机：`mysql` (Docker 网络中的服务名)
+
+### 数据存储配置
+#### 存储位置
+- 主数据目录：`/runData/gongChang/mysql_data`
+- 配置文件目录：`/runData/gongChang/mysql_config`
+- 日志文件目录：`/runData/gongChang/mysql_logs`
+
+#### 挂载配置
+在 `docker-compose.yml` 中的挂载配置：
+```yaml
+volumes:
+  - ./mysql_data:/var/lib/mysql
+  - ./mysql_config:/etc/mysql/conf.d
+  - ./mysql_logs:/var/log/mysql
+  - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+```
+
+#### 数据持久化说明
+1. 数据卷类型：本地目录挂载
+2. 数据备份：建议定期备份 `/runData/gongChang/mysql_data` 目录
+3. 权限设置：确保挂载目录有正确的读写权限
+4. 数据迁移：可以通过复制整个 `mysql_data` 目录进行数据迁移
+
+### 初始化脚本
+数据库初始化脚本位于 `./init.sql`，包含以下内容：
+```sql
+CREATE DATABASE IF NOT EXISTS gongchang;
+GRANT ALL PRIVILEGES ON gongchang.* TO 'gongchang'@'%';
+FLUSH PRIVILEGES;
+```
+
+### 常见问题解决
+#### 数据库未创建问题
+1. 停止服务：`docker-compose down`
+2. 删除数据卷：`docker volume rm gongchang_mysql_data`
+3. 重新启动：`docker-compose up -d`
+
+#### 手动创建数据库
 ```bash
 docker-compose exec mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS gongchang; GRANT ALL PRIVILEGES ON gongchang.* TO 'gongchang'@'%'; FLUSH PRIVILEGES;"
 ```
 
-无需手动创建数据库，首次启动时会自动完成配置。
+#### 数据备份与恢复
+1. 备份数据：
+```bash
+# 备份整个数据目录
+tar -czvf mysql_backup.tar.gz /runData/gongChang/mysql_data
+```
+
+2. 恢复数据：
+```bash
+# 停止服务
+docker-compose down
+
+# 恢复数据
+tar -xzvf mysql_backup.tar.gz -C /runData/gongChang/
+
+# 重新启动服务
+docker-compose up -d
+```
+
+## 环境要求
+- Go 1.16+
+- MySQL 8.0+
+- Docker & Docker Compose
 
 ## 安装步骤
 
@@ -54,113 +155,6 @@ docker-compose up -d
 4. 访问服务
 - 后端 API: https://localhost:443 或 http://localhost:8080
 - MySQL: localhost:3307
-
-## 项目结构
-```
-.
-├── backend/           # 后端服务
-│   ├── controllers/  # 控制器
-│   ├── models/       # 数据模型
-│   ├── routes/       # 路由
-│   ├── services/     # 业务逻辑
-│   ├── utils/        # 工具函数
-│   ├── main.go       # 主程序
-│   └── Dockerfile    # 后端 Docker 配置
-├── frontend/         # 前端应用
-│   ├── lib/         # 库文件
-│   ├── test/        # 测试文件
-│   └── pubspec.yaml # Flutter 配置
-├── docker-compose.yml # Docker 编排配置
-├── scripts/          # 脚本目录
-│   ├── backup/      # 备份脚本
-│   └── deploy/      # 部署脚本
-└── README.md         # 项目文档
-```
-
-## 认证与授权
-
-### JWT Token 认证
-系统使用 JWT (JSON Web Token) 进行身份认证。每个请求都需要在 Authorization 头中携带 token。
-
-#### Token 格式
-```
-Authorization: Bearer <token>
-```
-
-#### Token 结构
-```json
-{
-  "user_id": "string",
-  "role": "string",
-  "exp": "number",  // 过期时间
-  "iat": "number"   // 签发时间
-}
-```
-
-#### 错误处理
-- 401 Unauthorized: token 无效或过期
-- 403 Forbidden: 权限不足
-- 400 Bad Request: 请求格式错误
-
-#### 客户端处理
-1. 登录获取 token
-```javascript
-// 登录请求
-POST /api/auth/login
-{
-  "username": "string",
-  "password": "string"
-}
-
-// 响应
-{
-  "token": "string",
-  "user": {
-    "id": "string",
-    "username": "string",
-    "role": "string"
-  }
-}
-```
-
-2. 存储 token
-```javascript
-// 保存 token
-localStorage.setItem('token', token);
-
-// 获取 token
-const token = localStorage.getItem('token');
-```
-
-3. 请求拦截器
-```javascript
-// 添加请求头
-axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// 处理 401 错误
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.status === 401) {
-      // 清除 token 并重定向到登录页
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-```
-
-### 角色权限
-- designer: 设计师，可以创建订单
-- factory: 工厂，可以处理订单
-- supplier: 供应商，可以查看相关订单
 
 ## API 文档
 
