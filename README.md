@@ -61,6 +61,19 @@ backend/
 ## ⚠️ 重要：数据库配置说明
 数据库配置是系统正常运行的关键，请确保以下配置正确：
 
+### ⚠️ 重要警告：MySQL 数据目录权限
+MySQL 数据目录的所有者权限必须正确设置，否则会导致数据库无法正常启动或表结构无法创建：
+- 数据目录所有者必须是 MySQL 容器内的 `mysql` 用户（UID 999）
+- 如果发现数据目录所有者是 `dnsmasq` 或 `systemd-journal`，需要执行以下命令修复：
+  ```bash
+  sudo chown -R 999:999 mysql_data mysql_config mysql_logs
+  ```
+- 权限问题会导致：
+  - 数据库无法正常启动
+  - 表结构无法创建
+  - 数据无法持久化
+  - 服务无法正常运行
+
 ### 数据库基本信息
 - 数据库名称：`gongchang`
 - 用户名：`gongchang`
@@ -155,6 +168,34 @@ docker-compose up -d
 4. 访问服务
 - 后端 API: https://localhost:443 或 http://localhost:8080
 - MySQL: localhost:3307
+- 前端 Web: http://localhost:80
+
+## 前端（Flutter Web）Docker 部署说明
+
+1. 进入 web 目录，构建 Docker 镜像：
+```bash
+cd web
+# 构建镜像（可自定义 tag）
+docker build -t gongchang-web .
+```
+
+2. 启动服务（推荐使用 docker-compose）：
+```bash
+cd ..
+docker-compose up -d web
+```
+
+3. 访问前端页面：
+- http://localhost:80
+- 若部署到服务器，配置域名（如 aneworder.com）指向服务器公网 IP
+
+4. Nginx 配置说明：
+- 已内置于 web/nginx.conf，支持 Flutter Web SPA 路由
+- 静态资源缓存 30 天
+
+5. 常见问题
+- 若端口冲突，请修改 docker-compose.yml 中 web 服务的端口映射
+- 若需 HTTPS，请在服务器上配置反向代理或修改 Nginx 配置
 
 ## API 文档
 

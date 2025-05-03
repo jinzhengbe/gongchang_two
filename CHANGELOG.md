@@ -1,5 +1,21 @@
 # 更新日志
 
+## [2025-05-03] - MySQL 数据目录权限问题修复
+
+### 问题修复
+- 修复 MySQL 数据目录权限问题
+- 数据目录所有者从 `dnsmasq` 和 `systemd-journal` 修改为 MySQL 容器内的 `mysql` 用户（UID 999）
+- 执行 `sudo chown -R 999:999 mysql_data mysql_config mysql_logs` 修复权限
+- 重启服务后数据库表结构成功创建
+
+### 文档更新
+- 在 README.md 中添加重要警告，说明 MySQL 数据目录权限问题
+- 添加权限问题导致的后果说明
+- 添加权限修复方法说明
+
+### 当前状态
+- 数据库表已创建：`users`、`designer_profiles`、`factory_profiles`、`supplier_profiles`、`orders`、`order_progresses`、`order_attachments`、`products`、`files`
+
 ## [2025-05-02] - 服务测试与重构计划
 
 ### 测试结果
@@ -82,3 +98,13 @@ volumes:
 ### 已知问题
 - 数据卷持久化可能导致初始化脚本不执行
 - 需要手动执行数据库创建命令的情况 
+
+## [2024-06-09] - 前端容器化与文档完善
+
+### 新增
+- 前端（Flutter Web）添加 Dockerfile 和 nginx.conf，支持 Nginx 静态部署
+- docker-compose.yml 增加 web 服务，支持一键部署前后端
+- README.md 增加前端 Docker 部署与 Nginx 配置说明
+
+### 变更
+- 项目支持通过 Docker/Nginx 统一发布前后端，便于生产环境部署 
