@@ -10,6 +10,19 @@
 
 ## 最近更新
 
+### 2025-05-05
+- 修复了 MySQL 数据目录权限问题
+  - 问题：MySQL 数据目录权限被 dnsmasq 和 systemd-journal 服务修改
+  - 原因：k8s worker 节点存储池配置导致权限冲突
+  - 解决方案：
+    1. 删除不再使用的 k8s worker 节点配置
+    2. 修复数据目录权限为 999:999
+    3. 重启 MySQL 容器
+  - 预防措施：
+    1. 避免将 MySQL 数据目录放在系统服务可能访问的位置
+    2. 定期检查目录权限
+    3. 使用 ACL 权限控制
+
 ### 2024-05-01
 - 数据库存储配置说明
   - 确认数据库数据存储在容器外
@@ -446,207 +459,86 @@ gongChang/
 
 # 开发文档
 
-## API 接口说明
+## 系统架构
 
-### 公开订单接口
+### 后端服务
+- 使用 Go + Gin 框架
+- MySQL 数据库
+- JWT 认证
+- Docker 容器化部署
 
-#### 获取公开订单列表
-- 接口：`GET /public/orders`
-- 描述：获取所有公开的订单列表，无需认证
-- 请求参数：
-  - page: 页码（可选，默认1）
-  - pageSize: 每页数量（可选，默认10）
-- 响应示例：
-```json
-{
-  "orders": [
-    {
-      "id": "订单ID",
-      "title": "订单标题",
-      "description": "订单描述",
-      "quantity": 100,
-      "status": "订单状态",
-      "createTime": "创建时间"
-    }
-  ],
-  "page": 1,
-  "pageSize": 10,
-  "totalPages": 1
-}
+### 目录结构
+```
+backend/
+├── api/          # API 路由和处理
+├── config/       # 配置文件
+├── controllers/  # 控制器
+├── database/     # 数据库相关
+├── middleware/   # 中间件
+├── models/       # 数据模型
+├── routes/       # 路由配置
+└── services/     # 业务逻辑
 ```
 
-### 用户认证接口
-
-#### 用户注册
-- 接口：`POST /api/users/register`
-- 描述：注册新用户
-- 请求体：
-```json
-{
-  "username": "用户名",
-  "password": "密码",
-  "email": "邮箱",
-  "role": "用户角色" // designer, factory, supplier
-}
-```
-
-#### 用户登录
-- 接口：`POST /api/users/login`
-- 描述：用户登录获取token
-- 请求体：
-```json
-{
-  "username": "用户名",
-  "password": "密码"
-}
-```
-
-## 类型定义
-
-### UserRole 类型
-```go
-type UserRole string
-
-const (
-    RoleDesigner UserRole = "designer"
-    RoleFactory  UserRole = "factory"
-    RoleSupplier UserRole = "supplier"
-)
-```
-
-### User 结构体
-```go
-type User struct {
-    ID        string         `json:"id" gorm:"primaryKey;type:varchar(191)"`
-    Username  string         `json:"username" gorm:"unique;not null"`
-    Password  string         `json:"-" gorm:"not null"`
-    Email     string         `json:"email" gorm:"not null"`
-    Role      UserRole       `json:"role" gorm:"type:varchar(191);default:'user'"`
-    CreatedAt time.Time      `json:"created_at"`
-    UpdatedAt time.Time      `json:"updated_at"`
-    DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
-}
-```
-
-## 开发环境配置
+## 配置说明
 
 ### 数据库配置
-- 主机：mysql
-- 端口：3306
 - 数据库名：gongchang
-- 用户名：root
-- 密码：123456
+- 用户名：gongchang
+- 密码：gongchang
+- 端口：3306
 
-### 服务配置
-- 端口：8080
-- 运行环境：development
-- JWT密钥：your-secret-key
+### JWT 配置
+- 密钥：your-secret-key
+- 过期时间：24小时
 
-## 开发注意事项
+### 测试账号
+- 设计师账号：designer1 / test123
+- 工厂账号：factory1 / test123
+- 供应商账号：supplier1 / test123
 
-1. 用户角色类型使用 `UserRole` 而不是字符串
-2. 注册时角色字段需要是有效的 `UserRole` 值
-3. 数据库迁移时确保使用正确的类型定义
-4. 测试数据初始化时使用正确的角色常量 
+## API 接口
 
-## 数据库连接设置和验证
+### 认证接口
+- POST /api/users/login - 用户登录
+- POST /api/users/register - 用户注册
 
-### 1. 数据库连接前的准备工作
+### 订单接口
+- GET /api/orders - 获取订单列表
+- POST /api/orders - 创建订单
+- GET /api/orders/:id - 获取订单详情
+- PUT /api/orders/:id/status - 更新订单状态
 
-在开始任何开发或测试之前，请确保按照以下步骤操作：
+## 注意事项
 
-1. 检查 Docker 服务状态
-```bash
-# 检查 Docker 是否运行
-systemctl status docker
+1. 数据库权限
+   - MySQL 数据目录权限问题已解决
+   - 确保数据目录权限为 999:999（MySQL 容器用户）
+   - 避免与系统服务（如 dnsmasq）的权限冲突
 
-# 检查 MySQL 容器状态
-docker ps | grep mysql
-```
+2. 开发环境
+   - 使用 Docker Compose 管理服务
+   - 开发时注意检查容器日志
+   - 确保配置文件正确加载
 
-2. 如果 MySQL 容器未运行，使用以下命令启动：
-```bash
-# 停止所有相关容器
-docker-compose down
+3. 部署注意事项
+   - 确保环境变量正确设置
+   - 检查数据库连接配置
+   - 验证 JWT 密钥配置
 
-# 重新构建并启动服务
-docker-compose up --build
-```
+## 常见问题解决
 
-3. 验证数据库连接
-```bash
-# 检查 MySQL 容器是否健康
-docker inspect gongchang-mysql | grep Health
+1. 权限问题
+   - 如果遇到权限问题，检查目录权限
+   - 使用 `chown -R 999:999` 修复权限
+   - 重启相关容器
 
-# 测试数据库连接
-docker exec -it gongchang-mysql mysql -ugongchang -pgongchang -e "SELECT 1;"
-```
+2. 数据库连接
+   - 检查数据库配置
+   - 确保数据库容器正常运行
+   - 验证网络连接
 
-### 2. 开发环境配置
-
-1. 确保 config.yaml 中的数据库配置正确：
-```yaml
-database:
-  host: "mysql"  # 必须使用容器名称，而不是 localhost
-  port: "3306"
-  user: "gongchang"
-  password: "gongchang"
-  dbname: "gongchang"
-```
-
-2. 后端服务必须通过 Docker 运行：
-```bash
-# 不要直接在主机上运行 go run main.go
-# 必须使用 docker-compose 启动服务
-docker-compose up --build
-```
-
-### 3. 常见问题解决
-
-1. 如果遇到 "cannot connect to database" 错误：
-   - 检查 MySQL 容器是否正在运行
-   - 验证数据库配置是否正确
-   - 确保使用 docker-compose 启动服务
-
-2. 如果遇到端口冲突：
-```bash
-# 检查端口占用
-sudo lsof -i :8080
-
-# 如果端口被占用，停止相关进程
-kill <PID>
-```
-
-3. 如果数据库连接不稳定：
-   - 检查 MySQL 容器的健康状态
-   - 确保网络连接正常
-   - 验证数据库用户权限
-
-### 4. 开发流程
-
-每次开始开发或测试前，请按以下顺序操作：
-
-1. 停止现有服务
-```bash
-docker-compose down
-```
-
-2. 清理环境
-```bash
-# 检查并关闭占用端口的进程
-sudo lsof -i :8080
-```
-
-3. 启动服务
-```bash
-docker-compose up --build
-```
-
-4. 验证服务状态
-```bash
-# 检查容器状态
-docker-compose ps
-
-# 测试数据库连接
-curl http://localhost:8080/api/health
-``` 
+3. API 访问
+   - 确认接口路径正确
+   - 检查认证 token
+   - 验证请求参数格式 
