@@ -5,8 +5,14 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
+	"fmt"
+)
+
+const (
+	MaxFileSize = 100 * 1024 * 1024 // 100MB
 )
 
 type FileService struct {
@@ -15,6 +21,12 @@ type FileService struct {
 }
 
 func NewFileService(db *gorm.DB, uploadPath string) *FileService {
+	// 确保上传目录存在
+	if err := os.MkdirAll(uploadPath, 0755); err != nil {
+		log.Printf("Failed to create upload directory: %v", err)
+		panic(err)
+	}
+	log.Printf("File service initialized with upload path: %s", uploadPath)
 	return &FileService{
 		db:         db,
 		uploadPath: uploadPath,
@@ -29,18 +41,39 @@ func (s *FileService) SaveFile(file io.Reader, filename string, orderID uint) (*
 
 	// 确保上传目录存在
 	if err := os.MkdirAll(s.uploadPath, 0755); err != nil {
+		log.Printf("Failed to create upload directory: %v", err)
 		return nil, err
 	}
 
-	// 创建文件
-	dst, err := os.Create(filepath.Join(s.uploadPath, newFilename))
+	// 创建临时文件
+	tempFile := filepath.Join(s.uploadPath, "temp_"+newFilename)
+	dst, err := os.Create(tempFile)
 	if err != nil {
+		log.Printf("Failed to create temporary file: %v", err)
 		return nil, err
 	}
-	defer dst.Close()
+	defer func() {
+		dst.Close()
+		os.Remove(tempFile) // 清理临时文件
+	}()
 
-	// 复制文件内容
-	if _, err = io.Copy(dst, file); err != nil {
+	// 复制文件内容并检查大小
+	written, err := io.Copy(dst, file)
+	if err != nil {
+		log.Printf("Failed to copy file content: %v", err)
+		return nil, err
+	}
+
+	// 检查文件大小
+	if written > MaxFileSize {
+		log.Printf("File too large: %d bytes (max: %d bytes)", written, MaxFileSize)
+		return nil, fmt.Errorf("文件大小超过限制 (最大 %d MB)", MaxFileSize/1024/1024)
+	}
+
+	// 重命名临时文件为最终文件
+	finalPath := filepath.Join(s.uploadPath, newFilename)
+	if err := os.Rename(tempFile, finalPath); err != nil {
+		log.Printf("Failed to rename temporary file: %v", err)
 		return nil, err
 	}
 
@@ -53,11 +86,13 @@ func (s *FileService) SaveFile(file io.Reader, filename string, orderID uint) (*
 	}
 
 	if err := s.db.Create(fileRecord).Error; err != nil {
+		log.Printf("Failed to create file record in database: %v", err)
 		// 如果数据库创建失败，删除已上传的文件
-		os.Remove(filepath.Join(s.uploadPath, newFilename))
+		os.Remove(finalPath)
 		return nil, err
 	}
 
+	log.Printf("File saved successfully: %s (%d bytes)", newFilename, written)
 	return fileRecord, nil
 }
 

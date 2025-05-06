@@ -10,6 +10,28 @@
 
 ## 最近更新
 
+### 2025-05-06
+- 优化了文件上传功能
+  - 问题：文件上传时出现 SocketException: Connection reset by peer 错误
+  - 原因：
+    1. Nginx 配置中的文件大小限制不足
+    2. 上传路由未正确注册
+    3. 文件上传目录权限问题
+  - 解决方案：
+    1. 增加了 Nginx 配置中的文件大小限制
+    2. 修复了文件上传路由注册
+    3. 优化了文件上传目录权限设置
+    4. 增强了错误处理和日志记录
+  - 预防措施：
+    1. 定期检查上传目录权限
+    2. 监控文件上传错误日志
+    3. 实现文件上传进度跟踪
+  - 相关文件：
+    - `backend/controllers/file.go`
+    - `backend/services/file.go`
+    - `backend/routes/file.go`
+    - `data/nginx/conf.d/default.conf`
+
 ### 2025-05-05
 - 修复了 MySQL 数据目录权限问题
   - 问题：MySQL 数据目录权限被 dnsmasq 和 systemd-journal 服务修改
