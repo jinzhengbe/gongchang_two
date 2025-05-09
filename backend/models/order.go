@@ -20,9 +20,14 @@ type Order struct {
 	Description string      `json:"description"`
 	Fabric      string      `json:"fabric"`
 	Quantity    int         `json:"quantity"`
-	FactoryID   uint        `json:"factory_id" gorm:"not null"`
+	FactoryID   *uint       `json:"factory_id"`
 	Status      OrderStatus `json:"status" gorm:"type:varchar(191);default:'draft'"`
 	Factory     FactoryProfile `json:"factory" gorm:"foreignKey:FactoryID"`
+
+	FileIDs     []string `json:"file_ids" gorm:"type:json"`
+	ModelIDs    []string `json:"model_ids" gorm:"type:json"`
+	ImageIDs    []string `json:"image_ids" gorm:"type:json"`
+	VideoIDs    []string `json:"video_ids" gorm:"type:json"`
 }
 
 type PublicOrder struct {

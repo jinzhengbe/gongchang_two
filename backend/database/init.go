@@ -45,6 +45,22 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database after %d attempts: %v", maxRetries, err)
 	}
 
+	// 删除旧表
+	err = db.Migrator().DropTable(
+		&models.File{},
+		&models.Order{},
+		&models.Product{},
+		&models.User{},
+		&models.DesignerProfile{},
+		&models.FactoryProfile{},
+		&models.SupplierProfile{},
+		&models.OrderProgress{},
+		&models.OrderAttachment{},
+	)
+	if err != nil {
+		log.Printf("Warning: Failed to drop tables: %v", err)
+	}
+
 	// 自动迁移数据库表结构
 	err = db.AutoMigrate(
 		&models.User{},
@@ -186,6 +202,53 @@ func InitTestData(db *gorm.DB) error {
 		}
 	} else {
 		log.Printf("Supplier profile already exists for user ID: %s", supplierProfile.UserID)
+	}
+
+	// 创建测试订单
+	testOrders := []models.Order{
+		{
+			Title:       "夏季连衣裙订单",
+			Description: "100件夏季连衣裙，面料要求透气舒适",
+			Fabric:      "棉麻混纺",
+			Quantity:    100,
+			FactoryID:   new(uint),
+			Status:      models.OrderStatusPublished,
+		},
+		{
+			Title:       "冬季羽绒服订单",
+			Description: "200件冬季羽绒服，要求保暖性好",
+			Fabric:      "羽绒",
+			Quantity:    200,
+			FactoryID:   new(uint),
+			Status:      models.OrderStatusPublished,
+		},
+		{
+			Title:       "春季衬衫订单",
+			Description: "150件春季衬衫，要求版型修身",
+			Fabric:      "纯棉",
+			Quantity:    150,
+			FactoryID:   new(uint),
+			Status:      models.OrderStatusPublished,
+		},
+	}
+
+	// 创建订单
+	for _, order := range testOrders {
+		var existingOrder models.Order
+		if err := db.First(&existingOrder, "title = ?", order.Title).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				if err := db.Create(&order).Error; err != nil {
+					log.Printf("Error creating test order %s: %v", order.Title, err)
+					continue
+				}
+				log.Printf("Created test order: %s", order.Title)
+			} else {
+				log.Printf("Error checking existing order %s: %v", order.Title, err)
+				continue
+			}
+		} else {
+			log.Printf("Test order already exists: %s", order.Title)
+		}
 	}
 
 	log.Println("Test data initialization completed")

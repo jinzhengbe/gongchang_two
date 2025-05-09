@@ -20,28 +20,11 @@ func NewOrderController(orderService *services.OrderService) *OrderController {
 }
 
 func (c *OrderController) CreateOrder(ctx *gin.Context) {
-	// 从 JWT token 中获取用户 ID
-	factoryIDStr := ctx.GetString("user_id")
-	if factoryIDStr == "" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
-		return
-	}
-
-	// 转换 factoryID 为 uint
-	factoryID, err := strconv.ParseUint(factoryIDStr, 10, 32)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid factory ID"})
-		return
-	}
-
 	var order models.Order
 	if err := ctx.ShouldBindJSON(&order); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// 设置工厂 ID
-	order.FactoryID = uint(factoryID)
 
 	// 验证必要字段
 	if order.Quantity <= 0 {
@@ -104,11 +87,40 @@ func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 		return
 	}
 
+	// 组装返回格式，保证四个字段为数组
+	orderList := make([]gin.H, 0, len(orders))
+	for _, order := range orders {
+		fileIDs := order.FileIDs
+		if fileIDs == nil { fileIDs = []string{} }
+		modelIDs := order.ModelIDs
+		if modelIDs == nil { modelIDs = []string{} }
+		imageIDs := order.ImageIDs
+		if imageIDs == nil { imageIDs = []string{} }
+		videoIDs := order.VideoIDs
+		if videoIDs == nil { videoIDs = []string{} }
+		orderList = append(orderList, gin.H{
+			"id": order.ID,
+			"title": order.Title,
+			"description": order.Description,
+			"fabric": order.Fabric,
+			"quantity": order.Quantity,
+			"factory_id": order.FactoryID,
+			"status": order.Status,
+			"file_ids": fileIDs,
+			"model_ids": modelIDs,
+			"image_ids": imageIDs,
+			"video_ids": videoIDs,
+			"created_at": order.CreatedAt,
+			"updated_at": order.UpdatedAt,
+			// 可按需补充其他字段
+		})
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"total": total,
 		"page": page,
 		"pageSize": pageSize,
-		"orders": orders,
+		"orders": orderList,
 	})
 }
 
@@ -125,7 +137,32 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, order)
+	// 保证四个字段为非nil数组
+	fileIDs := order.FileIDs
+	if fileIDs == nil { fileIDs = []string{} }
+	modelIDs := order.ModelIDs
+	if modelIDs == nil { modelIDs = []string{} }
+	imageIDs := order.ImageIDs
+	if imageIDs == nil { imageIDs = []string{} }
+	videoIDs := order.VideoIDs
+	if videoIDs == nil { videoIDs = []string{} }
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"id": order.ID,
+		"title": order.Title,
+		"description": order.Description,
+		"fabric": order.Fabric,
+		"quantity": order.Quantity,
+		"factory_id": order.FactoryID,
+		"status": order.Status,
+		"file_ids": fileIDs,
+		"model_ids": modelIDs,
+		"image_ids": imageIDs,
+		"video_ids": videoIDs,
+		"created_at": order.CreatedAt,
+		"updated_at": order.UpdatedAt,
+		// 可按需补充其他字段
+	})
 }
 
 func (c *OrderController) UpdateOrderStatus(ctx *gin.Context) {
@@ -170,7 +207,35 @@ func (c *OrderController) SearchOrders(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, orders)
+	orderList := make([]gin.H, 0, len(orders))
+	for _, order := range orders {
+		fileIDs := order.FileIDs
+		if fileIDs == nil { fileIDs = []string{} }
+		modelIDs := order.ModelIDs
+		if modelIDs == nil { modelIDs = []string{} }
+		imageIDs := order.ImageIDs
+		if imageIDs == nil { imageIDs = []string{} }
+		videoIDs := order.VideoIDs
+		if videoIDs == nil { videoIDs = []string{} }
+		orderList = append(orderList, gin.H{
+			"id": order.ID,
+			"title": order.Title,
+			"description": order.Description,
+			"fabric": order.Fabric,
+			"quantity": order.Quantity,
+			"factory_id": order.FactoryID,
+			"status": order.Status,
+			"file_ids": fileIDs,
+			"model_ids": modelIDs,
+			"image_ids": imageIDs,
+			"video_ids": videoIDs,
+			"created_at": order.CreatedAt,
+			"updated_at": order.UpdatedAt,
+			// 可按需补充其他字段
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"orders": orderList})
 }
 
 // GetOrderStatistics 获取订单统计信息
@@ -204,5 +269,33 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, orders)
+	orderList := make([]gin.H, 0, len(orders))
+	for _, order := range orders {
+		fileIDs := order.FileIDs
+		if fileIDs == nil { fileIDs = []string{} }
+		modelIDs := order.ModelIDs
+		if modelIDs == nil { modelIDs = []string{} }
+		imageIDs := order.ImageIDs
+		if imageIDs == nil { imageIDs = []string{} }
+		videoIDs := order.VideoIDs
+		if videoIDs == nil { videoIDs = []string{} }
+		orderList = append(orderList, gin.H{
+			"id": order.ID,
+			"title": order.Title,
+			"description": order.Description,
+			"fabric": order.Fabric,
+			"quantity": order.Quantity,
+			"factory_id": order.FactoryID,
+			"status": order.Status,
+			"file_ids": fileIDs,
+			"model_ids": modelIDs,
+			"image_ids": imageIDs,
+			"video_ids": videoIDs,
+			"created_at": order.CreatedAt,
+			"updated_at": order.UpdatedAt,
+			// 可按需补充其他字段
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"orders": orderList})
 } 

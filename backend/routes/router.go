@@ -28,53 +28,61 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	userService := services.NewUserService(db)
 	productService := services.NewProductService(db)
 	orderService := services.NewOrderService(db)
+	fileService := services.NewFileService(db, "./uploads")
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
 	productController := controllers.NewProductController(productService)
 	orderController := controllers.NewOrderController(orderService)
-
-	// 注册公开订单路由
-	RegisterPublicRoutes(r, db)
+	fileController := controllers.NewFileController(fileService, "./uploads")
 
 	// API 路由组
 	api := r.Group("/api")
 	{
-		// 用户相关路由
-		api.POST("/users/register", userController.Register)
-		api.POST("/users/login", userController.Login)
-		api.GET("/users/:id", userController.GetUser)
-		api.PUT("/users/:id", userController.UpdateUser)
-		api.DELETE("/users/:id", userController.DeleteUser)
+		// 用户路由
+		userGroup := api.Group("/users")
+		{
+			userGroup.POST("/register", userController.Register)
+			userGroup.POST("/login", userController.Login)
+		}
 
-		// 产品相关路由
-		api.GET("/products", productController.GetProducts)
-		api.GET("/products/:id", productController.GetProduct)
-		api.POST("/products", productController.CreateProduct)
-		api.PUT("/products/:id", productController.UpdateProduct)
-		api.DELETE("/products/:id", productController.DeleteProduct)
+		// 需要认证的路由
+		authGroup := api.Group("")
+		authGroup.Use(middleware.AuthMiddleware())
+		{
+			// 产品路由
+			productGroup := authGroup.Group("/products")
+			{
+				productGroup.POST("", productController.CreateProduct)
+				productGroup.GET("", productController.GetProducts)
+				productGroup.GET("/:id", productController.GetProduct)
+				productGroup.PUT("/:id", productController.UpdateProduct)
+				productGroup.DELETE("/:id", productController.DeleteProduct)
+			}
 
-		// 订单相关路由
-		api.POST("/orders", middleware.AuthMiddleware(), orderController.CreateOrder)
-		api.GET("/orders/recent", middleware.AuthMiddleware(), orderController.GetRecentOrders)
-		api.GET("/orders/:id", middleware.AuthMiddleware(), orderController.GetOrderByID)
-		api.PUT("/orders/:id/status", middleware.AuthMiddleware(), orderController.UpdateOrderStatus)
-		api.GET("/orders", middleware.AuthMiddleware(), orderController.GetOrdersByUserID)
-		api.GET("/orders/search", middleware.AuthMiddleware(), orderController.SearchOrders)
-		api.GET("/orders/statistics", middleware.AuthMiddleware(), orderController.GetOrderStatistics)
-	}
+			// 订单路由
+			orderGroup := authGroup.Group("/orders")
+			{
+				orderGroup.POST("", orderController.CreateOrder)
+				orderGroup.GET("", orderController.GetOrdersByUserID)
+				orderGroup.GET("/:id", orderController.GetOrderByID)
+				orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
+				orderGroup.GET("/search", orderController.SearchOrders)
+				orderGroup.GET("/statistics", orderController.GetOrderStatistics)
+				orderGroup.GET("/recent", orderController.GetRecentOrders)
+			}
 
-	// 临时兼容层：支持旧的 API 路径
-	v1 := r.Group("/api/v1")
-	{
-		// 订单相关路由
-		v1.POST("/orders", middleware.AuthMiddleware(), orderController.CreateOrder)
-		v1.GET("/orders/recent", middleware.AuthMiddleware(), orderController.GetRecentOrders)
-		v1.GET("/orders/:id", middleware.AuthMiddleware(), orderController.GetOrderByID)
-		v1.PUT("/orders/:id/status", middleware.AuthMiddleware(), orderController.UpdateOrderStatus)
-		v1.GET("/orders", middleware.AuthMiddleware(), orderController.GetOrdersByUserID)
-		v1.GET("/orders/search", middleware.AuthMiddleware(), orderController.SearchOrders)
-		v1.GET("/orders/statistics", middleware.AuthMiddleware(), orderController.GetOrderStatistics)
+			// 文件路由
+			fileGroup := authGroup.Group("/files")
+			{
+				fileGroup.POST("/upload", fileController.UploadFile)
+				fileGroup.POST("/batch", fileController.GetBatchFileDetails)
+				fileGroup.GET("/:id", fileController.GetFileDetails)
+				fileGroup.GET("/download/:id", fileController.DownloadFile)
+				fileGroup.DELETE("/:id", fileController.DeleteFile)
+				fileGroup.GET("/order/:id", fileController.GetOrderFiles)
+			}
+		}
 	}
 
 	return r

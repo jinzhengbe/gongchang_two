@@ -32,7 +32,7 @@ func (c *PublicOrderController) GetPublicOrders(ctx *gin.Context) {
 	// 获取查询参数
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "10"))
-	status := ctx.DefaultQuery("status", "published")
+	status := models.OrderStatus(ctx.DefaultQuery("status", string(models.OrderStatusPublished)))
 
 	// 确保页码和每页数量合理
 	if page < 1 {
@@ -53,14 +53,14 @@ func (c *PublicOrderController) GetPublicOrders(ctx *gin.Context) {
 
 	// 获取总数
 	if err := query.Count(&total).Error; err != nil {
-		ctx.JSON(500, gin.H{"error": "获取订单总数失败"})
+		ctx.JSON(500, gin.H{"error": "获取订单总数失败: " + err.Error()})
 		return
 	}
 
 	// 分页查询
 	offset := (page - 1) * limit
 	if err := query.Offset(offset).Limit(limit).Find(&orders).Error; err != nil {
-		ctx.JSON(500, gin.H{"error": "获取订单列表失败"})
+		ctx.JSON(500, gin.H{"error": "获取订单列表失败: " + err.Error()})
 		return
 	}
 

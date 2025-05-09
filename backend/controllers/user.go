@@ -5,10 +5,10 @@ import (
 	"aneworder.com/backend/middleware"
 	"aneworder.com/backend/models"
 	"aneworder.com/backend/services"
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 type UserController struct {
@@ -28,6 +28,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
+	// 创建用户对象
 	user := &models.User{
 		Username: req.Username,
 		Password: req.Password,
@@ -35,28 +36,53 @@ func (c *UserController) Register(ctx *gin.Context) {
 		Role:     models.UserRole(req.Role),
 	}
 
+	// 使用 UserService 注册用户
 	if err := c.userService.Register(user); err != nil {
-		if errors.Is(err, services.ErrUsernameExists) {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		if err == services.ErrUsernameExists {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
 		} else {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "user registered successfully"})
+}
+
+type LoginRequest struct {
+	Username  string `json:"username" binding:"required"`
+	Password  string `json:"password" binding:"required"`
+	UserType  string `json:"user_type" binding:"required"`
 }
 
 func (c *UserController) Login(ctx *gin.Context) {
-	var req models.LoginRequest
+	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Printf("Login request binding error: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("Login attempt for user: %s, type: %s", req.Username, req.UserType)
+
+	// 验证用户类型
+	if req.UserType != string(models.RoleDesigner) && 
+	   req.UserType != string(models.RoleFactory) && 
+	   req.UserType != string(models.RoleSupplier) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user type"})
 		return
 	}
 
 	user, err := c.userService.Login(req.Username, req.Password)
 	if err != nil {
+		log.Printf("Login failed for user %s: %v", req.Username, err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 验证用户类型是否匹配
+	if string(user.Data.User.Role) != req.UserType {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "user type mismatch"})
 		return
 	}
 
@@ -67,7 +93,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.Data.User.ID, string(user.Data.User.Role), cfg.JWT.Secret)
+	token, err := middleware.GenerateToken(user.Data.User.ID, user.Data.User.Role, cfg.JWT.Secret)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return

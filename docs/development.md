@@ -31,6 +31,17 @@
     - `backend/services/file.go`
     - `backend/routes/file.go`
     - `data/nginx/conf.d/default.conf`
+- 改进了文件上传功能
+  - 变更：将订单ID（orderId）改为可选参数
+  - 原因：支持独立文件上传，不强制要求关联订单
+  - 实现：
+    1. 修改 File 模型，将 OrderID 改为指针类型
+    2. 更新文件上传接口，支持无订单ID上传
+    3. 优化日志记录，区分有无订单ID的情况
+  - 相关文件：
+    - `backend/models/file.go`
+    - `backend/controllers/file.go`
+    - `backend/services/file.go`
 
 ### 2025-05-05
 - 修复了 MySQL 数据目录权限问题
@@ -129,6 +140,19 @@
 - 更新了项目结构
   - 将后端代码移动到 backend 目录
   - 优化了目录结构
+
+### 2025-05-07
+- 订单结构与接口字段扩展
+  - 新增字段：file_ids, model_ids, image_ids, video_ids，均为 string 数组，可为空
+  - 数据库存储类型：JSON（推荐），如不支持则用 TEXT 存储 JSON 字符串
+  - 后端接口：支持这四个字段的读写和 JSON 解析，返回前端时保持为数组格式，避免字符串分割
+  - 文档同步：已更新 API 文档和数据结构说明，便于团队协作
+  - 兼容性：老数据默认空数组，前后端均已兼容
+  - 相关文件：
+    - backend/models/order.go
+    - backend/controllers/order.go
+    - docs/order_api.md
+    - docs/development.md
 
 ## 开发环境设置
 

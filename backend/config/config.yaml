@@ -1,21 +1,30 @@
 server:
   host: "0.0.0.0"
-  port: "8080"
-  trusted_proxies: ["127.0.0.1", "::1"]
+  port: "8081"
+  trusted_proxies:
+    - "127.0.0.1"
+    - "::1"
+    - "0.0.0.0"
+    - "aneworders.com"
 
 database:
-  host: "mysql"
+  host: "localhost"
   port: "3306"
-  user: "root"
-  password: "root"
+  user: "gongchang"
+  password: "gongchang"
   dbname: "gongchang"
 
 redis:
-  host: "localhost"
+  host: "redis"
   port: "6379"
   password: ""
   db: 0
 
 jwt:
   secret: "your-secret-key"
-  expire: 24 
+  expiration: 24 # hours
+
+upload:
+  max_size: 10 # MB
+  allowed_types: ["image/jpeg", "image/png", "application/pdf"]
+  path: "./uploads" 

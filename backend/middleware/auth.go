@@ -87,10 +87,10 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func GenerateToken(userID string, role string, secret string) (string, error) {
+func GenerateToken(userID string, role models.UserRole, secret string) (string, error) {
 	claims := Claims{
 		UserID: userID,
-		Role:   models.UserRole(role),
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

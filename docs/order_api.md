@@ -97,7 +97,11 @@ Authorization: Bearer <token>
     "status": "pending",       // 订单状态
     "payment_status": "unpaid",// 支付状态
     "shipping_address": "北京市朝阳区", // 收货地址
-    "order_date": "2024-04-17T10:00:00Z" // 订单日期
+    "order_date": "2024-04-17T10:00:00Z", // 订单日期
+    "file_ids": ["fileid1", "fileid2"],
+    "model_ids": ["modelid1"],
+    "image_ids": ["imgid1", "imgid2"],
+    "video_ids": []
 }
 ```
 
@@ -118,6 +122,10 @@ Authorization: Bearer <token>
         "payment_status": "unpaid",
         "shipping_address": "北京市朝阳区",
         "order_date": "2024-04-17T10:00:00Z",
+        "file_ids": ["fileid1", "fileid2"],
+        "model_ids": ["modelid1"],
+        "image_ids": ["imgid1", "imgid2"],
+        "video_ids": [],
         "created_at": "2024-04-17T10:00:00Z",
         "updated_at": "2024-04-17T10:00:00Z"
     }
@@ -234,6 +242,10 @@ Authorization: Bearer <token>
                 "payment_status": "unpaid",
                 "shipping_address": "北京市朝阳区",
                 "order_date": "2024-04-17T10:00:00Z",
+                "file_ids": ["fileid1", "fileid2"],
+                "model_ids": ["modelid1"],
+                "image_ids": ["imgid1", "imgid2"],
+                "video_ids": [],
                 "model_files": [
                     {
                         "id": 1,
@@ -288,6 +300,10 @@ Authorization: Bearer <token>
         "payment_status": "unpaid",
         "shipping_address": "北京市朝阳区",
         "order_date": "2024-04-17T10:00:00Z",
+        "file_ids": ["fileid1", "fileid2"],
+        "model_ids": ["modelid1"],
+        "image_ids": ["imgid1", "imgid2"],
+        "video_ids": [],
         "model_files": [
             {
                 "id": 1,

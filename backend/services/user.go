@@ -6,6 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"github.com/google/uuid"
+	"log"
 )
 
 // Custom error types
@@ -47,18 +48,28 @@ func (s *UserService) Register(user *models.User) error {
 }
 
 func (s *UserService) Login(username, password string) (*models.LoginResponse, error) {
+	log.Printf("Attempting login for user: %s", username)
+	
 	var user models.User
 	if err := s.db.Where("username = ?", username).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("User not found: %s", username)
 			return nil, errors.New("user not found")
 		}
+		log.Printf("Database error: %v", err)
 		return nil, err
 	}
 
+	log.Printf("User found, stored password hash: %s", user.Password)
+	log.Printf("Attempting to verify password...")
+
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		log.Printf("Password verification failed: %v", err)
 		return nil, errors.New("invalid password")
 	}
+
+	log.Printf("Password verified successfully")
 
 	// 根据用户角色获取相应的档案信息
 	var profile interface{}
@@ -121,4 +132,13 @@ func (s *UserService) UpdateUser(user *models.User) error {
 
 func (s *UserService) DeleteUser(userID string) error {
 	return s.db.Delete(&models.User{}, userID).Error
+}
+
+// HashPassword 使用 bcrypt 对密码进行哈希处理
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 } 

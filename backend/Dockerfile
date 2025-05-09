@@ -19,10 +19,10 @@ ENV GO111MODULE=on
 ENV CGO_ENABLED=1
 
 # 构建应用
-RUN go build -o app .
+RUN go build -o main .
 
 # 暴露端口
 EXPOSE 8080
 
-# 直接运行应用
-CMD ["./app"] 
+# 运行应用
+CMD ["./main"] 

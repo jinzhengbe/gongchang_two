@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -8,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"aneworder.com/backend/models"
 	"aneworder.com/backend/services"
+	"aneworder.com/backend/config"
 )
 
 type AuthController struct {
@@ -33,14 +36,28 @@ type LoginResponse struct {
 func (c *AuthController) Login(ctx *gin.Context) {
 	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Printf("Login request binding error: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Printf("Login attempt for user: %s", req.Username)
+
 	// 使用用户服务验证登录
 	loginResponse, err := c.userService.Login(req.Username, req.Password)
 	if err != nil {
+		log.Printf("Login failed for user %s: %v", req.Username, err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("Login successful for user: %s", req.Username)
+
+	// 获取配置
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Printf("Failed to load config: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load configuration"})
 		return
 	}
 
@@ -51,8 +68,9 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte("your-secret-key"))
+	tokenString, err := token.SignedString([]byte(cfg.JWT.Secret))
 	if err != nil {
+		log.Printf("Failed to generate token: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
 	}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -31,35 +32,8 @@ func NewFileController(fileService *services.FileService, uploadDir string) *Fil
 
 // UploadFile 处理文件上传
 func (c *FileController) UploadFile(ctx *gin.Context) {
-	// 获取并记录所有表单数据
-	form, err := ctx.MultipartForm()
-	if err != nil {
-		log.Printf("Failed to parse multipart form: %v", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无法解析表单数据"})
-		return
-	}
-
-	// 记录所有表单字段
-	log.Printf("Form fields received: %v", form.Value)
-
-	// 获取订单ID
-	orderIDStr := ctx.PostForm("orderId")
-	log.Printf("Received orderId: %s", orderIDStr)
-
-	if orderIDStr == "" {
-		log.Printf("OrderId is empty")
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "订单ID不能为空"})
-		return
-	}
-
-	// 尝试解析订单ID
-	orderID, err := strconv.ParseUint(orderIDStr, 10, 32)
-	if err != nil {
-		log.Printf("Failed to parse orderId '%s': %v", orderIDStr, err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("无效的订单ID格式: %s", orderIDStr)})
-		return
-	}
-
+	log.Printf("Starting file upload process...")
+	
 	// 获取上传的文件
 	file, header, err := ctx.Request.FormFile("file")
 	if err != nil {
@@ -68,15 +42,37 @@ func (c *FileController) UploadFile(ctx *gin.Context) {
 		return
 	}
 	defer file.Close()
+	log.Printf("Successfully received file: %s", header.Filename)
 
-	log.Printf("Processing file upload: %s (size: %d bytes) for order %d", 
-		header.Filename, header.Size, orderID)
+	// 获取订单ID（可选）
+	var orderID *uint
+	orderIDStr := ctx.PostForm("orderId")
+	log.Printf("Received orderId: %s", orderIDStr)
+	
+	if orderIDStr != "" {
+		// 尝试解析订单ID
+		parsedID, err := strconv.ParseUint(orderIDStr, 10, 32)
+		if err != nil {
+			log.Printf("Failed to parse orderId '%s': %v", orderIDStr, err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("无效的订单ID格式: %s", orderIDStr)})
+			return
+		}
+		uintID := uint(parsedID)
+		orderID = &uintID
+		log.Printf("Successfully parsed orderId: %d", *orderID)
+	} else {
+		log.Printf("No orderId provided, proceeding with file upload without order association")
+	}
 
 	// 保存文件
-	fileRecord, err := c.fileService.SaveFile(file, header.Filename, uint(orderID))
+	fileRecord, err := c.fileService.SaveFile(file, header.Filename, orderID)
 	if err != nil {
 		log.Printf("Failed to save file: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if err.Error() == "订单不存在" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -137,4 +133,57 @@ func (c *FileController) DeleteFile(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "文件删除成功"})
-} 
+}
+
+// GetFileDetails 获取单个文件详情
+func (c *FileController) GetFileDetails(ctx *gin.Context) {
+	fileID := ctx.Param("id")
+
+	file, err := c.fileService.GetFileByID(fileID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+		return
+	}
+
+	// 构建文件URL
+	fileURL := fmt.Sprintf("/api/files/%s/download", file.ID)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"id": file.ID,
+		"name": file.Name,
+		"url": fileURL,
+		"type": filepath.Ext(file.Name),
+	})
+}
+
+// GetBatchFileDetails 批量获取文件详情
+func (c *FileController) GetBatchFileDetails(ctx *gin.Context) {
+	var req struct {
+		IDs []string `json:"ids" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的请求参数"})
+		return
+	}
+
+	files, err := c.fileService.GetFilesByIDs(req.IDs)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 构建文件详情列表
+	fileDetails := make([]gin.H, 0, len(files))
+	for _, file := range files {
+		fileURL := fmt.Sprintf("/api/files/%s/download", file.ID)
+		fileDetails = append(fileDetails, gin.H{
+			"id": file.ID,
+			"name": file.Name,
+			"url": fileURL,
+			"type": filepath.Ext(file.Name),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"files": fileDetails})
+}
