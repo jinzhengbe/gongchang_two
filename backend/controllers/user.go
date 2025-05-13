@@ -49,12 +49,6 @@ func (c *UserController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "user registered successfully"})
 }
 
-type LoginRequest struct {
-	Username  string `json:"username" binding:"required"`
-	Password  string `json:"password" binding:"required"`
-	UserType  string `json:"user_type" binding:"required"`
-}
-
 func (c *UserController) Login(ctx *gin.Context) {
 	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

@@ -50,6 +50,14 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		authGroup := api.Group("")
 		authGroup.Use(middleware.AuthMiddleware())
 		{
+			// 用户路由
+			userGroup := authGroup.Group("/users")
+			{
+				userGroup.GET("/:id", userController.GetUser)
+				userGroup.PUT("/:id", userController.UpdateUser)
+				userGroup.DELETE("/:id", userController.DeleteUser)
+			}
+
 			// 产品路由
 			productGroup := authGroup.Group("/products")
 			{

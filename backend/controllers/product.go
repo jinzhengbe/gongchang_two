@@ -33,16 +33,9 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 		return
 	}
 
-	// 将 userID 从 string 转换为 uint
 	userIDStr, ok := userID.(string)
 	if !ok {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user ID type"})
-		return
-	}
-
-	userIDUint, err := strconv.ParseUint(userIDStr, 10, 32)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user ID format"})
 		return
 	}
 
@@ -52,7 +45,7 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 		Category:    req.Category,
 		Price:       req.Price,
 		Stock:       req.Stock,
-		CreatedBy:   uint(userIDUint),
+		CreatedBy:   userIDStr,
 	}
 
 	if err := c.productService.CreateProduct(product); err != nil {

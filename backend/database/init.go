@@ -211,7 +211,7 @@ func InitTestData(db *gorm.DB) error {
 			Description: "100件夏季连衣裙，面料要求透气舒适",
 			Fabric:      "棉麻混纺",
 			Quantity:    100,
-			FactoryID:   new(uint),
+			FactoryID:   nil,
 			Status:      models.OrderStatusPublished,
 		},
 		{
@@ -219,7 +219,7 @@ func InitTestData(db *gorm.DB) error {
 			Description: "200件冬季羽绒服，要求保暖性好",
 			Fabric:      "羽绒",
 			Quantity:    200,
-			FactoryID:   new(uint),
+			FactoryID:   nil,
 			Status:      models.OrderStatusPublished,
 		},
 		{
@@ -227,7 +227,7 @@ func InitTestData(db *gorm.DB) error {
 			Description: "150件春季衬衫，要求版型修身",
 			Fabric:      "纯棉",
 			Quantity:    150,
-			FactoryID:   new(uint),
+			FactoryID:   nil,
 			Status:      models.OrderStatusPublished,
 		},
 	}

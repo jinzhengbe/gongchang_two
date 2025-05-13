@@ -20,29 +20,52 @@ func NewOrderController(orderService *services.OrderService) *OrderController {
 }
 
 func (c *OrderController) CreateOrder(ctx *gin.Context) {
-	var order models.Order
-	if err := ctx.ShouldBindJSON(&order); err != nil {
+	var req models.OrderRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// 验证必要字段
-	if order.Quantity <= 0 {
+	if req.Quantity <= 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "数量必须大于 0"})
 		return
 	}
 
-	if order.Title == "" {
+	if req.Title == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "订单标题不能为空"})
 		return
 	}
 
-	// 设置默认值
-	if order.Status == "" {
-		order.Status = models.OrderStatusDraft
+	// 创建订单对象
+	order := &models.Order{
+		Title:             req.Title,
+		Description:       req.Description,
+		Fabric:            req.Fabric,
+		Quantity:          req.Quantity,
+		DesignerID:        req.DesignerID,
+		CustomerID:        req.CustomerID,
+		UnitPrice:         req.UnitPrice,
+		TotalPrice:        req.TotalPrice,
+		PaymentStatus:     req.PaymentStatus,
+		ShippingAddress:   req.ShippingAddress,
+		OrderType:         req.OrderType,
+		Fabrics:           req.Fabrics,
+		DeliveryDate:      req.DeliveryDate,
+		OrderDate:         req.OrderDate,
+		SpecialRequirements: req.SpecialRequirements,
+		FileIDs:           req.FileIDs,
+		ImageIDs:          req.ImageIDs,
 	}
 
-	if err := c.orderService.CreateOrder(&order); err != nil {
+	// 设置默认值
+	if req.Status == "" {
+		order.Status = models.OrderStatusDraft
+	} else {
+		order.Status = models.OrderStatus(req.Status)
+	}
+
+	if err := c.orderService.CreateOrder(order); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

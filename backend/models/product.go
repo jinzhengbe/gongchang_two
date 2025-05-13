@@ -12,12 +12,12 @@ type Product struct {
 	Price       float64   `json:"price" gorm:"not null"`
 	Stock       int       `json:"stock" gorm:"not null"`
 	Status      string    `json:"status" gorm:"default:'active'"`
-	CreatedBy   uint      `json:"created_by" gorm:"not null"`
+	CreatedBy   string    `json:"created_by" gorm:"not null"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	
 	// 关联
-	Creator     User      `json:"creator" gorm:"foreignKey:CreatedBy"`
+	Creator     User      `json:"creator" gorm:"foreignKey:CreatedBy;references:ID"`
 }
 
 type ProductRequest struct {

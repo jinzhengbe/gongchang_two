@@ -58,6 +58,23 @@ func LoadConfig() (*Config, error) {
 	// 处理环境变量
 	config.JWT.Secret = getEnvValue(config.JWT.Secret)
 	
+	// 处理数据库连接环境变量
+	if host := os.Getenv("DB_HOST"); host != "" {
+		config.Database.Host = host
+	}
+	if port := os.Getenv("DB_PORT"); port != "" {
+		config.Database.Port = port
+	}
+	if user := os.Getenv("DB_USER"); user != "" {
+		config.Database.User = user
+	}
+	if password := os.Getenv("DB_PASSWORD"); password != "" {
+		config.Database.Password = password
+	}
+	if dbname := os.Getenv("DB_NAME"); dbname != "" {
+		config.Database.DBName = dbname
+	}
+	
 	return config, nil
 }
 
