@@ -286,20 +286,46 @@ gongChang/
    - 用户名: designer1
    - 密码: test123
    - 邮箱: designer1@test.com
+   - 角色: designer
 
 2. 工厂用户
    - 用户名: factory1
    - 密码: test123
    - 邮箱: factory1@test.com
+   - 角色: factory
 
 3. 供应商用户
    - 用户名: supplier1
    - 密码: test123
    - 邮箱: supplier1@test.com
+   - 角色: supplier
 
 ## API 文档
 
 ### 用户认证
+
+#### 登录
+- 请求: POST `/api/users/login`
+- 请求体:
+```json
+{
+  "username": "string",
+  "password": "string",
+  "user_type": "string"  // 必须是 "designer", "factory", 或 "supplier"
+}
+```
+- 响应:
+```json
+{
+  "token": "string",
+  "user": {
+    "id": "string",
+    "username": "string",
+    "email": "string",
+    "role": "string"
+  }
+}
+```
 
 #### 注册
 - 请求: POST `/api/users/register`
@@ -309,7 +335,7 @@ gongChang/
   "username": "string",
   "password": "string",
   "email": "string",
-  "role": "string"
+  "role": "string"  // 必须是 "designer", "factory", 或 "supplier"
 }
 ```
 - 响应:
@@ -325,28 +351,6 @@ gongChang/
     "error": "Username already exists"
   }
   ```
-
-#### 登录
-- 请求: POST `/api/auth/login`
-- 请求体:
-```json
-{
-  "username": "string",
-  "password": "string"
-}
-```
-- 响应:
-```json
-{
-  "token": "string",
-  "user": {
-    "id": "string",
-    "username": "string",
-    "email": "string",
-    "role": "string"
-  }
-}
-```
 
 ### 健康检查
 
