@@ -143,7 +143,7 @@
 
 ### 2025-05-07
 - 订单结构与接口字段扩展
-  - 新增字段：file_ids, model_ids, image_ids, video_ids，均为 string 数组，可为空
+  - 新增字段：attachments, models, images, videos，均为 string 数组，可为空
   - 数据库存储类型：JSON（推荐），如不支持则用 TEXT 存储 JSON 字符串
   - 后端接口：支持这四个字段的读写和 JSON 解析，返回前端时保持为数组格式，避免字符串分割
   - 文档同步：已更新 API 文档和数据结构说明，便于团队协作
@@ -153,6 +153,44 @@
     - backend/controllers/order.go
     - docs/order_api.md
     - docs/development.md
+
+### 2025-05-08
+- 订单表字段名称变更
+  - 变更内容：
+    1. `attachments` 改为 `attachments`
+    2. `models` 改为 `models`
+    3. `images` 改为 `images`
+    4. `videos` 改为 `videos`
+  - 变更原因：统一字段命名规范，提高代码可读性
+  - 影响范围：
+    1. 数据库表结构
+    2. Order 模型结构
+    3. OrderRequest 结构
+    4. OrderController 相关代码
+  - 相关文件：
+    - backend/models/order.go
+    - backend/controllers/order.go
+    - docs/order_api.md
+    - docs/development.md
+  - 注意事项：
+    1. 数据库字段已通过 ALTER TABLE 语句更新
+    2. 代码中的字段名已同步更新
+    3. API 接口保持不变，仅内部字段名变更
+
+### 2025-05-09
+- 修复了 GORM datatypes 包依赖问题
+  - 问题：运行后端服务时出现 "no required module provides package gorm.io/datatypes" 错误
+  - 原因：缺少必要的 GORM datatypes 包依赖
+  - 解决方案：
+    1. 添加 gorm.io/datatypes 包依赖
+    2. 更新 go.mod 文件
+  - 执行命令：
+    ```bash
+    go get gorm.io/datatypes
+    ```
+  - 相关文件：
+    - backend/models/order.go
+    - backend/go.mod
 
 ## 开发环境设置
 
