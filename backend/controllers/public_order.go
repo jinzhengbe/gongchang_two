@@ -3,6 +3,7 @@ package controllers
 import (
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -75,7 +76,10 @@ func (c *PublicOrderController) GetPublicOrders(ctx *gin.Context) {
 			Quantity:    order.Quantity,
 			Factory:     order.Factory.CompanyName,
 			Status:      string(order.Status),
-			CreateTime:  order.CreatedAt,
+			CreateTime:  time.Now(),
+		}
+		if order.CreatedAt != nil {
+			publicOrders[i].CreateTime = *order.CreatedAt
 		}
 	}
 
@@ -90,4 +94,47 @@ func (c *PublicOrderController) GetPublicOrders(ctx *gin.Context) {
 		PageSize:   limit,
 		TotalPages: totalPages,
 	})
+}
+
+// GetPublicOrderDetail 获取公开订单详情
+// @Summary 获取公开订单详情
+// @Description 获取公开订单的详细信息，无需认证
+// @Tags 公开订单
+// @Accept json
+// @Produce json
+// @Param id path int true "订单ID"
+// @Success 200 {object} models.PublicOrder
+// @Router /public/orders/{id} [get]
+func (c *PublicOrderController) GetPublicOrderDetail(ctx *gin.Context) {
+	// 获取订单ID
+	id := ctx.Param("id")
+	orderID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "无效的订单ID"})
+		return
+	}
+
+	// 查询订单
+	var order models.Order
+	if err := c.db.Preload("Factory").First(&order, orderID).Error; err != nil {
+		ctx.JSON(404, gin.H{"error": "订单不存在"})
+		return
+	}
+
+	// 转换为公开订单格式
+	publicOrder := models.PublicOrder{
+		ID:          order.ID,
+		Title:       order.Title,
+		Description: order.Description,
+		Fabric:      order.Fabric,
+		Quantity:    order.Quantity,
+		Factory:     order.Factory.CompanyName,
+		Status:      string(order.Status),
+		CreateTime:  time.Now(),
+	}
+	if order.CreatedAt != nil {
+		publicOrder.CreateTime = *order.CreatedAt
+	}
+
+	ctx.JSON(200, publicOrder)
 } 

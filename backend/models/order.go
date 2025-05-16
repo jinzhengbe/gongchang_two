@@ -3,6 +3,7 @@ package models
 import (
 	"gorm.io/gorm"
 	"time"
+	"gorm.io/datatypes"
 )
 
 type OrderStatus string
@@ -15,7 +16,11 @@ const (
 )
 
 type Order struct {
-	gorm.Model
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt *time.Time     `json:"created_at" gorm:"autoCreateTime:false"`
+	UpdatedAt *time.Time     `json:"updated_at" gorm:"autoUpdateTime:false"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	
 	Title             string      `json:"title" gorm:"not null"`
 	Description       string      `json:"description"`
 	Fabric            string      `json:"fabric"`
@@ -31,14 +36,17 @@ type Order struct {
 	ShippingAddress   string      `json:"shipping_address"`
 	OrderType         string      `json:"order_type"`
 	Fabrics           string      `json:"fabrics"`
-	DeliveryDate      time.Time   `json:"delivery_date"`
-	OrderDate         time.Time   `json:"order_date"`
+	DeliveryDate      *time.Time  `json:"delivery_date"`
+	OrderDate         *time.Time  `json:"order_date"`
 	SpecialRequirements string    `json:"special_requirements"`
 
-	FileIDs     []string `json:"file_ids" gorm:"type:json"`
-	ModelIDs    []string `json:"model_ids" gorm:"type:json"`
-	ImageIDs    []string `json:"image_ids" gorm:"type:json"`
-	VideoIDs    []string `json:"video_ids" gorm:"type:json"`
+	Attachments       *datatypes.JSON `json:"attachments" gorm:"type:jsonb;default:null"`
+	Models            *datatypes.JSON `json:"models" gorm:"type:jsonb;default:null"`
+	Images            *datatypes.JSON `json:"images" gorm:"type:jsonb;default:null"`
+	Videos            *datatypes.JSON `json:"videos" gorm:"type:jsonb;default:null"`
+	
+	// 添加文件关联
+	Files             []File         `json:"files" gorm:"foreignKey:OrderID"`
 }
 
 type OrderRequest struct {
@@ -55,11 +63,13 @@ type OrderRequest struct {
 	ShippingAddress   string    `json:"shipping_address"`
 	OrderType         string    `json:"orderType"`
 	Fabrics           string    `json:"fabrics"`
-	DeliveryDate      time.Time `json:"deliveryDate"`
-	OrderDate         time.Time `json:"order_date"`
+	DeliveryDate      *time.Time `json:"deliveryDate"`
+	OrderDate         *time.Time `json:"order_date"`
 	SpecialRequirements string  `json:"specialRequirements"`
-	FileIDs           []string  `json:"file_ids"`
-	ImageIDs          []string  `json:"image_ids"`
+	Attachments       []string  `json:"attachments"`
+	Models            []string  `json:"models"`
+	Images            []string  `json:"images"`
+	Videos            []string  `json:"videos"`
 }
 
 type PublicOrder struct {

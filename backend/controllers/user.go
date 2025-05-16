@@ -50,7 +50,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 }
 
 func (c *UserController) Login(ctx *gin.Context) {
-	var req LoginRequest
+	var req models.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Printf("Login request binding error: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -10,6 +10,7 @@ import (
 	"log"
 	"time"
 	"github.com/google/uuid"
+	"gorm.io/gorm/logger"
 )
 
 // InitDB 初始化数据库连接
@@ -30,6 +31,7 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	for i := 0; i < maxRetries; i++ {
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			DisableForeignKeyConstraintWhenMigrating: true,
+			Logger: logger.Default.LogMode(logger.Info),
 		})
 		if err == nil {
 			break
@@ -45,7 +47,7 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database after %d attempts: %v", maxRetries, err)
 	}
 
-	// 删除旧表
+	// 删除旧表（仅开发调试时使用，生产环境请勿启用）
 	err = db.Migrator().DropTable(
 		&models.File{},
 		&models.Order{},
@@ -61,20 +63,9 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 		log.Printf("Warning: Failed to drop tables: %v", err)
 	}
 
-	// 自动迁移数据库表结构
-	err = db.AutoMigrate(
-		&models.User{},
-		&models.DesignerProfile{},
-		&models.FactoryProfile{},
-		&models.SupplierProfile{},
-		&models.Product{},
-		&models.Order{},
-		&models.OrderProgress{},
-		&models.OrderAttachment{},
-		&models.File{},
-	)
-	if err != nil {
-		return nil, err
+	// 执行自动迁移
+	if err := MigrateData(db); err != nil {
+		return nil, fmt.Errorf("failed to migrate database: %v", err)
 	}
 
 	// 初始化测试数据

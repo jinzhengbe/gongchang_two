@@ -8,6 +8,7 @@ import (
 	"aneworder.com/backend/middleware"
 	"net/http"
 	"aneworder.com/backend/config"
+	"log"
 )
 
 func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
@@ -91,6 +92,14 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				fileGroup.GET("/order/:id", fileController.GetOrderFiles)
 			}
 		}
+	}
+
+	// 注册公开路由
+	RegisterPublicRoutes(r, db)
+
+	// 打印所有已注册的路由
+	for _, route := range r.Routes() {
+		log.Printf("[ROUTE] %s %s", route.Method, route.Path)
 	}
 
 	return r

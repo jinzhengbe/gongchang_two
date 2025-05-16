@@ -3,6 +3,7 @@ package services
 import (
 	"aneworder.com/backend/models"
 	"gorm.io/gorm"
+	"gorm.io/datatypes"
 )
 
 type OrderService struct {
@@ -16,13 +17,38 @@ func NewOrderService(db *gorm.DB) *OrderService {
 }
 
 func (s *OrderService) CreateOrder(order *models.Order) error {
-	return s.db.Create(order).Error
+	// 显式排除 delivery_date 和 order_date 字段，避免插入零值时间字段
+	return s.db.Omit("delivery_date", "order_date").Create(order).Error
 }
 
 func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 	var order models.Order
-	err := s.db.Preload("Factory").First(&order, orderID).Error
-	return &order, err
+	err := s.db.Preload("Factory").
+		Preload("Files").
+		First(&order, orderID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 确保 JSON 字段不为 nil
+	if order.Attachments == nil {
+		emptyJSON := datatypes.JSON("[]")
+		order.Attachments = &emptyJSON
+	}
+	if order.Models == nil {
+		emptyJSON := datatypes.JSON("[]")
+		order.Models = &emptyJSON
+	}
+	if order.Images == nil {
+		emptyJSON := datatypes.JSON("[]")
+		order.Images = &emptyJSON
+	}
+	if order.Videos == nil {
+		emptyJSON := datatypes.JSON("[]")
+		order.Videos = &emptyJSON
+	}
+
+	return &order, nil
 }
 
 func (s *OrderService) UpdateOrderStatus(orderID uint, status models.OrderStatus) error {

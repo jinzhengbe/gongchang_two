@@ -145,7 +145,7 @@ func (s *FileService) SaveFile(file io.Reader, filename string, orderID *uint) (
 
 func (s *FileService) GetOrderFiles(orderID uint) ([]models.File, error) {
 	var files []models.File
-	err := s.db.Where("order_id = ?", orderID).Find(&files).Error
+	err := s.db.Where("orderID = ?", orderID).Find(&files).Error
 	return files, err
 }
 

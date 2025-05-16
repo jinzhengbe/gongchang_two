@@ -3,10 +3,12 @@ package controllers
 import (
 	"aneworder.com/backend/models"
 	"aneworder.com/backend/services"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 )
 
 type OrderController struct {
@@ -51,11 +53,66 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		ShippingAddress:   req.ShippingAddress,
 		OrderType:         req.OrderType,
 		Fabrics:           req.Fabrics,
-		DeliveryDate:      req.DeliveryDate,
-		OrderDate:         req.OrderDate,
 		SpecialRequirements: req.SpecialRequirements,
-		FileIDs:           req.FileIDs,
-		ImageIDs:          req.ImageIDs,
+	}
+
+	// 处理数组字段
+	if req.Attachments != nil {
+		// 确保数组不为空
+		if len(req.Attachments) > 0 {
+			attachmentsJSON, err := json.Marshal(req.Attachments)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid attachments format"})
+				return
+			}
+			jsonData := datatypes.JSON(attachmentsJSON)
+			order.Attachments = &jsonData
+		} else {
+			// 如果是空数组，设置为 null
+			order.Attachments = nil
+		}
+	}
+
+	if req.Models != nil {
+		if len(req.Models) > 0 {
+			modelsJSON, err := json.Marshal(req.Models)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid models format"})
+				return
+			}
+			jsonData := datatypes.JSON(modelsJSON)
+			order.Models = &jsonData
+		} else {
+			order.Models = nil
+		}
+	}
+
+	if req.Images != nil {
+		if len(req.Images) > 0 {
+			imagesJSON, err := json.Marshal(req.Images)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid images format"})
+				return
+			}
+			jsonData := datatypes.JSON(imagesJSON)
+			order.Images = &jsonData
+		} else {
+			order.Images = nil
+		}
+	}
+
+	if req.Videos != nil {
+		if len(req.Videos) > 0 {
+			videosJSON, err := json.Marshal(req.Videos)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid videos format"})
+				return
+			}
+			jsonData := datatypes.JSON(videosJSON)
+			order.Videos = &jsonData
+		} else {
+			order.Videos = nil
+		}
 	}
 
 	// 设置默认值
@@ -65,12 +122,36 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		order.Status = models.OrderStatus(req.Status)
 	}
 
+	// 判断时间字段是否为 nil
+	if req.DeliveryDate != nil {
+		order.DeliveryDate = req.DeliveryDate
+	}
+	if req.OrderDate != nil {
+		order.OrderDate = req.OrderDate
+	}
+
 	if err := c.orderService.CreateOrder(order); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, order)
+	// 返回响应
+	ctx.JSON(http.StatusCreated, gin.H{
+		"id": order.ID,
+		"title": order.Title,
+		"description": order.Description,
+		"fabric": order.Fabric,
+		"quantity": order.Quantity,
+		"designer_id": order.DesignerID,
+		"customer_id": order.CustomerID,
+		"status": order.Status,
+		"attachments": req.Attachments,
+		"models": req.Models,
+		"images": req.Images,
+		"videos": req.Videos,
+		"created_at": order.CreatedAt,
+		"updated_at": order.UpdatedAt,
+	})
 }
 
 func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
@@ -110,17 +191,9 @@ func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 		return
 	}
 
-	// 组装返回格式，保证四个字段为数组
+	// 组装返回格式
 	orderList := make([]gin.H, 0, len(orders))
 	for _, order := range orders {
-		fileIDs := order.FileIDs
-		if fileIDs == nil { fileIDs = []string{} }
-		modelIDs := order.ModelIDs
-		if modelIDs == nil { modelIDs = []string{} }
-		imageIDs := order.ImageIDs
-		if imageIDs == nil { imageIDs = []string{} }
-		videoIDs := order.VideoIDs
-		if videoIDs == nil { videoIDs = []string{} }
 		orderList = append(orderList, gin.H{
 			"id": order.ID,
 			"title": order.Title,
@@ -129,13 +202,12 @@ func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 			"quantity": order.Quantity,
 			"factory_id": order.FactoryID,
 			"status": order.Status,
-			"file_ids": fileIDs,
-			"model_ids": modelIDs,
-			"image_ids": imageIDs,
-			"video_ids": videoIDs,
+			"attachments": nil,
+			"models": nil,
+			"images": nil,
+			"videos": nil,
 			"created_at": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
-			// 可按需补充其他字段
 		})
 	}
 
@@ -160,16 +232,6 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		return
 	}
 
-	// 保证四个字段为非nil数组
-	fileIDs := order.FileIDs
-	if fileIDs == nil { fileIDs = []string{} }
-	modelIDs := order.ModelIDs
-	if modelIDs == nil { modelIDs = []string{} }
-	imageIDs := order.ImageIDs
-	if imageIDs == nil { imageIDs = []string{} }
-	videoIDs := order.VideoIDs
-	if videoIDs == nil { videoIDs = []string{} }
-
 	ctx.JSON(http.StatusOK, gin.H{
 		"id": order.ID,
 		"title": order.Title,
@@ -178,13 +240,24 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		"quantity": order.Quantity,
 		"factory_id": order.FactoryID,
 		"status": order.Status,
-		"file_ids": fileIDs,
-		"model_ids": modelIDs,
-		"image_ids": imageIDs,
-		"video_ids": videoIDs,
+		"attachments": order.Attachments,
+		"models": order.Models,
+		"images": order.Images,
+		"videos": order.Videos,
+		"files": order.Files,
 		"created_at": order.CreatedAt,
 		"updated_at": order.UpdatedAt,
-		// 可按需补充其他字段
+		"designer_id": order.DesignerID,
+		"customer_id": order.CustomerID,
+		"unit_price": order.UnitPrice,
+		"total_price": order.TotalPrice,
+		"payment_status": order.PaymentStatus,
+		"shipping_address": order.ShippingAddress,
+		"order_type": order.OrderType,
+		"fabrics": order.Fabrics,
+		"delivery_date": order.DeliveryDate,
+		"order_date": order.OrderDate,
+		"special_requirements": order.SpecialRequirements,
 	})
 }
 
@@ -232,14 +305,6 @@ func (c *OrderController) SearchOrders(ctx *gin.Context) {
 
 	orderList := make([]gin.H, 0, len(orders))
 	for _, order := range orders {
-		fileIDs := order.FileIDs
-		if fileIDs == nil { fileIDs = []string{} }
-		modelIDs := order.ModelIDs
-		if modelIDs == nil { modelIDs = []string{} }
-		imageIDs := order.ImageIDs
-		if imageIDs == nil { imageIDs = []string{} }
-		videoIDs := order.VideoIDs
-		if videoIDs == nil { videoIDs = []string{} }
 		orderList = append(orderList, gin.H{
 			"id": order.ID,
 			"title": order.Title,
@@ -248,13 +313,12 @@ func (c *OrderController) SearchOrders(ctx *gin.Context) {
 			"quantity": order.Quantity,
 			"factory_id": order.FactoryID,
 			"status": order.Status,
-			"file_ids": fileIDs,
-			"model_ids": modelIDs,
-			"image_ids": imageIDs,
-			"video_ids": videoIDs,
+			"attachments": nil,
+			"models": nil,
+			"images": nil,
+			"videos": nil,
 			"created_at": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
-			// 可按需补充其他字段
 		})
 	}
 
@@ -294,14 +358,6 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 
 	orderList := make([]gin.H, 0, len(orders))
 	for _, order := range orders {
-		fileIDs := order.FileIDs
-		if fileIDs == nil { fileIDs = []string{} }
-		modelIDs := order.ModelIDs
-		if modelIDs == nil { modelIDs = []string{} }
-		imageIDs := order.ImageIDs
-		if imageIDs == nil { imageIDs = []string{} }
-		videoIDs := order.VideoIDs
-		if videoIDs == nil { videoIDs = []string{} }
 		orderList = append(orderList, gin.H{
 			"id": order.ID,
 			"title": order.Title,
@@ -310,13 +366,12 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 			"quantity": order.Quantity,
 			"factory_id": order.FactoryID,
 			"status": order.Status,
-			"file_ids": fileIDs,
-			"model_ids": modelIDs,
-			"image_ids": imageIDs,
-			"video_ids": videoIDs,
+			"attachments": nil,
+			"models": nil,
+			"images": nil,
+			"videos": nil,
 			"created_at": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
-			// 可按需补充其他字段
 		})
 	}
 

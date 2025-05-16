@@ -55,6 +55,7 @@ type SupplierProfile struct {
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	UserType string `json:"user_type" binding:"required,oneof=designer factory supplier"`
 }
 
 type LoginData struct {

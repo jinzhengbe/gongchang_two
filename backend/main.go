@@ -38,6 +38,11 @@ func main() {
 	// 设置路由
 	router := routes.SetupRouter(db, cfg)
 
+	// 打印所有已注册的路由
+	for _, route := range router.Routes() {
+		log.Printf("[ROUTE] %s %s", route.Method, route.Path)
+	}
+
 	// 配置服务器
 	server := &http.Server{
 		Addr:         fmt.Sprintf("0.0.0.0:%s", cfg.Server.Port),
