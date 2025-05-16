@@ -49,7 +49,10 @@ Content-Type: application/json
    - factory: 工厂
    - supplier: 供应商
 
-3. 安全建议：
+3. 字段命名要求：
+   - 登录接口参数字段名必须为 user_type（下划线），不能为 userType（驼峰）。否则会导致 400 错误。
+
+4. 安全建议：
    - 使用 HTTPS 进行传输
    - 不要在客户端保存密码
    - Token 有效期为 24 小时
