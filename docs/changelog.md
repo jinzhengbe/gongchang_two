@@ -30,4 +30,15 @@
 - 数据库: MySQL 8.0
 - 容器化: Docker + Docker Compose
 - 认证: JWT
-- 文档: Markdown 
+- 文档: Markdown
+
+## [0.1.1] - 2024-05-08
+
+### 改进
+- 统一订单表字段命名规范
+  - 将 `attachments` 改为 `attachments`
+  - 将 `models` 改为 `models`
+  - 将 `images` 改为 `images`
+  - 将 `videos` 改为 `videos`
+- 优化代码可读性和维护性
+- 更新相关文档 
