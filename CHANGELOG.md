@@ -135,3 +135,16 @@ volumes:
 
 ### 文档更新
 - 在 docs/authentication.md 中补充说明：登录接口参数字段名必须为 user_type，不能为 userType，否则会导致 400 错误，便于前端开发者排查问题。 
+
+## [2025-05-17] - 数据库问题修复与订单数据更新
+
+### 问题修复
+- 彻底解决 MySQL 数据目录权限和初始化问题
+  - 删除数据卷 `gongchang_mysql_data`，确保 `init.sql` 重新执行
+  - 修正数据目录权限为 999:999
+  - 重启服务后数据库和表结构成功创建
+
+### 数据更新
+- 订单表最新数据状态：
+  - 最新订单（id=4）：attachments 字段有值 `["bf742079-9a93-46a4-93c5-7fbd67bc7ee1"]`，其他字段（models、images、videos）为 NULL
+  - 其他订单（id=1,2,3）：attachments、models、images、videos 均为 NULL 
