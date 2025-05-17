@@ -629,4 +629,35 @@ backend/
 3. API 访问
    - 确认接口路径正确
    - 检查认证 token
-   - 验证请求参数格式 
+   - 验证请求参数格式
+
+## 数据库持久化问题解决方案
+
+### 问题描述
+在开发过程中，发现 MySQL 数据库在服务重启后数据丢失，导致新插入的订单无法持久化。
+
+### 原因分析
+1. **数据卷挂载问题**：使用相对路径 `./mysql_data:/var/lib/mysql` 挂载数据卷，导致 Docker Compose 在不同工作目录下产生不同的数据卷，数据无法持久化。
+2. **目录权限问题**：`mysql_data` 目录的属主不是 `mysql`，而是 `dnsmasq`，导致 MySQL 容器无法正常写入数据。
+
+### 解决方案
+1. **使用绝对路径挂载数据卷**：
+   - 将 `docker-compose.yml` 中的挂载路径从相对路径 `./mysql_data:/var/lib/mysql` 改为绝对路径 `/runData/gongChang/mysql_data:/var/lib/mysql`。
+   - 确保 `mysql_data` 目录存在，并赋予正确权限：
+     ```bash
+     sudo mkdir -p /runData/gongChang/mysql_data
+     sudo chown -R 999:999 /runData/gongChang/mysql_data
+     sudo chmod -R 755 /runData/gongChang/mysql_data
+     ```
+
+2. **验证数据持久化**：
+   - 插入测试用户和订单数据。
+   - 关闭服务并重启，确认数据是否依然存在。
+
+### 验证结果
+- 新插入的订单在服务重启后依然存在，说明数据库持久化问题已解决。
+- 数据卷挂载和权限设置正确，MySQL 容器可以正常读写数据。
+
+### 后续建议
+- 定期备份 `mysql_data` 目录，防止数据丢失。
+- 监控 MySQL 容器的日志，及时发现潜在问题。 
