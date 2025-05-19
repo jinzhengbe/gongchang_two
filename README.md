@@ -141,6 +141,33 @@ tar -xzvf mysql_backup.tar.gz -C /runData/gongChang/
 docker-compose up -d
 ```
 
+### 数据库监控
+系统内置了数据库性能监控功能，可以实时监控数据库连接状态和查询性能：
+
+#### 连接池监控
+- 最大连接数
+- 当前打开连接数
+- 使用中连接数
+- 空闲连接数
+- 等待连接数
+- 等待时间
+- 连接关闭统计
+
+#### 慢查询监控
+- 可配置慢查询阈值
+- 自动记录超过阈值的查询
+- 记录查询执行时间
+- 记录完整 SQL 语句
+
+使用示例：
+```go
+// 启动数据库监控，每5秒记录一次统计信息
+MonitorDatabase(db, 5*time.Second)
+
+// 设置慢查询监控，记录执行时间超过1秒的查询
+MonitorSlowQueries(db, 1*time.Second)
+```
+
 ## 环境要求
 - Go 1.16+
 - MySQL 8.0+
