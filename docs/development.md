@@ -223,7 +223,7 @@ docker-compose logs -f
 #### 数据库服务
 - 类型：MySQL 8.0
 - 容器名称：gongchang-mysql
-- 主机名：mysql
+- 主机名：192.168.0.10
 - 端口：3306
 - 数据卷：gongchang_mysql_data
 
@@ -505,6 +505,37 @@ gongChang/
 - 请求头:
   - `Authorization: Bearer <token>`
 
+## 设计师订单接口
+
+### 获取设计师订单列表
+- **接口**: `GET /api/designer/orders`
+- **认证**: 需要设计师角色 token
+- **参数**:
+  - `designer_id`: 设计师ID（必填）
+- **返回**:
+  ```json
+  {
+    "orders": [
+      {
+        "id": 9,
+        "title": "sdfa",
+        "designer_id": "38ffe7c2-8deb-4aa3-b6c9-84aa320d3d09",
+        "status": "published",
+        ...
+      }
+    ],
+    "page": 1,
+    "pageSize": 10,
+    "total": 2
+  }
+  ```
+
+### 创建设计师订单
+- **接口**: `POST /api/designer/orders`
+- **认证**: 需要设计师角色 token
+- **参数**: 同普通订单创建
+- **返回**: 同普通订单创建
+
 ## 常见问题
 
 ### 健康检查失败
@@ -629,7 +660,7 @@ backend/
 3. API 访问
    - 确认接口路径正确
    - 检查认证 token
-   - 验证请求参数格式
+   - 验证请求参数格式 
 
 ## 数据库持久化问题解决方案
 
@@ -660,4 +691,18 @@ backend/
 
 ### 后续建议
 - 定期备份 `mysql_data` 目录，防止数据丢失。
-- 监控 MySQL 容器的日志，及时发现潜在问题。 
+- 监控 MySQL 容器的日志，及时发现潜在问题。
+
+## 设计师订单接口注意事项
+
+- `/api/designer/orders` 只会返回 designer_id 等于当前登录用户ID的订单。
+- 创建订单时，designer_id 字段必须设置为当前登录用户的 user_id。
+- 如果 designer_id 不一致，接口不会返回该订单。
+- 订单查询修正：2025-05-20 修复了 designer 订单接口查询逻辑，确保只查当前用户的订单。
+
+## 开发日志
+
+### 2025-05-20
+- 修复 `/api/designer/orders` 查询逻辑，原先用 factory_id 查询，现已改为 designer_id。
+- 增加日志输出，便于排查用户订单查询问题。
+- 测试通过，Flutter端和接口均能正确查到当前用户订单。 
