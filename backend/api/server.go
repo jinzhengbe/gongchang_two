@@ -1,8 +1,8 @@
 package api
 
 import (
-	"sewingmast-backend/config"
-	"sewingmast-backend/routes"
+	"backend/config"
+	"backend/routes"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -25,27 +25,7 @@ func NewServer(cfg *config.Config, db *gorm.DB) *Server {
 }
 
 func (s *Server) setupRoutes() {
-	// Register auth routes
-	routes.RegisterAuthRoutes(s.router, s.db)
-
-	// Protected routes
-	protected := s.router.Group("/api")
-	// protected.Use(middleware.JWTAuth())
-	{
-		// Designer routes
-		designer := protected.Group("/designer")
-		{
-			designer.GET("/orders", s.handleGetDesignerOrders)
-			designer.POST("/orders", s.handleCreateOrder)
-		}
-
-		// Factory routes
-		factory := protected.Group("/factory")
-		{
-			factory.GET("/orders", s.handleGetFactoryOrders)
-			factory.PUT("/orders/:id", s.handleUpdateOrderStatus)
-		}
-	}
+	s.router = routes.SetupRouter(s.db, s.config)
 }
 
 func (s *Server) Start() error {

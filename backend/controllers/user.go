@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"aneworder.com/backend/config"
-	"aneworder.com/backend/middleware"
-	"aneworder.com/backend/models"
-	"aneworder.com/backend/services"
+	"backend/config"
+	"backend/middleware"
+	"backend/models"
+	"backend/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

@@ -1,0 +1,210 @@
+{
+  "app": {
+    "title": "스마트소싱",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "refresh": "Refresh",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "forgot_password": "Forgot Password?",
+    "no_account": "No account?",
+    "have_account": "Already have an account?",
+    "qr_code_title": "Scan QR Code to Download APP",
+    "copy_download_link": "Copy Download Link",
+    "copy_success": "Download link copied",
+    "languages": {
+      "select": "Select Language",
+      "chinese": "中文",
+      "english": "English",
+      "korean": "한국어"
+    },
+    "language_change_title": "Change Language",
+    "language_change_message": "Are you sure you want to change the language? The app needs to restart for the changes to take full effect.",
+    "contact": "Contact",
+    "view_details": "View Details"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "username": "Username",
+      "password": "Password",
+      "username_required": "Please enter username",
+      "password_required": "Please enter password",
+      "login_failed": "Login failed",
+      "invalid_credentials": "Invalid username or password",
+      "user_not_found": "User not found",
+      "network_error": "Network error, please try again later",
+      "unknown_error": "Unknown error, please try again later",
+      "login": "Login",
+      "register": "Register",
+      "forgot_password": "Forgot Password?",
+      "designer": "Designer Login",
+      "factory": "Factory Login",
+      "supplier": "Supplier Login"
+    },
+    "register": {
+      "title": "Designer Registration",
+      "basic_info": "Basic Information",
+      "username": "Username",
+      "username_hint": "Enter 3-20 characters",
+      "password": "Password",
+      "password_hint": "Enter 6-20 characters",
+      "email": "Email",
+      "email_hint": "Enter a valid email address",
+      "designer_info": "Designer Profile",
+      "company_name": "Company Name",
+      "company_name_hint": "Enter company name",
+      "address": "Company Address",
+      "address_hint": "Enter company address",
+      "website": "Company Website (Optional)",
+      "website_hint": "Enter company website",
+      "bio": "Bio (Optional)",
+      "bio_hint": "Enter your bio",
+      "submit": "Register",
+      "register_success": "Registration successful",
+      "register_failed": "Registration failed",
+      "username_exists": "Username already exists",
+      "email_exists": "Email already registered"
+    }
+  },
+  "designer": {
+    "dashboard": {
+      "title": "Designer Dashboard",
+      "published_orders": "Published Orders",
+      "ongoing_orders": "Ongoing Orders",
+      "create_order": "Create Order",
+      "no_orders": "No orders yet",
+      "order_status": {
+        "published": "Published",
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "add_order": "Add Order"
+    },
+    "create_order": {
+      "title": "Create Order",
+      "basic_info": "Basic Information",
+      "order_title": "Order Title",
+      "order_title_required": "Please enter order title",
+      "product_id": "Product ID (Optional)",
+      "product_id_invalid": "Product ID must be a valid number",
+      "product_id_positive": "Product ID must be greater than 0",
+      "search_product": "Search Product",
+      "description": "Description",
+      "description_required": "Please enter description",
+      "fabric": "Fabric",
+      "fabric_required": "Please select fabric",
+      "select_fabric": "Select Fabric",
+      "quantity": "Quantity",
+      "quantity_required": "Please enter quantity",
+      "quantity_invalid": "Please enter a valid number",
+      "delivery_date": "Delivery Date",
+      "delivery_date_required": "Please select delivery date",
+      "delivery_date_invalid": "Invalid date format",
+      "special_requirements": "Special Requirements",
+      "shipping_address": "Shipping Address",
+      "attachments": "Attachments",
+      "create_success": "Order created successfully",
+      "create_failed": "Failed to create order",
+      "upload_file": "Upload File",
+      "capture": "Capture",
+      "model_files": "3D Model Files",
+      "images": "Images",
+      "videos": "Videos",
+      "order_type": "Order Type",
+      "order_type_required": "Please select order type"
+    },
+    "search": {
+      "product": "Search Product",
+      "category": "Category",
+      "all_categories": "All Categories",
+      "min_price": "Minimum Price",
+      "max_price": "Maximum Price",
+      "fabric": "Search Fabric",
+      "all": "All",
+      "cotton": "Cotton",
+      "silk": "Silk",
+      "wool": "Wool"
+    },
+    "search_hint": "Search orders, fabrics, factories..."
+  },
+  "order": {
+    "order_no": "Order No.",
+    "fabric": "Fabric",
+    "quantity": "Quantity",
+    "pieces": "pcs",
+    "factory": {
+      "title": "Factory",
+      "required": "Please enter factory"
+    },
+    "total_amount": "Total Amount",
+    "view_details": "View Details",
+    "basic_info": "Basic Information",
+    "style_no": "Style No.",
+    "style_no_required": "Please enter style number",
+    "sample_no": "Sample No.",
+    "sample_no_required": "Please enter sample number",
+    "order_type": "Order Type",
+    "order_type_required": "Please select order type",
+    "description": "Order Description",
+    "description_required": "Please enter order description",
+    "type": {
+      "sample": "Sample",
+      "production": "Production"
+    },
+    "status": {
+      "published": "Published",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "instruction_date": {
+      "title": "Instruction Date",
+      "required": "Please select instruction date"
+    },
+    "expected_in_date": {
+      "title": "Expected In Date",
+      "required": "Please select expected in date"
+    },
+    "expected_out_date": {
+      "title": "Expected Out Date",
+      "required": "Please select expected out date"
+    }
+  },
+  "home": {
+    "title": "Home",
+    "latest_orders": "Latest Orders",
+    "view_all": "View All",
+    "no_orders": "No orders yet",
+    "load_more": "Load More",
+    "pull_to_refresh": "Pull to refresh",
+    "platform_description": "Smart Garment Manufacturing Platform Connecting Designers and Factories",
+    "platform_features": "We provide efficient order management, real-time communication, and quality tracking to bring your design concepts to life",
+    "join_now": "Join Now",
+    "learn_more": "Learn More",
+    "scroll_down": "Scroll Down"
+  },
+  "errors": {
+    "network": "Network error, please try again later",
+    "server": "Server error",
+    "unknown": "Unknown error",
+    "required": "This field is required",
+    "invalid_format": "Invalid format",
+    "file_too_large": "File size exceeds limit",
+    "invalid_date": "Invalid date"
+  }
+} 

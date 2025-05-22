@@ -1,1 +1,42 @@
-mysql_data/\ndata/letsencrypt/\nmysql_data_backup/\n*.log\n*.tmp\n*.bak\nuploads/\n
+# 数据库文件
+mysql_data/
+mysql_data_backup/
+
+# SSL证书
+certbot/
+data/letsencrypt/
+
+# 上传文件
+uploads/
+
+# IDE文件
+.idea/
+.vscode/
+
+# 编译文件
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试文件
+*.test
+*.out
+
+# 依赖目录
+vendor/
+node_modules/
+
+# 环境文件
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+*.log
+logs/
+
+# 系统文件
+.DS_Store
+Thumbs.db

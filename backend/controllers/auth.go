@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"aneworder.com/backend/models"
-	"aneworder.com/backend/services"
-	"aneworder.com/backend/config"
+	"backend/models"
+	"backend/services"
+	"backend/config"
 )
 
 type AuthController struct {

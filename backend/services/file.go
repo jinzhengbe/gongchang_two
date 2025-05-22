@@ -1,7 +1,7 @@
 package services
 
 import (
-	"aneworder.com/backend/models"
+	"backend/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"io"
@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"fmt"
+	"strings"
 )
 
 const (
@@ -173,9 +174,25 @@ func (s *FileService) DeleteFile(fileID string) error {
 func (s *FileService) GetFilePath(fileID string) (string, error) {
 	var file models.File
 	if err := s.db.First(&file, "id = ?", fileID).Error; err != nil {
+		log.Printf("Failed to find file with ID %s: %v", fileID, err)
 		return "", err
 	}
-	return filepath.Join(s.uploadPath, file.Path), nil
+
+	// 确保文件路径是绝对路径
+	filePath := filepath.Join(s.uploadPath, file.Path)
+	absPath, err := filepath.Abs(filePath)
+	if err != nil {
+		log.Printf("Failed to get absolute path for %s: %v", filePath, err)
+		return "", err
+	}
+
+	// 验证文件路径是否在上传目录内
+	if !strings.HasPrefix(absPath, s.uploadPath) {
+		log.Printf("Invalid file path: %s (outside upload directory)", absPath)
+		return "", fmt.Errorf("invalid file path")
+	}
+
+	return absPath, nil
 }
 
 // GetFilesByIDs 批量获取文件信息

@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"aneworder.com/backend/config"
-	"aneworder.com/backend/models"
+	"backend/config"
+	"backend/models"
 	"log"
 	"net/http"
 	"strings"

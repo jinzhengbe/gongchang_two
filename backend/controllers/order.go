@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"aneworder.com/backend/models"
-	"aneworder.com/backend/services"
+	"backend/models"
+	"backend/services"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -56,63 +57,45 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		SpecialRequirements: req.SpecialRequirements,
 	}
 
-	// 处理数组字段
-	if req.Attachments != nil {
-		// 确保数组不为空
-		if len(req.Attachments) > 0 {
-			attachmentsJSON, err := json.Marshal(req.Attachments)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid attachments format"})
-				return
-			}
-			jsonData := datatypes.JSON(attachmentsJSON)
-			order.Attachments = &jsonData
-		} else {
-			// 如果是空数组，设置为 null
-			order.Attachments = nil
+	// 处理文件关联
+	if req.Attachments != nil && len(req.Attachments) > 0 {
+		attachmentsJSON, err := json.Marshal(req.Attachments)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid attachments format"})
+			return
 		}
+		jsonData := datatypes.JSON(attachmentsJSON)
+		order.Attachments = &jsonData
 	}
 
-	if req.Models != nil {
-		if len(req.Models) > 0 {
-			modelsJSON, err := json.Marshal(req.Models)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid models format"})
-				return
-			}
-			jsonData := datatypes.JSON(modelsJSON)
-			order.Models = &jsonData
-		} else {
-			order.Models = nil
+	if req.Models != nil && len(req.Models) > 0 {
+		modelsJSON, err := json.Marshal(req.Models)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid models format"})
+			return
 		}
+		jsonData := datatypes.JSON(modelsJSON)
+		order.Models = &jsonData
 	}
 
-	if req.Images != nil {
-		if len(req.Images) > 0 {
-			imagesJSON, err := json.Marshal(req.Images)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid images format"})
-				return
-			}
-			jsonData := datatypes.JSON(imagesJSON)
-			order.Images = &jsonData
-		} else {
-			order.Images = nil
+	if req.Images != nil && len(req.Images) > 0 {
+		imagesJSON, err := json.Marshal(req.Images)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid images format"})
+			return
 		}
+		jsonData := datatypes.JSON(imagesJSON)
+		order.Images = &jsonData
 	}
 
-	if req.Videos != nil {
-		if len(req.Videos) > 0 {
-			videosJSON, err := json.Marshal(req.Videos)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid videos format"})
-				return
-			}
-			jsonData := datatypes.JSON(videosJSON)
-			order.Videos = &jsonData
-		} else {
-			order.Videos = nil
+	if req.Videos != nil && len(req.Videos) > 0 {
+		videosJSON, err := json.Marshal(req.Videos)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid videos format"})
+			return
 		}
+		jsonData := datatypes.JSON(videosJSON)
+		order.Videos = &jsonData
 	}
 
 	// 设置默认值
@@ -130,6 +113,7 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		order.OrderDate = req.OrderDate
 	}
 
+	// 创建订单
 	if err := c.orderService.CreateOrder(order); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -156,11 +140,13 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 
 func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 	// 从 JWT token 中获取用户 ID
-	factoryID := ctx.GetString("user_id")
-	if factoryID == "" {
+	userID := ctx.GetString("user_id")
+	if userID == "" {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
 		return
 	}
+
+	log.Printf("Getting orders for user ID: %s", userID)
 
 	// 获取查询参数
 	status := ctx.Query("status")
@@ -178,18 +164,22 @@ func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 	}
 
 	// 获取订单列表
-	orders, err := c.orderService.GetOrdersByUserID(factoryID, status, page, pageSize)
+	orders, err := c.orderService.GetOrdersByUserID(userID, status, page, pageSize)
 	if err != nil {
+		log.Printf("Error getting orders: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// 获取总数
-	total, err := c.orderService.GetOrdersCount(factoryID, status)
+	total, err := c.orderService.GetOrdersCount(userID, status)
 	if err != nil {
+		log.Printf("Error getting orders count: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	log.Printf("Found %d orders for user %s", total, userID)
 
 	// 组装返回格式
 	orderList := make([]gin.H, 0, len(orders))
@@ -202,12 +192,23 @@ func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 			"quantity": order.Quantity,
 			"factory_id": order.FactoryID,
 			"status": order.Status,
-			"attachments": nil,
-			"models": nil,
-			"images": nil,
-			"videos": nil,
+			"attachments": order.Attachments,
+			"models": order.Models,
+			"images": order.Images,
+			"videos": order.Videos,
 			"created_at": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
+			"designer_id": order.DesignerID,
+			"customer_id": order.CustomerID,
+			"unit_price": order.UnitPrice,
+			"total_price": order.TotalPrice,
+			"payment_status": order.PaymentStatus,
+			"shipping_address": order.ShippingAddress,
+			"order_type": order.OrderType,
+			"fabrics": order.Fabrics,
+			"delivery_date": order.DeliveryDate,
+			"order_date": order.OrderDate,
+			"special_requirements": order.SpecialRequirements,
 		})
 	}
 
@@ -232,6 +233,21 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		return
 	}
 
+	// 处理文件信息
+	var attachments, models, images, videos []string
+	if order.Attachments != nil {
+		json.Unmarshal(*order.Attachments, &attachments)
+	}
+	if order.Models != nil {
+		json.Unmarshal(*order.Models, &models)
+	}
+	if order.Images != nil {
+		json.Unmarshal(*order.Images, &images)
+	}
+	if order.Videos != nil {
+		json.Unmarshal(*order.Videos, &videos)
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"id": order.ID,
 		"title": order.Title,
@@ -240,10 +256,10 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		"quantity": order.Quantity,
 		"factory_id": order.FactoryID,
 		"status": order.Status,
-		"attachments": order.Attachments,
-		"models": order.Models,
-		"images": order.Images,
-		"videos": order.Videos,
+		"attachments": attachments,
+		"models": models,
+		"images": images,
+		"videos": videos,
 		"files": order.Files,
 		"created_at": order.CreatedAt,
 		"updated_at": order.UpdatedAt,
@@ -376,4 +392,87 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"orders": orderList})
+}
+
+// GetOrdersByDesignerID 根据设计师ID获取订单列表
+func (c *OrderController) GetOrdersByDesignerID(ctx *gin.Context) {
+	// 从查询参数中获取设计师ID
+	designerID := ctx.Query("designer_id")
+	if designerID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "设计师ID不能为空"})
+		return
+	}
+
+	log.Printf("Getting orders for designer ID: %s", designerID)
+
+	// 获取查询参数
+	status := ctx.Query("status")
+	pageStr := ctx.DefaultQuery("page", "1")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "10")
+
+	// 转换分页参数
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	// 获取订单列表
+	orders, err := c.orderService.GetOrdersByUserID(designerID, status, page, pageSize)
+	if err != nil {
+		log.Printf("Error getting orders: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 获取总数
+	total, err := c.orderService.GetOrdersCount(designerID, status)
+	if err != nil {
+		log.Printf("Error getting orders count: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("Found %d orders for designer %s", total, designerID)
+
+	// 组装返回格式
+	orderList := make([]gin.H, 0, len(orders))
+	for _, order := range orders {
+		orderList = append(orderList, gin.H{
+			"id": order.ID,
+			"title": order.Title,
+			"description": order.Description,
+			"fabric": order.Fabric,
+			"quantity": order.Quantity,
+			"factory_id": order.FactoryID,
+			"status": order.Status,
+			"attachments": order.Attachments,
+			"models": order.Models,
+			"images": order.Images,
+			"videos": order.Videos,
+			"created_at": order.CreatedAt,
+			"updated_at": order.UpdatedAt,
+			"designer_id": order.DesignerID,
+			"customer_id": order.CustomerID,
+			"unit_price": order.UnitPrice,
+			"total_price": order.TotalPrice,
+			"payment_status": order.PaymentStatus,
+			"shipping_address": order.ShippingAddress,
+			"order_type": order.OrderType,
+			"fabrics": order.Fabrics,
+			"delivery_date": order.DeliveryDate,
+			"order_date": order.OrderDate,
+			"special_requirements": order.SpecialRequirements,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"total": total,
+		"page": page,
+		"pageSize": pageSize,
+		"orders": orderList,
+	})
 } 

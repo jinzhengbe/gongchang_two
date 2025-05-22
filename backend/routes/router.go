@@ -1,14 +1,15 @@
 package routes
 
 import (
-	"aneworder.com/backend/controllers"
-	"aneworder.com/backend/services"
+	"backend/controllers"
+	"backend/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"aneworder.com/backend/middleware"
+	"backend/middleware"
 	"net/http"
-	"aneworder.com/backend/config"
+	"backend/config"
 	"log"
+	"backend/internal/factory"
 )
 
 func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
@@ -18,7 +19,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	r.SetTrustedProxies(cfg.Server.TrustedProxies)
 
 	// 添加健康检查路由
-	r.GET("/health", func(c *gin.Context) {
+	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
@@ -30,16 +31,25 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	productService := services.NewProductService(db)
 	orderService := services.NewOrderService(db)
 	fileService := services.NewFileService(db, "./uploads")
+	factoryService := factory.NewService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
 	productController := controllers.NewProductController(productService)
 	orderController := controllers.NewOrderController(orderService)
 	fileController := controllers.NewFileController(fileService, "./uploads")
+	factoryHandler := factory.NewHandler(factoryService)
 
 	// API 路由组
 	api := r.Group("/api")
 	{
+		// 工厂路由
+		factoryGroup := api.Group("/factory")
+		{
+			factoryGroup.POST("/register", factoryHandler.Register)
+			factoryGroup.POST("/login", factoryHandler.Login)
+		}
+
 		// 用户路由
 		userGroup := api.Group("/users")
 		{
@@ -73,12 +83,18 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			orderGroup := authGroup.Group("/orders")
 			{
 				orderGroup.POST("", orderController.CreateOrder)
-				orderGroup.GET("", orderController.GetOrdersByUserID)
 				orderGroup.GET("/:id", orderController.GetOrderByID)
 				orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
 				orderGroup.GET("/search", orderController.SearchOrders)
 				orderGroup.GET("/statistics", orderController.GetOrderStatistics)
 				orderGroup.GET("/recent", orderController.GetRecentOrders)
+			}
+
+			// 工厂订单路由
+			factoryGroup := authGroup.Group("/factory")
+			{
+				factoryGroup.GET("/orders", orderController.GetOrdersByUserID)
+				factoryGroup.PUT("/orders/:id", orderController.UpdateOrderStatus)
 			}
 
 			// 文件路由
@@ -92,6 +108,15 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				fileGroup.GET("/order/:id", fileController.GetOrderFiles)
 			}
 		}
+
+		// 设计师订单路由（单独注册，确保一定生效）
+		designerGroup := api.Group("/designer")
+		designerGroup.Use(middleware.AuthMiddleware())
+		{
+			designerGroup.GET("/orders", orderController.GetOrdersByDesignerID)
+			designerGroup.POST("/orders", orderController.CreateOrder)
+		}
+		log.Println("!!! DESIGNER ROUTE REGISTERED !!!")
 	}
 
 	// 注册公开路由

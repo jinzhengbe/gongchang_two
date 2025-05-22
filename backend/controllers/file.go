@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"aneworder.com/backend/services"
+	"backend/services"
 	"fmt"
 	"log"
 	"net/http"
@@ -112,20 +112,45 @@ func (c *FileController) GetFileInfo(ctx *gin.Context) {
 
 // DownloadFile 处理文件下载
 func (c *FileController) DownloadFile(ctx *gin.Context) {
-	fileID := ctx.Param("fileId")
+	fileID := ctx.Param("id")
+	log.Printf("Attempting to download file with ID: %s", fileID)
 
 	filePath, err := c.fileService.GetFilePath(fileID)
 	if err != nil {
+		log.Printf("Failed to get file path for ID %s: %v", fileID, err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
 		return
 	}
 
+	// 检查文件是否存在
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("File not found at path: %s", filePath)
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+		return
+	}
+
+	// 获取文件信息
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		log.Printf("Failed to get file info for %s: %v", filePath, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "无法读取文件信息"})
+		return
+	}
+
+	// 设置响应头
+	ctx.Header("Content-Description", "File Transfer")
+	ctx.Header("Content-Transfer-Encoding", "binary")
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(filePath)))
+	ctx.Header("Content-Type", "application/octet-stream")
+	ctx.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+
+	// 发送文件
 	ctx.File(filePath)
 }
 
 // DeleteFile 处理文件删除
 func (c *FileController) DeleteFile(ctx *gin.Context) {
-	fileID := ctx.Param("fileId")
+	fileID := ctx.Param("id")
 
 	if err := c.fileService.DeleteFile(fileID); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -145,8 +170,8 @@ func (c *FileController) GetFileDetails(ctx *gin.Context) {
 		return
 	}
 
-	// 构建文件URL
-	fileURL := fmt.Sprintf("/api/files/%s/download", file.ID)
+	// 统一使用 /api/files/download/{id} 格式
+	fileURL := fmt.Sprintf("/api/files/download/%s", file.ID)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"id": file.ID,
@@ -176,7 +201,7 @@ func (c *FileController) GetBatchFileDetails(ctx *gin.Context) {
 	// 构建文件详情列表
 	fileDetails := make([]gin.H, 0, len(files))
 	for _, file := range files {
-		fileURL := fmt.Sprintf("/api/files/%s/download", file.ID)
+		fileURL := fmt.Sprintf("/api/files/download/%s", file.ID)
 		fileDetails = append(fileDetails, gin.H{
 			"id": file.ID,
 			"name": file.Name,

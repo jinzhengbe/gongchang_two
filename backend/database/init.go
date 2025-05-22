@@ -1,8 +1,8 @@
 package database
 
 import (
-	"aneworder.com/backend/config"
-	"aneworder.com/backend/models"
+	"backend/config"
+	"backend/models"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
@@ -34,6 +34,18 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 			Logger: logger.Default.LogMode(logger.Info),
 		})
 		if err == nil {
+			// 配置连接池
+			sqlDB, err := db.DB()
+			if err == nil {
+				// 设置最大空闲连接数
+				sqlDB.SetMaxIdleConns(10)
+				// 设置最大打开连接数
+				sqlDB.SetMaxOpenConns(100)
+				// 设置连接最大生命周期
+				sqlDB.SetConnMaxLifetime(time.Hour)
+				// 设置空闲连接最大生命周期
+				sqlDB.SetConnMaxIdleTime(time.Minute * 10)
+			}
 			break
 		}
 		log.Printf("Failed to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
@@ -48,6 +60,7 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	}
 
 	// 删除旧表（仅开发调试时使用，生产环境请勿启用）
+	/*
 	err = db.Migrator().DropTable(
 		&models.File{},
 		&models.Order{},
@@ -62,6 +75,7 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	if err != nil {
 		log.Printf("Warning: Failed to drop tables: %v", err)
 	}
+	*/
 
 	// 执行自动迁移
 	if err := MigrateData(db); err != nil {
@@ -78,6 +92,20 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 
 // InitTestData 初始化测试数据
 func InitTestData(db *gorm.DB) error {
+	// 检查数据库是否为空
+	var count int64
+	if err := db.Model(&models.User{}).Count(&count).Error; err != nil {
+		return fmt.Errorf("failed to check if database is empty: %v", err)
+	}
+
+	// 如果数据库不为空，跳过初始化
+	if count > 0 {
+		log.Printf("Database is not empty, skipping test data initialization")
+		return nil
+	}
+
+	log.Printf("Database is empty, initializing test data...")
+
 	// 创建测试用户密码
 	password := "test123"
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -112,26 +140,16 @@ func InitTestData(db *gorm.DB) error {
 
 	// 创建用户
 	for _, user := range testUsers {
-		var existingUser models.User
-		if err := db.First(&existingUser, "username = ?", user.Username).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
-				if err := db.Create(&user).Error; err != nil {
-					log.Printf("Error creating test user %s: %v", user.Username, err)
-					continue
-				}
-				log.Printf("Created test user: %s", user.Username)
-			} else {
-				log.Printf("Error checking existing user %s: %v", user.Username, err)
-				continue
-			}
-		} else {
-			log.Printf("Test user already exists: %s", user.Username)
+		if err := db.Create(&user).Error; err != nil {
+			log.Printf("Error creating test user %s: %v", user.Username, err)
+			continue
 		}
+		log.Printf("Created test user: %s", user.Username)
 	}
 
 	// 创建用户档案
 	designerProfile := models.DesignerProfile{
-		UserID:      "1",
+		UserID:      testUsers[0].ID, // 使用新创建的用户ID
 		CompanyName: "设计工作室1",
 		Address:     "北京市朝阳区",
 		Website:     "http://designer1.com",
@@ -139,7 +157,7 @@ func InitTestData(db *gorm.DB) error {
 	}
 
 	factoryProfile := models.FactoryProfile{
-		UserID:       "2",
+		UserID:       testUsers[1].ID, // 使用新创建的用户ID
 		CompanyName:  "服装厂1",
 		Address:      "广东省深圳市",
 		Capacity:     1000,
@@ -148,7 +166,7 @@ func InitTestData(db *gorm.DB) error {
 	}
 
 	supplierProfile := models.SupplierProfile{
-		UserID:       "3",
+		UserID:       testUsers[2].ID, // 使用新创建的用户ID
 		CompanyName:  "面料供应商1",
 		Address:      "浙江省绍兴市",
 		MainProducts: "棉料,丝绸,化纤",
@@ -156,92 +174,23 @@ func InitTestData(db *gorm.DB) error {
 	}
 
 	// 创建档案
-	var existingDesignerProfile models.DesignerProfile
-	if err := db.First(&existingDesignerProfile, "user_id = ?", designerProfile.UserID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			if err := db.Create(&designerProfile).Error; err != nil {
-				log.Printf("Error creating designer profile: %v", err)
-			} else {
-				log.Printf("Created designer profile for user ID: %s", designerProfile.UserID)
-			}
-		}
+	if err := db.Create(&designerProfile).Error; err != nil {
+		log.Printf("Error creating designer profile: %v", err)
 	} else {
-		log.Printf("Designer profile already exists for user ID: %s", designerProfile.UserID)
+		log.Printf("Created designer profile for user ID: %s", designerProfile.UserID)
 	}
 
-	var existingFactoryProfile models.FactoryProfile
-	if err := db.First(&existingFactoryProfile, "user_id = ?", factoryProfile.UserID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			if err := db.Create(&factoryProfile).Error; err != nil {
-				log.Printf("Error creating factory profile: %v", err)
-			} else {
-				log.Printf("Created factory profile for user ID: %s", factoryProfile.UserID)
-			}
-		}
+	if err := db.Create(&factoryProfile).Error; err != nil {
+		log.Printf("Error creating factory profile: %v", err)
 	} else {
-		log.Printf("Factory profile already exists for user ID: %s", factoryProfile.UserID)
+		log.Printf("Created factory profile for user ID: %s", factoryProfile.UserID)
 	}
 
-	var existingSupplierProfile models.SupplierProfile
-	if err := db.First(&existingSupplierProfile, "user_id = ?", supplierProfile.UserID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			if err := db.Create(&supplierProfile).Error; err != nil {
-				log.Printf("Error creating supplier profile: %v", err)
-			} else {
-				log.Printf("Created supplier profile for user ID: %s", supplierProfile.UserID)
-			}
-		}
+	if err := db.Create(&supplierProfile).Error; err != nil {
+		log.Printf("Error creating supplier profile: %v", err)
 	} else {
-		log.Printf("Supplier profile already exists for user ID: %s", supplierProfile.UserID)
+		log.Printf("Created supplier profile for user ID: %s", supplierProfile.UserID)
 	}
 
-	// 创建测试订单
-	testOrders := []models.Order{
-		{
-			Title:       "夏季连衣裙订单",
-			Description: "100件夏季连衣裙，面料要求透气舒适",
-			Fabric:      "棉麻混纺",
-			Quantity:    100,
-			FactoryID:   nil,
-			Status:      models.OrderStatusPublished,
-		},
-		{
-			Title:       "冬季羽绒服订单",
-			Description: "200件冬季羽绒服，要求保暖性好",
-			Fabric:      "羽绒",
-			Quantity:    200,
-			FactoryID:   nil,
-			Status:      models.OrderStatusPublished,
-		},
-		{
-			Title:       "春季衬衫订单",
-			Description: "150件春季衬衫，要求版型修身",
-			Fabric:      "纯棉",
-			Quantity:    150,
-			FactoryID:   nil,
-			Status:      models.OrderStatusPublished,
-		},
-	}
-
-	// 创建订单
-	for _, order := range testOrders {
-		var existingOrder models.Order
-		if err := db.First(&existingOrder, "title = ?", order.Title).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
-				if err := db.Create(&order).Error; err != nil {
-					log.Printf("Error creating test order %s: %v", order.Title, err)
-					continue
-				}
-				log.Printf("Created test order: %s", order.Title)
-			} else {
-				log.Printf("Error checking existing order %s: %v", order.Title, err)
-				continue
-			}
-		} else {
-			log.Printf("Test order already exists: %s", order.Title)
-		}
-	}
-
-	log.Println("Test data initialization completed")
 	return nil
 } 

@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"time"
-	"aneworder.com/backend/config"
-	"aneworder.com/backend/database"
-	"aneworder.com/backend/routes"
+	"backend/config"
+	"backend/database"
+	"backend/routes"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,10 +25,35 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// 自动迁移数据库表结构
+	// 自动迁移数据库表结构（已稳定，暂时注释）
+	/*
 	if err := database.MigrateData(db); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
+	*/
+
+	// 启动数据库监控
+	go database.MonitorDatabase(db, 5*time.Minute)
+	database.MonitorSlowQueries(db, 1*time.Second)
+
+	// 设置定时备份
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			if err := database.BackupDatabase(cfg); err != nil {
+				log.Printf("Failed to backup database: %v", err)
+			} else {
+				log.Println("Database backup completed successfully")
+			}
+
+			// 清理30天前的备份
+			if err := database.CleanOldBackups(30 * 24 * time.Hour); err != nil {
+				log.Printf("Failed to clean old backups: %v", err)
+			}
+		}
+	}()
 
 	// 设置 Gin 模式
 	if os.Getenv("GIN_MODE") != "debug" {

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"aneworder.com/backend/services"
+	"backend/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

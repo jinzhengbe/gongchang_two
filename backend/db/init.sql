@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS factories (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     type ENUM('standard', 'premium') NOT NULL,
     location VARCHAR(255) NOT NULL,
     rating DECIMAL(2,1),

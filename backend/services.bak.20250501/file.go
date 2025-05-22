@@ -1,7 +1,7 @@
 package services
 
 import (
-	"aneworder.com/backend/models"
+	"backend/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"io"

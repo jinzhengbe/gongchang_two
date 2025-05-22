@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gongchang-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gongchang
+      MYSQL_USER: gongchang
+      MYSQL_PASSWORD: gongchang
+    ports:
+      - "3306:3306"
+    volumes:
+      - /runData/gongChang/mysql_data:/var/lib/mysql
+      - /runData/gongChang/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gongchang-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gongchang-backend
+    ports:
+      - "8080:8080"
+      - "51050:8080"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=gongchang
+      - DB_PASSWORD=gongchang
+      - DB_NAME=gongchang
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: always
+    extra_hosts:
+      - "aneworders.com:127.0.0.1"
+    networks:
+      - gongchang-network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: gongchang-web
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - gongchang-network
+
+networks:
+  gongchang-network:
+    driver: bridge 

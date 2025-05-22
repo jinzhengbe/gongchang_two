@@ -1,7 +1,8 @@
 package database
 
 import (
-	"aneworder.com/backend/models"
+	"backend/models"
+	"backend/internal/factory"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,7 @@ func MigrateData(db *gorm.DB) error {
 		&models.SupplierProfile{},
 		&models.OrderProgress{},
 		&models.OrderAttachment{},
+		&factory.Factory{},
 	)
 	if err != nil {
 		return err

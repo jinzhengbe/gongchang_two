@@ -1,55 +1,44 @@
+# 注意：重启容器时不要使用 docker-compose down -v，这会删除所有数据卷
+# 正确的重启命令是：docker-compose down && docker-compose up -d
+
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: gongchang-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: gongchang
-      MYSQL_USER: gongchang
-      MYSQL_PASSWORD: gongchang
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "gongchang", "-pgongchang"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - gongchang-network
-
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: gongchang-backend
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: gongchang_backend
+    restart: always
     ports:
-      - "8080:8080"
+      - "8008:8008"
     environment:
-      - DB_HOST=mysql
+      - DB_HOST=192.168.0.10
       - DB_PORT=3306
       - DB_USER=gongchang
       - DB_PASSWORD=gongchang
       - DB_NAME=gongchang
-    depends_on:
-      mysql:
-        condition: service_healthy
-    restart: always
-    extra_hosts:
-      - "aneworders.com:127.0.0.1"
+      - JWT_SECRET=your_jwt_secret_key
     networks:
-      - gongchang-network
+      - gongchang_network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: gongchang_web
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /runData/gongChang/web:/usr/share/nginx/html
+      - /runData/gongChang/data/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+    networks:
+      - gongchang_network
 
 networks:
-  gongchang-network:
+  gongchang_network:
     driver: bridge 
-
-volumes:
-  mysql_data:
-    driver: local 

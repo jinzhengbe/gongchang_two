@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"aneworder.com/backend/database"
+	"backend/database"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -18,8 +18,8 @@ func main() {
 		Password string
 		DBName   string
 	}{
-		Host:     "localhost",  // 使用 localhost 连接容器
-		Port:     "3307",       // 使用映射到主机的端口
+		Host:     "192.168.0.10",  // 使用外部数据库主机
+		Port:     "3306",       // 使用标准MySQL端口
 		User:     "gongchang",
 		Password: "gongchang",
 		DBName:   "gongchang",

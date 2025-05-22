@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"aneworder.com/backend/controllers"
-	"aneworder.com/backend/services"
+	"backend/controllers"
+	"backend/services"
 	"gorm.io/gorm"
 )
 

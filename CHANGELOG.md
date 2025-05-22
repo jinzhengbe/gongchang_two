@@ -86,6 +86,7 @@ backend/
 - 密码：`gongchang`
 - 端口：`3306`
 - 数据存储位置：`/runData/gongChang/mysql_data`
+- 主机：`192.168.0.10` (外部数据库主机)
 
 #### 数据存储配置
 - 主数据目录：`/runData/gongChang/mysql_data`

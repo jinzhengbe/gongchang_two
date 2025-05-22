@@ -1,7 +1,7 @@
 package services
 
 import (
-	"aneworder.com/backend/models"
+	"backend/models"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
