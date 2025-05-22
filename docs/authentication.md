@@ -62,4 +62,34 @@ Content-Type: application/json
 ### 密码存储
 - 使用 bcrypt 进行密码加密
 - 加密强度：默认 cost=10
-- 密码哈希格式：`$2a$10$... 
+- 密码哈希格式：`$2a$10$...`
+
+## 工厂用户注册与登录
+
+### 工厂用户注册
+- 接口：`/api/users/register`
+- 请求格式：
+  ```json
+  {
+    "username": "your_factory_username",
+    "password": "your_password",
+    "email": "your_email@example.com",
+    "role": "factory"
+  }
+  ```
+- 说明：工厂用户注册到 users 表，role 字段必须为 "factory"。
+
+### 工厂用户登录
+- 接口：`/api/users/login`
+- 请求格式：
+  ```json
+  {
+    "username": "your_factory_username",
+    "password": "your_password",
+    "user_type": "factory"
+  }
+  ```
+- 说明：登录时 user_type 必须为 "factory"，否则会返回错误。
+
+## 开发日志
+- 2025-05-23: 更新工厂用户注册和登录接口，统一使用 /api/users 路径，并更新文档。 
