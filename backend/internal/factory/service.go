@@ -73,4 +73,14 @@ func (s *Service) Login(req *LoginRequest) (*LoginResponse, error) {
 		Token:   token,
 		Factory: factory,
 	}, nil
+}
+
+// GetRecentFactories 获取最近注册的工厂列表
+func (s *Service) GetRecentFactories(limit int) ([]Factory, error) {
+	var factories []Factory
+	err := s.db.Order("created_at desc").Limit(limit).Find(&factories).Error
+	if err != nil {
+		return nil, err
+	}
+	return factories, nil
 } 

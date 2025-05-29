@@ -1,10 +1,13 @@
 {
   "app": {
-    "title": "스마트소싱",
+    "title": "智能缝制",
     "loading": "加载中...",
     "error": "错误",
     "success": "成功",
     "warning": "警告",
+    "notice": "提示",
+    "download_progress": "下载进度",
+    "upload_progress": "上传进度",
     "confirm": "确认",
     "cancel": "取消",
     "save": "保存",
@@ -28,7 +31,8 @@
       "select": "选择语言",
       "chinese": "中文",
       "english": "English",
-      "korean": "한국어"
+      "korean": "한국어",
+      "vietnamese": "Tiếng Việt"
     },
     "language_change_title": "切换语言",
     "language_change_message": "确定要切换语言吗？切换后需要重启应用才能完全生效。",
@@ -51,7 +55,10 @@
       "register": "注册",
       "forgot_password": "忘记密码？",
       "designer": "设计师登录",
-      "factory": "工厂登录",
+      "factory": {
+        "title": "工厂登录",
+        "no_account": "还没有账号？点击注册"
+      },
       "supplier": "供应商登录"
     },
     "register": {
@@ -76,7 +83,21 @@
       "register_success": "注册成功",
       "register_failed": "注册失败",
       "username_exists": "用户名已存在",
-      "email_exists": "邮箱已被注册"
+      "email_exists": "邮箱已被注册",
+      "factory": {
+        "title": "工厂注册",
+        "company_name": "工厂名称",
+        "company_name_required": "请输入工厂名称",
+        "phone": "联系电话",
+        "phone_required": "请输入联系电话",
+        "phone_invalid": "请输入11位有效的手机号码",
+        "phone_exists": "该手机号已被注册",
+        "address": "工厂地址",
+        "address_required": "请输入工厂地址",
+        "success": "注册成功，正在自动登录...",
+        "auto_login_failed": "注册成功，但自动登录失败，请手动登录",
+        "failed": "注册失败，请稍后重试"
+      }
     }
   },
   "designer": {
@@ -163,7 +184,8 @@
     "description_required": "请输入订单描述",
     "type": {
       "sample": "样品",
-      "production": "生产"
+      "production": "生产",
+      "custom": "定制"
     },
     "status": {
       "published": "已发布",
@@ -183,7 +205,24 @@
     "expected_out_date": {
       "title": "出库预定日",
       "required": "请选择出库预定日"
-    }
+    },
+    "images": "图片",
+    "no_images": "暂无图片",
+    "attachments": "附件",
+    "no_attachments": "暂无附件",
+    "models": "3D模型",
+    "no_models": "暂无3D模型",
+    "videos": "视频",
+    "no_videos": "暂无视频",
+    "files_fetch_partial_failed": "部分文件获取失败，请检查网络连接后重试",
+    "files_fetch_failed": "获取文件信息失败，请稍后重试",
+    "file_downloaded": "文件已下载到",
+    "file_download_failed": "下载文件失败",
+    "file_upload_success": "文件上传成功",
+    "file_upload_failed": "文件上传失败",
+    "file_delete_success": "文件删除成功",
+    "file_delete_failed": "文件删除失败",
+    "update_success": "订单信息已更新"
   },
   "home": {
     "title": "首页",
@@ -205,6 +244,28 @@
     "required": "此字段为必填项",
     "invalid_format": "格式不正确",
     "file_too_large": "文件大小超出限制",
-    "invalid_date": "无效的日期"
+    "invalid_date": "无效的日期",
+    "storage_permission_required": "需要存储权限才能下载文件",
+    "storage_access_denied": "无法访问存储目录",
+    "file_path_not_found": "无法获取文件路径",
+    "user_not_found": "未找到用户ID"
+  },
+  "factory": {
+    "dashboard": {
+      "title": "工厂仪表盘",
+      "basic_info": "基本信息",
+      "name": "工厂名称",
+      "phone": "联系电话",
+      "address": "工厂地址",
+      "production_capacity": "生产能力",
+      "employee_count": "员工数量",
+      "orders": {
+        "pending": "待处理订单",
+        "in_progress": "进行中订单",
+        "completed": "已完成订单",
+        "total": "总订单数"
+      },
+      "recent_orders": "最近订单"
+    }
   }
 } 

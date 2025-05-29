@@ -28,7 +28,8 @@
       "select": "Select Language",
       "chinese": "中文",
       "english": "English",
-      "korean": "한국어"
+      "korean": "한국어",
+      "vietnamese": "Tiếng Việt"
     },
     "language_change_title": "Change Language",
     "language_change_message": "Are you sure you want to change the language? The app needs to restart for the changes to take full effect.",
@@ -51,7 +52,10 @@
       "register": "Register",
       "forgot_password": "Forgot Password?",
       "designer": "Designer Login",
-      "factory": "Factory Login",
+      "factory": {
+        "title": "Factory Login",
+        "no_account": "Don't have an account? Click to register"
+      },
       "supplier": "Supplier Login"
     },
     "register": {
@@ -76,7 +80,21 @@
       "register_success": "Registration successful",
       "register_failed": "Registration failed",
       "username_exists": "Username already exists",
-      "email_exists": "Email already registered"
+      "email_exists": "Email already registered",
+      "factory": {
+        "title": "Factory Registration",
+        "company_name": "Factory Name",
+        "company_name_required": "Please enter factory name",
+        "phone": "Contact Phone",
+        "phone_required": "Please enter contact phone",
+        "phone_invalid": "Please enter a valid 11-digit phone number",
+        "phone_exists": "This phone number is already registered",
+        "address": "Factory Address",
+        "address_required": "Please enter factory address",
+        "success": "Registration successful, auto-login in progress...",
+        "auto_login_failed": "Registration successful, but auto-login failed. Please login manually",
+        "failed": "Registration failed, please try again later"
+      }
     }
   },
   "designer": {
@@ -206,5 +224,23 @@
     "invalid_format": "Invalid format",
     "file_too_large": "File size exceeds limit",
     "invalid_date": "Invalid date"
+  },
+  "factory": {
+    "dashboard": {
+      "title": "Factory Dashboard",
+      "basic_info": "Basic Information",
+      "name": "Factory Name",
+      "phone": "Contact Phone",
+      "address": "Factory Address",
+      "production_capacity": "Production Capacity",
+      "employee_count": "Employee Count",
+      "orders": {
+        "pending": "Pending Orders",
+        "in_progress": "In Progress Orders",
+        "completed": "Completed Orders",
+        "total": "Total Orders"
+      },
+      "recent_orders": "Recent Orders"
+    }
   }
 } 

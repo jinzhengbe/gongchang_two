@@ -3,14 +3,17 @@ package factory
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"github.com/your-project/models"
+	"github.com/your-project/services"
 )
 
 type Handler struct {
 	service *Service
+	userService *UserService
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, userService *UserService) *Handler {
+	return &Handler{service: service, userService: userService}
 }
 
 // Register 工厂注册
@@ -29,8 +32,21 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Register(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 创建用户对象，注册到 users 表
+	user := &models.User{
+		Username: req.Username,
+		Password: req.Password,
+		Email:    req.Email,
+		Role:     models.RoleFactory,
+	}
+
+	// 使用 UserService 注册用户
+	if err := h.userService.Register(user); err != nil {
+		if err == services.ErrUsernameExists {
+			c.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

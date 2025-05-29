@@ -5,25 +5,22 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="스마트소잉 - Modern Collaboration Platform for Fashion Industry">
-
-  <!-- iOS meta tags & icons -->
+  <meta name="description" content="app.appDescription">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="스마트소잉">
+  <meta name="apple-mobile-web-app-title" content="app.appName">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>스마트소잉</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <title>app.appName</title>
   <link rel="manifest" href="manifest.json">
-
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = '"1187884204"';
+    var serviceWorkerVersion = '"824446306"';
   </script>
-  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
   <style>
     .loading {
@@ -37,7 +34,6 @@
       -ms-transform: translate(-50%, -50%);
       transform: translate(-50%, -50%);
     }
-    
     .loader {
       border: 4px solid #f3f3f3;
       border-radius: 50%;
@@ -47,20 +43,23 @@
       -webkit-animation: spin 1s linear infinite;
       animation: spin 1s linear infinite;
     }
-    
     @-webkit-keyframes spin {
       0% { -webkit-transform: rotate(0deg); }
       100% { -webkit-transform: rotate(360deg); }
     }
-    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
     #flutter_target {
       width: 100vw;
       height: 100vh;
+    }
+    .error-message {
+      color: #d32f2f;
+      text-align: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
     }
   </style>
 </head>
@@ -70,24 +69,31 @@
     <div class="loader"></div>
   </div>
   <script>
-    window.addEventListener('load', async function() {
+    window.addEventListener('load', function(ev) {
       var loading = document.querySelector('.loading');
-      
-      // Initialize Flutter
-      await _flutter.loader.loadEntrypoint({
+      _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: async function(engineInitializer) {
-          let appRunner = await engineInitializer.initializeEngine({
-            hostElement: document.querySelector('#flutter_target'),
-            renderer: "html"
-          });
-          await appRunner.runApp();
-          loading.remove();
+          try {
+            let appRunner = await engineInitializer.initializeEngine({
+              hostElement: document.querySelector('#flutter_target'),
+              renderer: "html"
+            });
+            await appRunner.runApp();
+            loading.remove();
+          } catch (error) {
+            console.error('Failed to initialize Flutter app:', error);
+            loading.innerHTML = '<div class="error-message">Failed to load application. Please refresh the page.</div>';
+          }
         }
       });
     });
+  </script>
+  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+  <script>
+    new VConsole();
   </script>
 </body>
 </html> 

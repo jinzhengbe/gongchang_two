@@ -1,11 +1,11 @@
 {
-    "name": "스마트소잉",
-    "short_name": "스마트소잉",
+    "name": "app.appName",
+    "short_name": "app.appName",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#2196F3",
-    "theme_color": "#2196F3",
-    "description": "Modern Collaboration Platform for Fashion Industry",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "app.appDescription",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
