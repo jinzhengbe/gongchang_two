@@ -1,8 +1,8 @@
 package database
 
 import (
-	"backend/config"
-	"backend/models"
+	"gongChang/config"
+	"gongChang/models"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"

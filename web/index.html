@@ -19,7 +19,7 @@
   <link rel="manifest" href="manifest.json">
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = '"824446306"';
+    var serviceWorkerVersion = '"2227988658"';
   </script>
   <script src="flutter.js" defer></script>
   <style>
@@ -71,23 +71,57 @@
   <script>
     window.addEventListener('load', function(ev) {
       var loading = document.querySelector('.loading');
-      _flutter.loader.loadEntrypoint({
+      window._flutter = window._flutter || {};
+      window._flutter.buildConfig = {
+        builds: [
+          {
+            mainJsPath: "main.dart.js",
+            renderer: "html"
+          }
+        ],
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
+        assetsBase: "./"
+      };
+
+      // 添加错误处理
+      window.addEventListener('error', function(e) {
+        console.error('Global error:', e);
+        if (loading) {
+          loading.innerHTML = '<div class="error-message">加载失败，请刷新页面重试</div>';
+        }
+      });
+
+      // 确保 Flutter 加载器存在
+      if (!window._flutter.loader) {
+        console.error('Flutter loader not found');
+        loading.innerHTML = '<div class="error-message">Flutter 加载器未找到，请刷新页面重试</div>';
+        return;
+      }
+
+      window._flutter.loader.load({
         onEntrypointLoaded: async function(engineInitializer) {
           try {
+            console.log('Flutter engine initializer loaded');
             let appRunner = await engineInitializer.initializeEngine({
               hostElement: document.querySelector('#flutter_target'),
-              renderer: "html"
+              renderer: "html",
+              useColorEmoji: true,
+              assetBase: "./"
             });
+            console.log('Flutter engine initialized');
             await appRunner.runApp();
+            console.log('Flutter app running');
             loading.remove();
           } catch (error) {
             console.error('Failed to initialize Flutter app:', error);
-            loading.innerHTML = '<div class="error-message">Failed to load application. Please refresh the page.</div>';
+            loading.innerHTML = '<div class="error-message">应用加载失败，请刷新页面重试</div>';
           }
         }
+      }).catch(function(error) {
+        console.error('Failed to load Flutter app:', error);
+        loading.innerHTML = '<div class="error-message">应用加载失败，请刷新页面重试</div>';
       });
     });
   </script>

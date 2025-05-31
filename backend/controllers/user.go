@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"backend/config"
-	"backend/middleware"
-	"backend/models"
-	"backend/services"
+	"gongChang/config"
+	"gongChang/middleware"
+	"gongChang/models"
+	"gongChang/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

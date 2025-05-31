@@ -1,8 +1,8 @@
 package database
 
 import (
-	"backend/models"
-	"backend/internal/factory"
+	"gongChang/models"
+	"gongChang/internal/factory"
 	"gorm.io/gorm"
 )
 

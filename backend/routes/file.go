@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"backend/controllers"
-	"backend/middleware"
+	"gongChang/controllers"
+	"gongChang/middleware"
 )
 
 func SetupFileRoutes(router *gin.Engine, fileController *controllers.FileController) {

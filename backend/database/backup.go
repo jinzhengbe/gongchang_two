@@ -1,7 +1,7 @@
 package database
 
 import (
-	"backend/config"
+	"gongChang/config"
 	"fmt"
 	"os"
 	"os/exec"

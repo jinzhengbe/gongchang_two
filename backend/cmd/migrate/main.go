@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"backend/database"
+	"gongChang/database"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

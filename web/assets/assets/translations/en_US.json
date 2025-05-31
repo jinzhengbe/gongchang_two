@@ -38,7 +38,7 @@
   },
   "auth": {
     "login": {
-      "title": "Login",
+      "title": "Factory Login",
       "username": "Username",
       "password": "Password",
       "username_required": "Please enter username",
@@ -214,7 +214,9 @@
     "platform_features": "We provide efficient order management, real-time communication, and quality tracking to bring your design concepts to life",
     "join_now": "Join Now",
     "learn_more": "Learn More",
-    "scroll_down": "Scroll Down"
+    "scroll_down": "Scroll Down",
+    "factories": "Factories",
+    "no_factories": "No factories available"
   },
   "errors": {
     "network": "Network error, please try again later",
@@ -228,19 +230,38 @@
   "factory": {
     "dashboard": {
       "title": "Factory Dashboard",
-      "basic_info": "Basic Information",
+      "info": "Factory Info",
       "name": "Factory Name",
       "phone": "Contact Phone",
       "address": "Factory Address",
-      "production_capacity": "Production Capacity",
-      "employee_count": "Employee Count",
-      "orders": {
-        "pending": "Pending Orders",
-        "in_progress": "In Progress Orders",
-        "completed": "Completed Orders",
-        "total": "Total Orders"
-      },
-      "recent_orders": "Recent Orders"
+      "capacity": "Production Capacity",
+      "employees": "Number of Employees",
+      "order_manage": "Order Management",
+      "view_all": "View All",
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "recent_orders": "Recent Orders",
+      "order_no": "Order No: "
+    },
+    "address": "Address",
+    "phone": "Phone",
+    "production_capacity": "Capacity",
+    "employee_count": "Employees",
+    "rating": "Rating",
+    "completed_orders": "Completed Orders",
+    "pieces": "pcs",
+    "people": "people",
+    "view_details": "View Details",
+    "status": {
+      "active": "Active",
+      "busy": "Busy",
+      "inactive": "Inactive"
     }
+  },
+  "common": {
+    "load_more": "Load More",
+    "error": "Error",
+    "unknown_error": "Unknown Error"
   }
 } 

@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"backend/models"
-	"backend/services"
+	"gongChang/models"
+	"gongChang/services"
 	"encoding/json"
 	"log"
 	"net/http"

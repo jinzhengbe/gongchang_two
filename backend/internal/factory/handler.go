@@ -3,16 +3,16 @@ package factory
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/your-project/models"
-	"github.com/your-project/services"
+	"gongChang/models"
+	"gongChang/services"
 )
 
 type Handler struct {
 	service *Service
-	userService *UserService
+	userService *services.UserService
 }
 
-func NewHandler(service *Service, userService *UserService) *Handler {
+func NewHandler(service *Service, userService *services.UserService) *Handler {
 	return &Handler{service: service, userService: userService}
 }
 

@@ -4,7 +4,7 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_proxy/shelf_proxy.dart';
 
 void main() async {
-  final handler = proxyHandler('https://localhost:8008/',
+  final handler = proxyHandler('https://localhost/',
       client: HttpClient()
         ..badCertificateCallback = (cert, host, port) => true);
 

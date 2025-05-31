@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"backend/services"
+	"gongChang/services"
 	"fmt"
 	"log"
 	"net/http"

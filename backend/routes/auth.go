@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"backend/controllers"
-	"backend/services"
+	"gongChang/controllers"
+	"gongChang/services"
 	"gorm.io/gorm"
 )
 

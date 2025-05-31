@@ -235,7 +235,9 @@
     "platform_features": "我们提供高效的订单管理、实时沟通和质量追踪，让您的设计理念完美实现",
     "join_now": "立即加入",
     "learn_more": "了解更多",
-    "scroll_down": "向下滚动"
+    "scroll_down": "向下滚动",
+    "factories": "工厂列表",
+    "no_factories": "暂无工厂数据"
   },
   "errors": {
     "network": "网络错误，请稍后重试",
@@ -253,19 +255,38 @@
   "factory": {
     "dashboard": {
       "title": "工厂仪表盘",
-      "basic_info": "基本信息",
+      "info": "工厂信息",
       "name": "工厂名称",
       "phone": "联系电话",
       "address": "工厂地址",
-      "production_capacity": "生产能力",
-      "employee_count": "员工数量",
-      "orders": {
-        "pending": "待处理订单",
-        "in_progress": "进行中订单",
-        "completed": "已完成订单",
-        "total": "总订单数"
-      },
-      "recent_orders": "最近订单"
+      "capacity": "生产能力",
+      "employees": "员工人数",
+      "order_manage": "订单管理",
+      "view_all": "查看全部",
+      "pending": "待处理",
+      "in_progress": "进行中",
+      "completed": "已完成",
+      "recent_orders": "最近订单",
+      "order_no": "订单号: "
+    },
+    "address": "地址",
+    "phone": "电话",
+    "production_capacity": "产能",
+    "employee_count": "员工数",
+    "rating": "评分",
+    "completed_orders": "已完成订单",
+    "pieces": "件",
+    "people": "人",
+    "view_details": "查看详情",
+    "status": {
+      "active": "正常",
+      "busy": "忙碌",
+      "inactive": "停业"
     }
+  },
+  "common": {
+    "load_more": "加载更多",
+    "error": "错误",
+    "unknown_error": "未知错误"
   }
 } 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"backend/models"
+	"gongChang/models"
 )
 
 type PublicOrderController struct {

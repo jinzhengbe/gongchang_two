@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"backend/controllers"
-	"backend/middleware"
+	"gongChang/controllers"
+	"gongChang/middleware"
 
 	"github.com/gin-gonic/gin"
 )

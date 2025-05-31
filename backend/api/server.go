@@ -1,8 +1,8 @@
 package api
 
 import (
-	"backend/config"
-	"backend/routes"
+	"gongChang/config"
+	"gongChang/routes"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

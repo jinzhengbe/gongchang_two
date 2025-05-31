@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"time"
-	"backend/config"
-	"backend/database"
-	"backend/routes"
+	"gongChang/config"
+	"gongChang/database"
+	"gongChang/routes"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

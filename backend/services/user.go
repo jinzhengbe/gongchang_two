@@ -1,7 +1,7 @@
 package services
 
 import (
-	"backend/models"
+	"gongChang/models"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"

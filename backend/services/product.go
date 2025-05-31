@@ -1,7 +1,7 @@
 package services
 
 import (
-	"backend/models"
+	"gongChang/models"
 	"gorm.io/gorm"
 )
 

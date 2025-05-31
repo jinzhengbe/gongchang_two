@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"backend/config"
-	"backend/models"
+	"gongChang/config"
+	"gongChang/models"
 	"log"
 	"net/http"
 	"strings"

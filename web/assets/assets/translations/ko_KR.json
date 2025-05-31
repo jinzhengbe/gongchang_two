@@ -21,7 +21,7 @@
     "forgot_password": "비밀번호를 잊으셨나요?",
     "no_account": "계정이 없으신가요?",
     "have_account": "이미 계정이 있으신가요?",
-    "qr_code_title": "QR 코드를 스캔하여 앱 다운로드",
+    "qr_code_title": "QR 코드를 스캔하여 APP 다운로드",
     "copy_download_link": "다운로드 링크 복사",
     "copy_success": "다운로드 링크가 복사되었습니다",
     "languages": {
@@ -38,7 +38,7 @@
   },
   "auth": {
     "login": {
-      "title": "로그인",
+      "title": "공장 로그인",
       "username": "사용자 이름",
       "password": "비밀번호",
       "username_required": "사용자 이름을 입력하세요",
@@ -52,7 +52,10 @@
       "register": "회원가입",
       "forgot_password": "비밀번호를 잊으셨나요?",
       "designer": "디자이너 로그인",
-      "factory": "공장 로그인",
+      "factory": {
+        "title": "공장 로그인",
+        "no_account": "아직 계정이 없으신가요? 클릭하여 회원가입"
+      },
       "supplier": "공급업체 로그인"
     },
     "register": {
@@ -207,5 +210,23 @@
     "invalid_format": "잘못된 형식입니다",
     "file_too_large": "파일 크기가 제한을 초과했습니다",
     "invalid_date": "잘못된 날짜입니다"
+  },
+  "factory": {
+    "dashboard": {
+      "title": "공장 대시보드",
+      "info": "공장 정보",
+      "name": "공장명",
+      "phone": "연락처",
+      "address": "공장 주소",
+      "capacity": "생산 능력",
+      "employees": "직원 수",
+      "order_manage": "주문 관리",
+      "view_all": "전체 보기",
+      "pending": "대기 중",
+      "in_progress": "진행 중",
+      "completed": "완료됨",
+      "recent_orders": "최근 주문",
+      "order_no": "주문번호: "
+    }
   }
 } 

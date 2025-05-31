@@ -1,15 +1,15 @@
 package routes
 
 import (
-	"backend/controllers"
-	"backend/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"backend/middleware"
+	"gongChang/controllers"
+	"gongChang/services"
+	"gongChang/middleware"
+	"gongChang/config"
 	"net/http"
-	"backend/config"
 	"log"
-	"backend/internal/factory"
+	"gongChang/internal/factory"
 )
 
 func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
@@ -38,7 +38,8 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	productController := controllers.NewProductController(productService)
 	orderController := controllers.NewOrderController(orderService)
 	fileController := controllers.NewFileController(fileService, "./uploads")
-	factoryHandler := factory.NewHandler(factoryService)
+	factoryHandler := factory.NewHandler(factoryService, nil)
+	factoryController := factory.NewController(factoryService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -49,6 +50,9 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			factoryGroup.POST("/register", factoryHandler.Register)
 			factoryGroup.POST("/login", factoryHandler.Login)
 		}
+
+		// 工厂清单路由
+		api.GET("/factories", factoryController.GetFactoryList)
 
 		// 用户路由
 		userGroup := api.Group("/users")

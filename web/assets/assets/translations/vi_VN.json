@@ -1,0 +1,246 @@
+{
+  "app": {
+    "title": "May Mặc Thông Minh",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "warning": "Cảnh báo",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "search": "Tìm kiếm",
+    "refresh": "Làm mới",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "submit": "Gửi",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Đăng ký",
+    "forgot_password": "Quên mật khẩu?",
+    "no_account": "Chưa có tài khoản?",
+    "have_account": "Đã có tài khoản?",
+    "qr_code_title": "Scan QR Code to Download APP",
+    "copy_download_link": "Copy Download Link",
+    "copy_success": "Download link copied",
+    "languages": {
+      "select": "Chọn ngôn ngữ",
+      "chinese": "中文",
+      "english": "English",
+      "korean": "한국어",
+      "vietnamese": "Tiếng Việt"
+    },
+    "language_change_title": "Thay đổi ngôn ngữ",
+    "language_change_message": "Bạn có chắc chắn muốn thay đổi ngôn ngữ không? Ứng dụng cần khởi động lại để thay đổi có hiệu lực hoàn toàn.",
+    "contact": "Liên hệ",
+    "view_details": "Xem chi tiết"
+  },
+  "auth": {
+    "login": {
+      "title": "Factory Login",
+      "username": "Username",
+      "password": "Password",
+      "username_required": "Vui lòng nhập tên đăng nhập",
+      "password_required": "Vui lòng nhập mật khẩu",
+      "login_failed": "Đăng nhập thất bại",
+      "invalid_credentials": "Tên đăng nhập hoặc mật khẩu không đúng",
+      "user_not_found": "Không tìm thấy người dùng",
+      "network_error": "Lỗi mạng, vui lòng thử lại sau",
+      "unknown_error": "Lỗi không xác định, vui lòng thử lại sau",
+      "login": "Login",
+      "register": "Register",
+      "forgot_password": "Forgot Password?",
+      "designer": "Đăng nhập nhà thiết kế",
+      "factory": {
+        "title": "Factory Login",
+        "no_account": "Don't have an account? Click to register"
+      },
+      "supplier": "Đăng nhập nhà cung cấp"
+    },
+    "register": {
+      "title": "Đăng ký nhà thiết kế",
+      "basic_info": "Thông tin cơ bản",
+      "username": "Tên đăng nhập",
+      "username_hint": "Nhập 3-20 ký tự",
+      "password": "Mật khẩu",
+      "password_hint": "Nhập 6-20 ký tự",
+      "email": "Email",
+      "email_hint": "Nhập địa chỉ email hợp lệ",
+      "designer_info": "Hồ sơ nhà thiết kế",
+      "company_name": "Tên công ty",
+      "company_name_hint": "Nhập tên công ty",
+      "address": "Địa chỉ công ty",
+      "address_hint": "Nhập địa chỉ công ty",
+      "website": "Trang web công ty (Tùy chọn)",
+      "website_hint": "Nhập trang web công ty",
+      "bio": "Giới thiệu (Tùy chọn)",
+      "bio_hint": "Nhập giới thiệu của bạn",
+      "submit": "Đăng ký",
+      "register_success": "Đăng ký thành công",
+      "register_failed": "Đăng ký thất bại",
+      "username_exists": "Tên đăng nhập đã tồn tại",
+      "email_exists": "Email đã được đăng ký",
+      "factory": {
+        "title": "Đăng ký nhà máy",
+        "company_name": "Tên nhà máy",
+        "company_name_required": "Vui lòng nhập tên nhà máy",
+        "phone": "Số điện thoại liên hệ",
+        "phone_required": "Vui lòng nhập số điện thoại liên hệ",
+        "phone_invalid": "Vui lòng nhập số điện thoại hợp lệ 11 chữ số",
+        "phone_exists": "Số điện thoại này đã được đăng ký",
+        "address": "Địa chỉ nhà máy",
+        "address_required": "Vui lòng nhập địa chỉ nhà máy",
+        "success": "Đăng ký thành công, đang tự động đăng nhập...",
+        "auto_login_failed": "Đăng ký thành công, nhưng tự động đăng nhập thất bại. Vui lòng đăng nhập thủ công",
+        "failed": "Đăng ký thất bại, vui lòng thử lại sau"
+      }
+    }
+  },
+  "designer": {
+    "dashboard": {
+      "title": "Bảng điều khiển nhà thiết kế",
+      "published_orders": "Đơn hàng đã đăng",
+      "ongoing_orders": "Đơn hàng đang thực hiện",
+      "create_order": "Tạo đơn hàng",
+      "no_orders": "Chưa có đơn hàng",
+      "order_status": {
+        "published": "Đã đăng",
+        "ongoing": "Đang thực hiện",
+        "completed": "Hoàn thành",
+        "cancelled": "Đã hủy"
+      },
+      "add_order": "Thêm đơn hàng"
+    },
+    "create_order": {
+      "title": "Tạo đơn hàng",
+      "basic_info": "Thông tin cơ bản",
+      "order_title": "Tiêu đề đơn hàng",
+      "order_title_required": "Vui lòng nhập tiêu đề đơn hàng",
+      "product_id": "ID sản phẩm (Tùy chọn)",
+      "product_id_invalid": "ID sản phẩm phải là số hợp lệ",
+      "product_id_positive": "ID sản phẩm phải lớn hơn 0",
+      "search_product": "Tìm kiếm sản phẩm",
+      "description": "Mô tả",
+      "description_required": "Vui lòng nhập mô tả",
+      "fabric": "Vải",
+      "fabric_required": "Vui lòng chọn vải",
+      "select_fabric": "Chọn vải",
+      "quantity": "Số lượng",
+      "quantity_required": "Vui lòng nhập số lượng",
+      "quantity_invalid": "Vui lòng nhập số hợp lệ",
+      "delivery_date": "Ngày giao hàng",
+      "delivery_date_required": "Vui lòng chọn ngày giao hàng",
+      "delivery_date_invalid": "Định dạng ngày không hợp lệ",
+      "special_requirements": "Yêu cầu đặc biệt",
+      "shipping_address": "Địa chỉ giao hàng",
+      "attachments": "Tệp đính kèm",
+      "create_success": "Tạo đơn hàng thành công",
+      "create_failed": "Tạo đơn hàng thất bại",
+      "upload_file": "Tải lên tệp",
+      "capture": "Chụp ảnh",
+      "model_files": "Tệp mô hình 3D",
+      "images": "Hình ảnh",
+      "videos": "Video",
+      "order_type": "Loại đơn hàng",
+      "order_type_required": "Vui lòng chọn loại đơn hàng"
+    },
+    "search": {
+      "product": "Tìm kiếm sản phẩm",
+      "category": "Danh mục",
+      "all_categories": "Tất cả danh mục",
+      "min_price": "Giá tối thiểu",
+      "max_price": "Giá tối đa",
+      "fabric": "Tìm kiếm vải",
+      "all": "Tất cả",
+      "cotton": "Cotton",
+      "silk": "Lụa",
+      "wool": "Len"
+    },
+    "search_hint": "Tìm kiếm đơn hàng, vải, nhà máy..."
+  },
+  "order": {
+    "order_no": "Số đơn hàng",
+    "fabric": "Vải",
+    "quantity": "Số lượng",
+    "pieces": "cái",
+    "factory": {
+      "title": "Nhà máy sản xuất",
+      "required": "Vui lòng nhập nhà máy sản xuất"
+    },
+    "total_amount": "Tổng số tiền",
+    "view_details": "Xem chi tiết",
+    "basic_info": "Thông tin cơ bản",
+    "style_no": "Mã kiểu",
+    "style_no_required": "Vui lòng nhập mã kiểu",
+    "sample_no": "Mã mẫu",
+    "sample_no_required": "Vui lòng nhập mã mẫu",
+    "order_type": "Loại đơn hàng",
+    "order_type_required": "Vui lòng chọn loại đơn hàng",
+    "description": "Mô tả đơn hàng",
+    "description_required": "Vui lòng nhập mô tả đơn hàng",
+    "type": {
+      "sample": "Mẫu",
+      "production": "Sản xuất"
+    },
+    "status": {
+      "published": "Đã đăng",
+      "in_progress": "Đang thực hiện",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy",
+      "unknown": "Không xác định"
+    },
+    "instruction_date": {
+      "title": "Ngày chỉ đạo sản xuất",
+      "required": "Vui lòng chọn ngày chỉ đạo sản xuất"
+    },
+    "expected_in_date": {
+      "title": "Ngày dự kiến nhập kho",
+      "required": "Vui lòng chọn ngày dự kiến nhập kho"
+    },
+    "expected_out_date": {
+      "title": "Ngày dự kiến xuất kho",
+      "required": "Vui lòng chọn ngày dự kiến xuất kho"
+    }
+  },
+  "home": {
+    "title": "Trang chủ",
+    "latest_orders": "Đơn hàng mới nhất",
+    "view_all": "Xem tất cả",
+    "no_orders": "Chưa có đơn hàng",
+    "load_more": "Tải thêm",
+    "pull_to_refresh": "Kéo để làm mới",
+    "platform_description": "Nền tảng sản xuất may mặc thông minh kết nối nhà thiết kế và nhà máy",
+    "platform_features": "Chúng tôi cung cấp quản lý đơn hàng hiệu quả, giao tiếp thời gian thực và theo dõi chất lượng để biến ý tưởng thiết kế của bạn thành hiện thực",
+    "join_now": "Tham gia ngay",
+    "learn_more": "Tìm hiểu thêm",
+    "scroll_down": "Cuộn xuống"
+  },
+  "errors": {
+    "network": "Lỗi mạng, vui lòng thử lại sau",
+    "server": "Lỗi máy chủ",
+    "unknown": "Lỗi không xác định",
+    "required": "Trường này là bắt buộc",
+    "invalid_format": "Định dạng không hợp lệ",
+    "file_too_large": "Kích thước tệp vượt quá giới hạn",
+    "invalid_date": "Ngày không hợp lệ"
+  },
+  "factory": {
+    "dashboard": {
+      "title": "Factory Dashboard",
+      "info": "Factory Info",
+      "name": "Factory Name",
+      "phone": "Contact Phone",
+      "address": "Factory Address",
+      "capacity": "Production Capacity",
+      "employees": "Number of Employees",
+      "order_manage": "Order Management",
+      "view_all": "View All",
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "recent_orders": "Recent Orders",
+      "order_no": "Order No: "
+    }
+  }
+} 
