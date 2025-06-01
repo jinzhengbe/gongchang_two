@@ -1,0 +1,120 @@
+{
+  "app": {
+    "title": "スマートソーシング",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "warning": "警告",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "search": "検索",
+    "refresh": "更新",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "送信",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "register": "登録",
+    "forgot_password": "パスワードをお忘れですか？",
+    "no_account": "アカウントがありませんか？",
+    "have_account": "すでにアカウントをお持ちですか？",
+    "qr_code_title": "QRコードをスキャンしてアプリをダウンロード",
+    "copy_download_link": "ダウンロードリンクをコピー",
+    "copy_success": "ダウンロードリンクがコピーされました",
+    "languages": {
+      "select": "言語を選択",
+      "chinese": "中国語",
+      "english": "英語",
+      "japanese": "日本語",
+      "korean": "韓国語",
+      "vietnamese": "ベトナム語"
+    },
+    "language_change_title": "言語を切り替え",
+    "language_change_message": "言語を切り替えますか？切り替え後、アプリを再起動する必要があります。",
+    "contact": "連絡先",
+    "view_details": "詳細を見る"
+  },
+  "home": {
+    "title": "ホーム",
+    "latest_orders": "最新注文",
+    "view_all": "すべて表示",
+    "no_orders": "注文がありません",
+    "load_more": "さらに読み込む",
+    "pull_to_refresh": "下に引っ張って更新",
+    "platform_description": "デザイナーと工場をつなぐスマート衣料プラットフォーム",
+    "platform_features": "効率的な注文管理、リアルタイムコミュニケーション、品質追跡を提供し、あなたのデザインコンセプトを実現します",
+    "join_now": "今すぐ参加",
+    "learn_more": "詳細を見る",
+    "scroll_down": "下にスクロール",
+    "factories": "工場リスト",
+    "orders": "最新注文",
+    "view_more": "もっと見る",
+    "no_factories": "工場がありません",
+    "role_select": {
+      "title": "役割を選択してください",
+      "designer": "デザイナー",
+      "designer_no_account": "登録",
+      "factory": "工場",
+      "supplier": "サプライヤー"
+    }
+  },
+  "factory": {
+    "status": {
+      "active": "稼働中",
+      "busy": "繁忙",
+      "inactive": "停止中"
+    },
+    "address": "住所",
+    "phone": "電話番号",
+    "production_capacity": "生産能力",
+    "employee_count": "従業員数",
+    "rating": "評価",
+    "completed_orders": "完了注文",
+    "pieces": "個",
+    "people": "人",
+    "view_details": "詳細を見る"
+  },
+  "order": {
+    "order_no": "注文番号",
+    "fabric": "生地",
+    "quantity": "数量",
+    "pieces": "点",
+    "total_amount": "合計金額",
+    "create_time": "作成日時",
+    "status": {
+      "pending": "処理待ち",
+      "accepted": "受付済み",
+      "in_progress": "進行中",
+      "completed": "完了",
+      "cancelled": "キャンセル"
+    },
+    "payment_status": {
+      "unpaid": "未払い",
+      "paid": "支払済み",
+      "refunded": "返金済み",
+      "failed": "支払い失敗"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "デザイナー ログイン",
+      "username": "ユーザー名",
+      "password": "パスワード",
+      "username_required": "ユーザー名を入力してください",
+      "password_required": "パスワードを入力してください",
+      "login_failed": "ログインに失敗しました",
+      "invalid_credentials": "ユーザー名またはパスワードが正しくありません",
+      "user_not_found": "ユーザーが見つかりません",
+      "network_error": "ネットワークエラー。後でもう一度お試しください",
+      "unknown_error": "不明なエラー。後でもう一度お試しください",
+      "login": "ログイン",
+      "register": "登録",
+      "forgot_password": "パスワードをお忘れですか？",
+      "designer": "デザイナー ログイン",
+      "designer_no_account": "登録"
+    }
+  }
+} 

@@ -52,6 +52,7 @@
       "register": "회원가입",
       "forgot_password": "비밀번호를 잊으셨나요?",
       "designer": "디자이너 로그인",
+      "designer_no_account": "회원가입",
       "factory": {
         "title": "공장 로그인",
         "no_account": "아직 계정이 없으신가요? 클릭하여 회원가입"
@@ -200,7 +201,13 @@
     "platform_features": "효율적인 주문 관리, 실시간 커뮤니케이션, 품질 추적을 제공하여 디자인 컨셉을 실현합니다",
     "join_now": "지금 가입하기",
     "learn_more": "자세히 알아보기",
-    "scroll_down": "아래로 스크롤"
+    "scroll_down": "아래로 스크롤",
+    "factories": "공장 목록",
+    "orders": "최근 주문",
+    "view_more": "더 보기",
+    "no_factories": "공장이 없습니다",
+    "no_orders": "주문이 없습니다",
+    "load_more": "더 불러오기"
   },
   "errors": {
     "network": "네트워크 오류, 잠시 후 다시 시도하세요",
@@ -227,6 +234,20 @@
       "completed": "완료됨",
       "recent_orders": "최근 주문",
       "order_no": "주문번호: "
-    }
+    },
+    "status": {
+      "active": "활성",
+      "busy": "바쁨",
+      "inactive": "비활성"
+    },
+    "address": "주소",
+    "phone": "전화번호",
+    "production_capacity": "생산 능력",
+    "employee_count": "직원 수",
+    "rating": "평가",
+    "completed_orders": "완료된 주문",
+    "pieces": "개",
+    "people": "명",
+    "view_details": "상세 보기"
   }
 } 

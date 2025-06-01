@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "스마트소싱",
+    "title": "Smart Sourcing",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -28,6 +28,7 @@
       "select": "Select Language",
       "chinese": "中文",
       "english": "English",
+      "japanese": "日本語",
       "korean": "한국어",
       "vietnamese": "Tiếng Việt"
     },
@@ -52,6 +53,7 @@
       "register": "Register",
       "forgot_password": "Forgot Password?",
       "designer": "Designer Login",
+      "designer_no_account": "Register",
       "factory": {
         "title": "Factory Login",
         "no_account": "Don't have an account? Click to register"
@@ -216,7 +218,16 @@
     "learn_more": "Learn More",
     "scroll_down": "Scroll Down",
     "factories": "Factories",
-    "no_factories": "No factories available"
+    "orders": "Latest Orders",
+    "view_more": "View More",
+    "no_factories": "No Factories",
+    "no_orders": "No Orders",
+    "role_select": {
+      "title": "Please select your role",
+      "designer": "Designer",
+      "factory": "Factory",
+      "supplier": "Supplier"
+    }
   },
   "errors": {
     "network": "Network error, please try again later",
@@ -246,11 +257,11 @@
     },
     "address": "Address",
     "phone": "Phone",
-    "production_capacity": "Capacity",
+    "production_capacity": "Production Capacity",
     "employee_count": "Employees",
     "rating": "Rating",
     "completed_orders": "Completed Orders",
-    "pieces": "pcs",
+    "pieces": "pieces",
     "people": "people",
     "view_details": "View Details",
     "status": {

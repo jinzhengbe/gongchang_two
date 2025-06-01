@@ -54,6 +54,9 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		// 工厂清单路由
 		api.GET("/factories", factoryController.GetFactoryList)
 
+		// 获取最近订单（公开路由）
+		api.GET("/orders/recent", orderController.GetRecentOrders)
+
 		// 用户路由
 		userGroup := api.Group("/users")
 		{
@@ -91,7 +94,6 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
 				orderGroup.GET("/search", orderController.SearchOrders)
 				orderGroup.GET("/statistics", orderController.GetOrderStatistics)
-				orderGroup.GET("/recent", orderController.GetRecentOrders)
 			}
 
 			// 工厂订单路由

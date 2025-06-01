@@ -18,8 +18,13 @@ echo -e "\n## $current_date\n- 完成了代码更新\n- 更新了相关文档" >
 
 # 3. Git 操作
 echo -e "${GREEN}正在执行 Git 操作...${NC}"
+if [ -f last_publish_message.txt ]; then
+  commit_msg=$(cat last_publish_message.txt)
+else
+  commit_msg="docs: 更新开发文档和日志 ($current_date)"
+fi
 git add .
-git commit -m "docs: 更新开发文档和日志 ($current_date)"
+git commit -m "$commit_msg"
 git push
 
 echo -e "${GREEN}发布流程完成！${NC}" 

@@ -31,6 +31,7 @@
       "select": "选择语言",
       "chinese": "中文",
       "english": "English",
+      "japanese": "日语",
       "korean": "한국어",
       "vietnamese": "Tiếng Việt"
     },
@@ -55,6 +56,7 @@
       "register": "注册",
       "forgot_password": "忘记密码？",
       "designer": "设计师登录",
+      "designer_no_account": "点击注册",
       "factory": {
         "title": "工厂登录",
         "no_account": "还没有账号？点击注册"
@@ -160,7 +162,11 @@
       "silk": "丝绸",
       "wool": "羊毛"
     },
-    "search_hint": "搜索订单、面料、工厂..."
+    "search_hint": "搜索订单、面料、工厂...",
+    "factories": {
+      "title": "工厂列表",
+      "no_factories": "暂无工厂"
+    }
   },
   "order": {
     "order_no": "订单号",
@@ -237,7 +243,16 @@
     "learn_more": "了解更多",
     "scroll_down": "向下滚动",
     "factories": "工厂列表",
-    "no_factories": "暂无工厂数据"
+    "orders": "最新订单",
+    "view_more": "查看更多",
+    "no_factories": "暂无工厂",
+    "no_orders": "暂无订单",
+    "role_select": {
+      "title": "请选择您的身份",
+      "designer": "设计师",
+      "factory": "工厂",
+      "supplier": "供应商"
+    }
   },
   "errors": {
     "network": "网络错误，请稍后重试",
@@ -282,6 +297,10 @@
       "active": "正常",
       "busy": "忙碌",
       "inactive": "停业"
+    },
+    "orders": {
+      "title": "订单列表",
+      "no_orders": "暂无订单"
     }
   },
   "common": {

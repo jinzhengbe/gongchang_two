@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "May Mặc Thông Minh",
+    "title": "Smart Sourcing",
     "loading": "Đang tải...",
     "error": "Lỗi",
     "success": "Thành công",
@@ -21,18 +21,19 @@
     "forgot_password": "Quên mật khẩu?",
     "no_account": "Chưa có tài khoản?",
     "have_account": "Đã có tài khoản?",
-    "qr_code_title": "Scan QR Code to Download APP",
-    "copy_download_link": "Copy Download Link",
-    "copy_success": "Download link copied",
+    "qr_code_title": "Quét mã QR để tải ứng dụng",
+    "copy_download_link": "Sao chép liên kết tải xuống",
+    "copy_success": "Đã sao chép liên kết tải xuống",
     "languages": {
       "select": "Chọn ngôn ngữ",
       "chinese": "中文",
       "english": "English",
+      "japanese": "日本語",
       "korean": "한국어",
       "vietnamese": "Tiếng Việt"
     },
     "language_change_title": "Thay đổi ngôn ngữ",
-    "language_change_message": "Bạn có chắc chắn muốn thay đổi ngôn ngữ không? Ứng dụng cần khởi động lại để thay đổi có hiệu lực hoàn toàn.",
+    "language_change_message": "Bạn có chắc chắn muốn thay đổi ngôn ngữ? Ứng dụng cần khởi động lại để áp dụng thay đổi.",
     "contact": "Liên hệ",
     "view_details": "Xem chi tiết"
   },
@@ -52,6 +53,7 @@
       "register": "Register",
       "forgot_password": "Forgot Password?",
       "designer": "Đăng nhập nhà thiết kế",
+      "designer_no_account": "Đăng ký",
       "factory": {
         "title": "Factory Login",
         "no_account": "Don't have an account? Click to register"
@@ -214,7 +216,12 @@
     "platform_features": "Chúng tôi cung cấp quản lý đơn hàng hiệu quả, giao tiếp thời gian thực và theo dõi chất lượng để biến ý tưởng thiết kế của bạn thành hiện thực",
     "join_now": "Tham gia ngay",
     "learn_more": "Tìm hiểu thêm",
-    "scroll_down": "Cuộn xuống"
+    "scroll_down": "Cuộn xuống",
+    "factories": "Danh sách nhà máy",
+    "orders": "Đơn hàng mới nhất",
+    "view_more": "Xem thêm",
+    "no_factories": "Không có nhà máy",
+    "no_orders": "Không có đơn hàng"
   },
   "errors": {
     "network": "Lỗi mạng, vui lòng thử lại sau",
@@ -241,6 +248,20 @@
       "completed": "Completed",
       "recent_orders": "Recent Orders",
       "order_no": "Order No: "
-    }
+    },
+    "status": {
+      "active": "Hoạt động",
+      "busy": "Bận",
+      "inactive": "Không hoạt động"
+    },
+    "address": "Địa chỉ",
+    "phone": "Số điện thoại",
+    "production_capacity": "Công suất sản xuất",
+    "employee_count": "Số nhân viên",
+    "rating": "Đánh giá",
+    "completed_orders": "Đơn hàng hoàn thành",
+    "pieces": "chiếc",
+    "people": "người",
+    "view_details": "Xem chi tiết"
   }
 } 
