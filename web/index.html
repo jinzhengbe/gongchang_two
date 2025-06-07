@@ -13,13 +13,46 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="app.appName">
+  
+  <!-- 预加载关键资源 -->
+  <link rel="preload" href="flutter.js" as="script">
+  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="preload" href="manifest.json" as="fetch" crossorigin>
+  
+  <!-- 缓存控制 -->
+  <meta http-equiv="Cache-Control" content="public, max-age=31536000">
+  <meta http-equiv="Expires" content="31536000">
+  
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <link rel="icon" type="image/png" href="favicon.png" />
   <title>app.appName</title>
   <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
+  
+  <!-- 性能监控 -->
+  <script>
+    // 性能监控
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var timing = window.performance.timing;
+        var loadTime = timing.loadEventEnd - timing.navigationStart;
+        console.log('页面加载时间:', loadTime + 'ms');
+        
+        // 发送性能数据到服务器
+        if (window._flutter && window._flutter.loader) {
+          window._flutter.loader.performanceData = {
+            loadTime: loadTime,
+            firstPaint: timing.responseEnd - timing.navigationStart,
+            domReady: timing.domComplete - timing.navigationStart
+          };
+        }
+      }, 0);
+    });
+  </script>
+  
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = '"3841781335"';
+    var serviceWorkerVersion = '"3029228526"';
   </script>
   <script src="flutter.js" defer></script>
   <style>
@@ -100,6 +133,13 @@
         return;
       }
 
+      // 添加资源加载超时处理
+      var loadTimeout = setTimeout(function() {
+        if (loading) {
+          loading.innerHTML = '<div class="error-message">加载超时，请刷新页面重试</div>';
+        }
+      }, 30000); // 30秒超时
+
       window._flutter.loader.load({
         onEntrypointLoaded: async function(engineInitializer) {
           try {
@@ -113,15 +153,18 @@
             console.log('Flutter engine initialized');
             await appRunner.runApp();
             console.log('Flutter app running');
+            clearTimeout(loadTimeout);
             loading.remove();
           } catch (error) {
             console.error('Failed to initialize Flutter app:', error);
             loading.innerHTML = '<div class="error-message">应用加载失败，请刷新页面重试</div>';
+            clearTimeout(loadTimeout);
           }
         }
       }).catch(function(error) {
         console.error('Failed to load Flutter app:', error);
         loading.innerHTML = '<div class="error-message">应用加载失败，请刷新页面重试</div>';
+        clearTimeout(loadTimeout);
       });
     });
   </script>

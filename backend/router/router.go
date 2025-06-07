@@ -17,7 +17,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) {
 	userGroup.GET("/:id", userController.GetUser)
 
 	// 工厂相关路由
-	factoryGroup := r.Group("/api")
 	factoryController := &controllers.FactoryController{DB: db}
-	factoryGroup.GET("/factories", factoryController.GetFactoryList)
+	r.GET("/api/factories", factoryController.GetFactoryList)
+	r.GET("/api/factory/factories", factoryController.GetFactoryList)
 } 

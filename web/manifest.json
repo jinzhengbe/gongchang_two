@@ -8,6 +8,29 @@
     "description": "app.appDescription",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "scope": "/",
+    "categories": ["business", "productivity"],
+    "dir": "ltr",
+    "lang": "zh-CN",
+    "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+    "shortcuts": [
+        {
+            "name": "首页",
+            "short_name": "首页",
+            "description": "访问首页",
+            "url": "/",
+            "icons": [{ "src": "icons/Icon-192.png", "sizes": "192x192" }]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "icons/screenshot1.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "首页截图"
+        }
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -31,5 +54,9 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "related_applications": [],
+    "edge_side_panel": {
+        "preferred_width": 400
+    }
 } 

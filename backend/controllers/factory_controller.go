@@ -17,32 +17,31 @@ type FactoryController struct {
 func (fc *FactoryController) GetFactoryList(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	status, _ := strconv.Atoi(c.DefaultQuery("status", "-1"))
 
-	query := fc.DB.Model(&models.Factory{})
-
-	// 如果指定了状态，添加状态过滤
-	if status >= 0 {
-		query = query.Where("status = ?", status)
-	}
+	query := fc.DB.Model(&models.FactoryProfile{})
 
 	// 获取总数
 	var total int64
 	query.Count(&total)
 
 	// 获取分页数据
-	var factories []models.Factory
+	var factories []models.FactoryProfile
 	offset := (page - 1) * pageSize
 	query.Offset(offset).Limit(pageSize).Find(&factories)
 
-	response := models.FactoryListResponse{
-		Total:     total,
-		Factories: factories,
+	// 获取关联的用户信息
+	for i := range factories {
+		var user models.User
+		fc.DB.Where("id = ?", factories[i].UserID).First(&user)
+		factories[i].User = user
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
-		"data": response,
+		"data": gin.H{
+			"total": total,
+			"factories": factories,
+		},
 	})
 } 

@@ -40,8 +40,8 @@
   "auth": {
     "login": {
       "title": "Factory Login",
-      "username": "Username",
-      "password": "Password",
+      "username": "Tên đăng nhập",
+      "password": "Mật khẩu",
       "username_required": "Vui lòng nhập tên đăng nhập",
       "password_required": "Vui lòng nhập mật khẩu",
       "login_failed": "Đăng nhập thất bại",
@@ -49,9 +49,9 @@
       "user_not_found": "Không tìm thấy người dùng",
       "network_error": "Lỗi mạng, vui lòng thử lại sau",
       "unknown_error": "Lỗi không xác định, vui lòng thử lại sau",
-      "login": "Login",
+      "login": "Đăng nhập",
       "register": "Register",
-      "forgot_password": "Forgot Password?",
+      "forgot_password": "Quên mật khẩu?",
       "designer": "Đăng nhập nhà thiết kế",
       "designer_no_account": "Đăng ký",
       "factory": {

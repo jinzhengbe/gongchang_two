@@ -35,7 +35,11 @@
     "language_change_title": "Change Language",
     "language_change_message": "Are you sure you want to change the language? The app needs to restart for the changes to take full effect.",
     "contact": "Contact",
-    "view_details": "View Details"
+    "view_details": "View Details",
+    "font_size": "Font Size",
+    "font_size_small": "Small",
+    "font_size_medium": "Medium",
+    "font_size_large": "Large"
   },
   "auth": {
     "login": {
@@ -55,8 +59,7 @@
       "designer": "Designer Login",
       "designer_no_account": "Register",
       "factory": {
-        "title": "Factory Login",
-        "no_account": "Don't have an account? Click to register"
+        "title": "Factory Login"
       },
       "supplier": "Supplier Login"
     },

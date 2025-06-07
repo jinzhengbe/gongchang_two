@@ -38,20 +38,28 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	productController := controllers.NewProductController(productService)
 	orderController := controllers.NewOrderController(orderService)
 	fileController := controllers.NewFileController(fileService, "./uploads")
-	factoryHandler := factory.NewHandler(factoryService, nil)
-	factoryController := factory.NewController(factoryService)
+	factoryHandler := factory.NewHandler(factoryService, userService)
+	authController := controllers.NewAuthController(userService)
+	factoryController := &controllers.FactoryController{DB: db}
 
 	// API 路由组
 	api := r.Group("/api")
 	{
+		// 认证路由
+		authGroup := api.Group("/auth")
+		{
+			authGroup.POST("/login", authController.Login)
+		}
+
 		// 工厂路由
 		factoryGroup := api.Group("/factory")
 		{
 			factoryGroup.POST("/register", factoryHandler.Register)
 			factoryGroup.POST("/login", factoryHandler.Login)
+			factoryGroup.GET("/factories", factoryController.GetFactoryList)
 		}
 
-		// 工厂清单路由
+		// 工厂列表路由（直接注册，确保一定生效）
 		api.GET("/factories", factoryController.GetFactoryList)
 
 		// 获取最近订单（公开路由）
@@ -65,7 +73,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		}
 
 		// 需要认证的路由
-		authGroup := api.Group("")
+		authGroup = api.Group("")
 		authGroup.Use(middleware.AuthMiddleware())
 		{
 			// 用户路由

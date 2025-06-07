@@ -38,7 +38,11 @@
     "language_change_title": "切换语言",
     "language_change_message": "确定要切换语言吗？切换后需要重启应用才能完全生效。",
     "contact": "联系方式",
-    "view_details": "查看详情"
+    "view_details": "查看详情",
+    "font_size": "字体大小",
+    "font_size_small": "小",
+    "font_size_medium": "中",
+    "font_size_large": "大"
   },
   "auth": {
     "login": {
@@ -58,8 +62,7 @@
       "designer": "设计师登录",
       "designer_no_account": "点击注册",
       "factory": {
-        "title": "工厂登录",
-        "no_account": "还没有账号？点击注册"
+        "title": "工厂登录"
       },
       "supplier": "供应商登录"
     },

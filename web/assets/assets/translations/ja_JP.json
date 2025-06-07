@@ -75,7 +75,8 @@
     "completed_orders": "完了注文",
     "pieces": "個",
     "people": "人",
-    "view_details": "詳細を見る"
+    "view_details": "詳細を見る",
+    "title": "工場ログイン"
   },
   "order": {
     "order_no": "注文番号",
@@ -114,7 +115,9 @@
       "register": "登録",
       "forgot_password": "パスワードをお忘れですか？",
       "designer": "デザイナー ログイン",
-      "designer_no_account": "登録"
+      "designer_no_account": "登録",
+      "factory": "工場ログイン",
+      "supplier": "サプライヤーログイン"
     }
   }
 } 

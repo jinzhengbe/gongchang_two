@@ -4,6 +4,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gongChang/models"
 )
 
 type Service struct {
@@ -80,6 +81,15 @@ func (s *Service) GetRecentFactories(limit int) ([]Factory, error) {
 	var factories []Factory
 	err := s.db.Order("created_at desc").Limit(limit).Find(&factories).Error
 	if err != nil {
+		return nil, err
+	}
+	return factories, nil
+}
+
+// GetFactories 获取工厂清单
+func (s *Service) GetFactories() ([]models.Factory, error) {
+	var factories []models.Factory
+	if err := s.db.Find(&factories).Error; err != nil {
 		return nil, err
 	}
 	return factories, nil
