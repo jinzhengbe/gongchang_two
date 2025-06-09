@@ -70,29 +70,9 @@ func (s *OrderService) CreateOrder(order *models.Order) error {
 
 func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 	var order models.Order
-	err := s.db.Preload("Factory").
-		Preload("Files").
-		First(&order, orderID).Error
+	err := s.db.Preload("Files").First(&order, orderID).Error
 	if err != nil {
 		return nil, err
-	}
-
-	// 确保 JSON 字段不为 nil
-	if order.Attachments == nil {
-		emptyJSON := datatypes.JSON("[]")
-		order.Attachments = &emptyJSON
-	}
-	if order.Models == nil {
-		emptyJSON := datatypes.JSON("[]")
-		order.Models = &emptyJSON
-	}
-	if order.Images == nil {
-		emptyJSON := datatypes.JSON("[]")
-		order.Images = &emptyJSON
-	}
-	if order.Videos == nil {
-		emptyJSON := datatypes.JSON("[]")
-		order.Videos = &emptyJSON
 	}
 
 	// 处理文件关联
@@ -117,19 +97,46 @@ func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 		if len(attachments) > 0 {
 			jsonData, _ := json.Marshal(attachments)
 			order.Attachments = (*datatypes.JSON)(&jsonData)
+		} else {
+			emptyArray := []string{}
+			jsonData, _ := json.Marshal(emptyArray)
+			order.Attachments = (*datatypes.JSON)(&jsonData)
 		}
+
 		if len(models) > 0 {
 			jsonData, _ := json.Marshal(models)
 			order.Models = (*datatypes.JSON)(&jsonData)
+		} else {
+			emptyArray := []string{}
+			jsonData, _ := json.Marshal(emptyArray)
+			order.Models = (*datatypes.JSON)(&jsonData)
 		}
+
 		if len(images) > 0 {
 			jsonData, _ := json.Marshal(images)
 			order.Images = (*datatypes.JSON)(&jsonData)
+		} else {
+			emptyArray := []string{}
+			jsonData, _ := json.Marshal(emptyArray)
+			order.Images = (*datatypes.JSON)(&jsonData)
 		}
+
 		if len(videos) > 0 {
 			jsonData, _ := json.Marshal(videos)
 			order.Videos = (*datatypes.JSON)(&jsonData)
+		} else {
+			emptyArray := []string{}
+			jsonData, _ := json.Marshal(emptyArray)
+			order.Videos = (*datatypes.JSON)(&jsonData)
 		}
+	} else {
+		// 如果没有文件，设置空数组
+		emptyArray := []string{}
+		jsonData, _ := json.Marshal(emptyArray)
+		order.Attachments = (*datatypes.JSON)(&jsonData)
+		order.Models = (*datatypes.JSON)(&jsonData)
+		order.Images = (*datatypes.JSON)(&jsonData)
+		order.Videos = (*datatypes.JSON)(&jsonData)
 	}
 
 	return &order, nil
