@@ -151,7 +151,8 @@
       "images": "图片",
       "videos": "视频",
       "order_type": "订单类型",
-      "order_type_required": "请选择订单类型"
+      "order_type_required": "请选择订单类型",
+      "submit": "提交订单"
     },
     "search": {
       "product": "搜索产品",
@@ -176,10 +177,7 @@
     "fabric": "面料",
     "quantity": "数量",
     "pieces": "件",
-    "factory": {
-      "title": "生产处",
-      "required": "请输入生产处"
-    },
+    "factory": "工厂",
     "total_amount": "总金额",
     "view_details": "查看详情",
     "basic_info": "基本信息",
