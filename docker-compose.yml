@@ -15,27 +15,10 @@ services:
     environment:
       - DB_HOST=192.168.0.10
       - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=zhengbe7761
+      - DB_USER=gongchang
+      - DB_PASSWORD=gongchang
       - DB_NAME=gongchang
       - JWT_SECRET=your_jwt_secret_key
-    networks:
-      - gongchang_network
-
-  web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    container_name: gongchang_web
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /runData/gongChang/web:/usr/share/nginx/html
-      - /runData/gongChang/data/nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - backend
     networks:
       - gongchang_network
 

@@ -36,7 +36,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
 	productController := controllers.NewProductController(productService)
-	orderController := controllers.NewOrderController(orderService)
+	orderController := controllers.NewOrderController(orderService, db)
 	fileController := controllers.NewFileController(fileService, "./uploads")
 	factoryHandler := factory.NewHandler(factoryService, userService)
 	authController := controllers.NewAuthController(userService)

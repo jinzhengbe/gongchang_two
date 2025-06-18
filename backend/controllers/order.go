@@ -10,15 +10,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type OrderController struct {
 	orderService *services.OrderService
+	DB           *gorm.DB
 }
 
-func NewOrderController(orderService *services.OrderService) *OrderController {
+func NewOrderController(orderService *services.OrderService, db *gorm.DB) *OrderController {
 	return &OrderController{
 		orderService: orderService,
+		DB:           db,
 	}
 }
 
@@ -196,7 +199,7 @@ func (c *OrderController) GetOrdersByUserID(ctx *gin.Context) {
 			"models": order.Models,
 			"images": order.Images,
 			"videos": order.Videos,
-			"created_at": order.CreatedAt,
+			"createTime": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
 			"designer_id": order.DesignerID,
 			"customer_id": order.CustomerID,
@@ -261,7 +264,7 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		"images": images,
 		"videos": videos,
 		"files": order.Files,
-		"created_at": order.CreatedAt,
+		"createTime": order.CreatedAt,
 		"updated_at": order.UpdatedAt,
 		"designer_id": order.DesignerID,
 		"customer_id": order.CustomerID,
@@ -333,7 +336,7 @@ func (c *OrderController) SearchOrders(ctx *gin.Context) {
 			"models": nil,
 			"images": nil,
 			"videos": nil,
-			"created_at": order.CreatedAt,
+			"createTime": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
 		})
 	}
@@ -386,7 +389,7 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 			"models": nil,
 			"images": nil,
 			"videos": nil,
-			"created_at": order.CreatedAt,
+			"createTime": order.CreatedAt,
 			"updated_at": order.UpdatedAt,
 		})
 	}
@@ -396,21 +399,14 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 
 // GetOrdersByDesignerID 根据设计师ID获取订单列表
 func (c *OrderController) GetOrdersByDesignerID(ctx *gin.Context) {
-	// 从查询参数中获取设计师ID
 	designerID := ctx.Query("designer_id")
 	if designerID == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "设计师ID不能为空"})
 		return
 	}
 
-	log.Printf("Getting orders for designer ID: %s", designerID)
-
-	// 获取查询参数
-	status := ctx.Query("status")
 	pageStr := ctx.DefaultQuery("page", "1")
-	pageSizeStr := ctx.DefaultQuery("pageSize", "10")
-
-	// 转换分页参数
+	pageSizeStr := ctx.DefaultQuery("page_size", "10")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
 		page = 1
@@ -419,60 +415,30 @@ func (c *OrderController) GetOrdersByDesignerID(ctx *gin.Context) {
 	if err != nil || pageSize < 1 {
 		pageSize = 10
 	}
+	offset := (page - 1) * pageSize
 
-	// 获取订单列表
-	orders, err := c.orderService.GetOrdersByUserID(designerID, status, page, pageSize)
+	orders := []models.Order{}
+	err = c.DB.Where("designer_id = ?", designerID).
+		Order("id desc").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&orders).Error
 	if err != nil {
-		log.Printf("Error getting orders: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 获取总数
-	total, err := c.orderService.GetOrdersCount(designerID, status)
+	total := int64(0)
+	err = c.DB.Model(&models.Order{}).Where("designer_id = ?", designerID).Count(&total).Error
 	if err != nil {
-		log.Printf("Error getting orders count: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	log.Printf("Found %d orders for designer %s", total, designerID)
-
-	// 组装返回格式
-	orderList := make([]gin.H, 0, len(orders))
-	for _, order := range orders {
-		orderList = append(orderList, gin.H{
-			"id": order.ID,
-			"title": order.Title,
-			"description": order.Description,
-			"fabric": order.Fabric,
-			"quantity": order.Quantity,
-			"factory_id": order.FactoryID,
-			"status": order.Status,
-			"attachments": order.Attachments,
-			"models": order.Models,
-			"images": order.Images,
-			"videos": order.Videos,
-			"created_at": order.CreatedAt,
-			"updated_at": order.UpdatedAt,
-			"designer_id": order.DesignerID,
-			"customer_id": order.CustomerID,
-			"unit_price": order.UnitPrice,
-			"total_price": order.TotalPrice,
-			"payment_status": order.PaymentStatus,
-			"shipping_address": order.ShippingAddress,
-			"order_type": order.OrderType,
-			"fabrics": order.Fabrics,
-			"delivery_date": order.DeliveryDate,
-			"order_date": order.OrderDate,
-			"special_requirements": order.SpecialRequirements,
-		})
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"total": total,
 		"page": page,
-		"pageSize": pageSize,
-		"orders": orderList,
+		"page_size": pageSize,
+		"orders": orders,
 	})
 } 

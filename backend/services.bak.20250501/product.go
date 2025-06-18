@@ -88,7 +88,7 @@ func (s *ProductService) GetProductsByCategory(category string, page, pageSize i
 
 func (s *ProductService) GetLatestProducts(limit int) ([]models.Product, error) {
 	var products []models.Product
-	err := s.db.Order("created_at desc").Limit(limit).Find(&products).Error
+	err := s.db.Order("id desc").Limit(limit).Find(&products).Error
 	return products, err
 }
 

@@ -79,7 +79,7 @@ func (s *Service) Login(req *LoginRequest) (*LoginResponse, error) {
 // GetRecentFactories 获取最近注册的工厂列表
 func (s *Service) GetRecentFactories(limit int) ([]Factory, error) {
 	var factories []Factory
-	err := s.db.Order("created_at desc").Limit(limit).Find(&factories).Error
+	err := s.db.Order("id desc").Limit(limit).Find(&factories).Error
 	if err != nil {
 		return nil, err
 	}
@@ -121,17 +121,8 @@ func (s *Service) GetFactoryOrders(factoryID string, req *OrderListRequest) (*Or
 	if err := query.Count(&total).Error; err != nil {
 		return nil, err
 	}
-
-	// 设置排序
-	sortBy := "created_at"
-	if req.SortBy != "" {
-		sortBy = req.SortBy
-	}
-	sortOrder := "desc"
-	if req.SortOrder != "" {
-		sortOrder = req.SortOrder
-	}
-	query = query.Order(sortBy + " " + sortOrder)
+	// 强制按id desc排序，不允许前端覆盖
+	query = query.Order("id desc")
 
 	// 分页查询
 	offset := (req.Page - 1) * req.PageSize
@@ -173,17 +164,8 @@ func (s *Service) GetDesignerOrders(designerID string, req *OrderListRequest) (*
 	if err := query.Count(&total).Error; err != nil {
 		return nil, err
 	}
-
-	// 设置排序
-	sortBy := "created_at"
-	if req.SortBy != "" {
-		sortBy = req.SortBy
-	}
-	sortOrder := "desc"
-	if req.SortOrder != "" {
-		sortOrder = req.SortOrder
-	}
-	query = query.Order(sortBy + " " + sortOrder)
+	// 强制按id desc排序，不允许前端覆盖
+	query = query.Order("id desc")
 
 	// 分页查询
 	offset := (req.Page - 1) * req.PageSize

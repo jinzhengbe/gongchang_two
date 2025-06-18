@@ -64,7 +64,7 @@ func (s *OrderService) SearchOrders(query string, userID uint) ([]models.Order, 
 // GetRecentOrders 获取最近的订单
 func (s *OrderService) GetRecentOrders(limit int) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Order("created_at desc").
+	err := s.db.Order("id desc").
 		Limit(limit).
 		Preload("Designer").
 		Preload("Customer").
@@ -119,7 +119,7 @@ func (s *OrderService) GetOrderStatistics(userID uint) (*models.OrderStatistics,
 // GetLatestOrders 获取最新订单列表
 func (s *OrderService) GetLatestOrders(limit int) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Order("created_at desc").
+	err := s.db.Order("id desc").
 		Limit(limit).
 		Preload("Designer").
 		Preload("Customer").

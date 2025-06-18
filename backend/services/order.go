@@ -198,21 +198,21 @@ func (s *OrderService) GetOrderStatistics(factoryID string) (*models.OrderStatis
 
 func (s *OrderService) GetRecentOrders(limit int) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Preload("Factory").Order("created_at desc").Limit(limit).Find(&orders).Error
+	err := s.db.Preload("Factory").Order("id desc").Limit(limit).Find(&orders).Error
 	return orders, err
 }
 
 func (s *OrderService) GetOrdersByUserID(userID string, status string, page int, pageSize int) ([]models.Order, error) {
 	var orders []models.Order
 	query := s.db.Model(&models.Order{}).Where("designer_id = ?", userID)
-	
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-
+	// 增加SQL调试日志
+	query = query.Debug()
 	err := query.Preload("Factory").
 		Offset((page - 1) * pageSize).Limit(pageSize).
-		Order("created_at desc").
+		Order("id desc").
 		Find(&orders).Error
 	return orders, err
 }
