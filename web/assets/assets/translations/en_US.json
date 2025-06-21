@@ -103,6 +103,13 @@
     }
   },
   "designer": {
+    "title": "Designer Dashboard",
+    "search_hint": "Search orders, fabrics, factories...",
+    "status": {
+      "all": "All",
+      "published": "Published",
+      "in_progress": "In Progress"
+    },
     "dashboard": {
       "title": "Designer Dashboard",
       "published_orders": "Published Orders",
@@ -161,8 +168,7 @@
       "cotton": "Cotton",
       "silk": "Silk",
       "wool": "Wool"
-    },
-    "search_hint": "Search orders, fabrics, factories..."
+    }
   },
   "order": {
     "order_no": "Order No.",

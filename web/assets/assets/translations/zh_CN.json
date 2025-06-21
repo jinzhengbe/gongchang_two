@@ -106,6 +106,7 @@
     }
   },
   "designer": {
+    "title": "设计师后台",
     "dashboard": {
       "title": "设计师后台",
       "published_orders": "已发布订单",
@@ -170,6 +171,11 @@
     "factories": {
       "title": "工厂列表",
       "no_factories": "暂无工厂"
+    },
+    "status": {
+      "all": "全部",
+      "published": "已发布",
+      "in_progress": "进行中"
     }
   },
   "order": {

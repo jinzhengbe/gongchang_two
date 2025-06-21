@@ -19,6 +19,8 @@ services:
       - DB_PASSWORD=gongchang
       - DB_NAME=gongchang
       - JWT_SECRET=your_jwt_secret_key
+    volumes:
+      - /runData/gongChang/backend/uploads:/app/uploads
     networks:
       - gongchang_network
 
