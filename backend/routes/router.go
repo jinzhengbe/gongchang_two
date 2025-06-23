@@ -32,6 +32,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	orderService := services.NewOrderService(db)
 	fileService := services.NewFileService(db, "./uploads")
 	factoryService := factory.NewService(db)
+	fabricService := services.NewFabricService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
@@ -41,6 +42,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	factoryHandler := factory.NewHandler(factoryService, userService)
 	authController := controllers.NewAuthController(userService)
 	factoryController := &controllers.FactoryController{DB: db}
+	fabricController := controllers.NewFabricController(fabricService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -121,6 +123,15 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				fileGroup.DELETE("/:id", fileController.DeleteFile)
 				fileGroup.GET("/order/:id", fileController.GetOrderFiles)
 			}
+
+			// 布料管理路由（需要认证）
+			fabricGroup := authGroup.Group("/fabrics")
+			{
+				fabricGroup.POST("", fabricController.CreateFabric)
+				fabricGroup.PUT("/:id", fabricController.UpdateFabric)
+				fabricGroup.DELETE("/:id", fabricController.DeleteFabric)
+				fabricGroup.PUT("/:id/stock", fabricController.UpdateFabricStock)
+			}
 		}
 
 		// 设计师订单路由（单独注册，确保一定生效）
@@ -131,6 +142,19 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			designerGroup.POST("/orders", orderController.CreateOrder)
 		}
 		log.Println("!!! DESIGNER ROUTE REGISTERED !!!")
+
+		// 布料公开路由（无需认证）
+		fabricPublicGroup := api.Group("/fabrics")
+		{
+			fabricPublicGroup.GET("/all", fabricController.GetAllFabrics)
+			fabricPublicGroup.GET("/categories", fabricController.GetFabricCategories)
+			fabricPublicGroup.GET("/search", fabricController.SearchFabrics)
+			fabricPublicGroup.GET("/category/:category", fabricController.GetFabricsByCategory)
+			fabricPublicGroup.GET("/material/:material", fabricController.GetFabricsByMaterial)
+			fabricPublicGroup.GET("/:id", fabricController.GetFabricByID)
+			fabricPublicGroup.GET("/statistics", fabricController.GetFabricStatistics)
+			fabricPublicGroup.POST("/create", fabricController.CreateFabricPublic)
+		}
 	}
 
 	// 注册公开路由

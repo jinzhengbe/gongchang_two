@@ -100,6 +100,18 @@
     }
   },
   "designer": {
+    "title": "Bảng điều khiển nhà thiết kế",
+    "all_orders": "Tất cả đơn hàng",
+    "add_order": "Thêm đơn hàng",
+    "no_orders": "Chưa có đơn hàng",
+    "load_more": "Tải thêm",
+    "order_id": "ID đơn hàng",
+    "creation_time": "Thời gian tạo",
+    "fabric": "Vải",
+    "quantity": "Số lượng",
+    "attachments": "Tệp đính kèm",
+    "images": "Hình ảnh",
+    "search_hint": "Tìm kiếm đơn hàng, vải, nhà máy...",
     "dashboard": {
       "title": "Bảng điều khiển nhà thiết kế",
       "published_orders": "Đơn hàng đã đăng",
@@ -145,7 +157,8 @@
       "images": "Hình ảnh",
       "videos": "Video",
       "order_type": "Loại đơn hàng",
-      "order_type_required": "Vui lòng chọn loại đơn hàng"
+      "order_type_required": "Vui lòng chọn loại đơn hàng",
+      "submit": "Gửi đơn hàng"
     },
     "search": {
       "product": "Tìm kiếm sản phẩm",
@@ -157,9 +170,21 @@
       "all": "Tất cả",
       "cotton": "Cotton",
       "silk": "Lụa",
-      "wool": "Len"
+      "wool": "Len",
+      "no_fabric": "Không tìm thấy vải",
+      "selected": "Đã chọn",
+      "material": "Chất liệu",
+      "price": "Giá"
     },
-    "search_hint": "Tìm kiếm đơn hàng, vải, nhà máy..."
+    "factories": {
+      "title": "Danh sách nhà máy",
+      "no_factories": "Không có nhà máy"
+    },
+    "status": {
+      "all": "Tất cả",
+      "published": "Đã đăng",
+      "in_progress": "Đang thực hiện"
+    }
   },
   "order": {
     "order_no": "Số đơn hàng",
@@ -181,6 +206,14 @@
     "order_type_required": "Vui lòng chọn loại đơn hàng",
     "description": "Mô tả đơn hàng",
     "description_required": "Vui lòng nhập mô tả đơn hàng",
+    "title": "Tiêu đề đơn hàng",
+    "title_required": "Vui lòng nhập tiêu đề đơn hàng",
+    "create_time": "Thời gian tạo",
+    "update_time": "Thời gian cập nhật",
+    "unnamed": "Đơn hàng không tên",
+    "attachments": "Tệp đính kèm",
+    "images": "Hình ảnh",
+    "fabrics": "Vải",
     "type": {
       "sample": "Mẫu",
       "production": "Sản xuất"

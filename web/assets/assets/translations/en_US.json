@@ -104,12 +104,17 @@
   },
   "designer": {
     "title": "Designer Dashboard",
+    "all_orders": "All Orders",
+    "add_order": "Add Order",
+    "no_orders": "No orders yet",
+    "load_more": "Load More",
+    "order_id": "Order ID",
+    "creation_time": "Creation Time",
+    "fabric": "Fabric",
+    "quantity": "Quantity",
+    "attachments": "Attachments",
+    "images": "Images",
     "search_hint": "Search orders, fabrics, factories...",
-    "status": {
-      "all": "All",
-      "published": "Published",
-      "in_progress": "In Progress"
-    },
     "dashboard": {
       "title": "Designer Dashboard",
       "published_orders": "Published Orders",
@@ -155,7 +160,8 @@
       "images": "Images",
       "videos": "Videos",
       "order_type": "Order Type",
-      "order_type_required": "Please select order type"
+      "order_type_required": "Please select order type",
+      "submit": "Submit Order"
     },
     "search": {
       "product": "Search Product",
@@ -167,12 +173,24 @@
       "all": "All",
       "cotton": "Cotton",
       "silk": "Silk",
-      "wool": "Wool"
+      "wool": "Wool",
+      "no_fabric": "No fabric found",
+      "selected": "Selected",
+      "material": "Material",
+      "price": "Price"
+    },
+    "factories": {
+      "title": "Factories",
+      "no_factories": "No factories"
+    },
+    "status": {
+      "all": "All",
+      "published": "Published",
+      "in_progress": "In Progress"
     }
   },
   "order": {
     "order_no": "Order No.",
-    "fabric": "Fabric",
     "quantity": "Quantity",
     "pieces": "pcs",
     "factory": {
@@ -190,29 +208,46 @@
     "order_type_required": "Please select order type",
     "description": "Order Description",
     "description_required": "Please enter order description",
-    "type": {
-      "sample": "Sample",
-      "production": "Production"
-    },
+    "title": "Order Title",
+    "title_required": "Please enter order title",
+    "fabric": "Fabric",
+    "fabric_required": "Please enter fabric details",
+    "create_time": "Create Time",
+    "update_time": "Update Time",
+    "unnamed": "Unnamed",
+    "attachments": "Attachments",
+    "images": "Images",
+    "fabrics": "Fabrics",
     "status": {
-      "published": "Published",
-      "in_progress": "In Progress",
+      "label": "Status",
+      "unknown": "Unknown",
+      "created": "Created",
+      "designer_confirmed": "Designer Confirmed",
+      "factory_confirmed": "Factory Confirmed",
+      "in_production": "In Production",
       "completed": "Completed",
+      "shipped": "Shipped",
       "cancelled": "Cancelled",
-      "unknown": "Unknown"
+      "published": "Published"
     },
-    "instruction_date": {
-      "title": "Instruction Date",
-      "required": "Please select instruction date"
-    },
-    "expected_in_date": {
-      "title": "Expected In Date",
-      "required": "Please select expected in date"
-    },
-    "expected_out_date": {
-      "title": "Expected Out Date",
-      "required": "Please select expected out date"
-    }
+    "image_count": "Image Count",
+    "image_url": "Image URL",
+    "download_failed_try_again": "Download failed, please try again",
+    "file_opened_in_new_window": "File opened in new tab",
+    "save_as_prompt": "Your browser should prompt you to save the file.",
+    "open_file_failed": "Failed to open file",
+    "check_connection": "Please check your network connection or if the file exists.",
+    "download_progress": "Downloading...",
+    "download_success": "Download successful",
+    "file_saved_to": "File saved to",
+    "download_failed": "Download failed",
+    "file_not_found": "File not found (404)",
+    "permission_denied": "Permission denied (403)",
+    "download_timeout": "Download timed out",
+    "downloading": "Downloading...",
+    "models": "Model Files",
+    "videos": "Videos",
+    "files": "Files"
   },
   "home": {
     "title": "Home",
