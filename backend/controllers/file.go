@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"gongChang/services"
+	"gongChang/config"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,9 +16,10 @@ import (
 type FileController struct {
 	fileService *services.FileService
 	uploadDir   string
+	config      *config.Config
 }
 
-func NewFileController(fileService *services.FileService, uploadDir string) *FileController {
+func NewFileController(fileService *services.FileService, uploadDir string, cfg *config.Config) *FileController {
 	// 确保上传目录存在
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		log.Printf("Failed to create upload directory: %v", err)
@@ -27,6 +29,7 @@ func NewFileController(fileService *services.FileService, uploadDir string) *Fil
 	return &FileController{
 		fileService: fileService,
 		uploadDir:   uploadDir,
+		config:      cfg,
 	}
 }
 
@@ -76,8 +79,23 @@ func (c *FileController) UploadFile(ctx *gin.Context) {
 		return
 	}
 
+	// 构建完整的文件访问URL
+	baseURL := c.config.Server.BaseURL
+	fileURL := fmt.Sprintf("%s/api/files/download/%s", baseURL, fileRecord.ID)
+	
+	// 返回包含完整URL的响应
+	response := gin.H{
+		"id":        fileRecord.ID,
+		"name":      fileRecord.Name,
+		"path":      fileRecord.Path,
+		"url":       fileURL,
+		"order_id":  fileRecord.OrderID,
+		"created_at": fileRecord.CreatedAt,
+		"updated_at": fileRecord.UpdatedAt,
+	}
+
 	log.Printf("File uploaded successfully: %s", fileRecord.ID)
-	ctx.JSON(http.StatusOK, fileRecord)
+	ctx.JSON(http.StatusOK, response)
 }
 
 // GetOrderFiles 获取订单的所有文件
@@ -94,7 +112,25 @@ func (c *FileController) GetOrderFiles(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"files": files})
+	// 构建文件详情列表，包含完整的URL
+	fileDetails := make([]gin.H, 0, len(files))
+	baseURL := c.config.Server.BaseURL
+	
+	for _, file := range files {
+		fileURL := fmt.Sprintf("%s/api/files/download/%s", baseURL, file.ID)
+		fileDetails = append(fileDetails, gin.H{
+			"id":        file.ID,
+			"name":      file.Name,
+			"path":      file.Path,
+			"url":       fileURL,
+			"order_id":  file.OrderID,
+			"type":      filepath.Ext(file.Name),
+			"created_at": file.CreatedAt,
+			"updated_at": file.UpdatedAt,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"files": fileDetails})
 }
 
 // GetFileInfo 获取文件信息
@@ -137,10 +173,16 @@ func (c *FileController) DownloadFile(ctx *gin.Context) {
 		return
 	}
 
+	// 设置CORS头
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	ctx.Header("Access-Control-Allow-Methods", "GET, OPTIONS")
+	ctx.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	ctx.Header("Access-Control-Max-Age", "86400")
+
 	// 设置响应头
 	ctx.Header("Content-Description", "File Transfer")
 	ctx.Header("Content-Transfer-Encoding", "binary")
-	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(filePath)))
+	ctx.Header("Content-Disposition", fmt.Sprintf("inline; filename=%s", filepath.Base(filePath)))
 	ctx.Header("Content-Type", "application/octet-stream")
 	ctx.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
 
@@ -170,14 +212,19 @@ func (c *FileController) GetFileDetails(ctx *gin.Context) {
 		return
 	}
 
-	// 统一使用 /api/files/download/{id} 格式
-	fileURL := fmt.Sprintf("/api/files/download/%s", file.ID)
+	// 构建完整的文件访问URL
+	baseURL := c.config.Server.BaseURL
+	fileURL := fmt.Sprintf("%s/api/files/download/%s", baseURL, file.ID)
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"id": file.ID,
-		"name": file.Name,
-		"url": fileURL,
-		"type": filepath.Ext(file.Name),
+		"id":        file.ID,
+		"name":      file.Name,
+		"path":      file.Path,
+		"url":       fileURL,
+		"order_id":  file.OrderID,
+		"type":      filepath.Ext(file.Name),
+		"created_at": file.CreatedAt,
+		"updated_at": file.UpdatedAt,
 	})
 }
 
@@ -200,13 +247,19 @@ func (c *FileController) GetBatchFileDetails(ctx *gin.Context) {
 
 	// 构建文件详情列表
 	fileDetails := make([]gin.H, 0, len(files))
+	baseURL := c.config.Server.BaseURL
+	
 	for _, file := range files {
-		fileURL := fmt.Sprintf("/api/files/download/%s", file.ID)
+		fileURL := fmt.Sprintf("%s/api/files/download/%s", baseURL, file.ID)
 		fileDetails = append(fileDetails, gin.H{
-			"id": file.ID,
-			"name": file.Name,
-			"url": fileURL,
-			"type": filepath.Ext(file.Name),
+			"id":        file.ID,
+			"name":      file.Name,
+			"path":      file.Path,
+			"url":       fileURL,
+			"order_id":  file.OrderID,
+			"type":      filepath.Ext(file.Name),
+			"created_at": file.CreatedAt,
+			"updated_at": file.UpdatedAt,
 		})
 	}
 

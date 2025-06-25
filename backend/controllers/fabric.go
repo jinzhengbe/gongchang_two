@@ -58,8 +58,8 @@ func (fc *FabricController) CreateFabric(c *gin.Context) {
 		userIDStr := userID.(string)
 		req.SupplierID = userIDStr
 	case "factory":
-		userIDStr := userID.(string)
-		req.FactoryID = userIDStr
+		c.JSON(http.StatusForbidden, gin.H{"error": "工厂账号不允许创建布料"})
+		return
 	default:
 		c.JSON(http.StatusForbidden, gin.H{"error": "用户角色不允许创建布料"})
 		return

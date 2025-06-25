@@ -8,6 +8,7 @@ import (
 	"gongChang/middleware"
 	"gongChang/config"
 	"net/http"
+	"strings"
 )
 
 func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
@@ -24,6 +25,20 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	// 添加 CORS 中间件
 	r.Use(middleware.CORSMiddleware())
 
+	// 添加静态文件服务，专门用于提供上传的文件
+	r.Static("/uploads", "./uploads")
+	
+	// 为静态文件添加CORS头
+	r.Use(func(c *gin.Context) {
+		if c.Request.URL.Path == "/uploads" || strings.HasPrefix(c.Request.URL.Path, "/uploads/") {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			c.Header("Access-Control-Max-Age", "86400")
+		}
+		c.Next()
+	})
+
 	// 创建服务实例
 	userService := services.NewUserService(db)
 	productService := services.NewProductService(db)
@@ -35,7 +50,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	userController := controllers.NewUserController(userService)
 	productController := controllers.NewProductController(productService)
 	orderController := controllers.NewOrderController(orderService, db)
-	fileController := controllers.NewFileController(fileService, "./uploads")
+	fileController := controllers.NewFileController(fileService, "./uploads", cfg)
 	factoryController := &controllers.FactoryController{DB: db}
 	fabricController := controllers.NewFabricController(fabricService)
 
