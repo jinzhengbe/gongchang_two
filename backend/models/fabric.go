@@ -24,7 +24,9 @@ type Fabric struct {
 	ThumbnailURL string        `json:"thumbnail_url" gorm:"type:varchar(500)"`        // 缩略图URL
 	Tags        string         `json:"tags" gorm:"type:varchar(500)"`                 // 标签，逗号分隔
 	Status      int            `json:"status" gorm:"default:1"`                       // 状态：1-可用 0-停用
+	DesignerID  *string        `json:"designer_id" gorm:"type:varchar(191)"`          // 设计师ID
 	SupplierID  *string        `json:"supplier_id" gorm:"type:varchar(191)"`          // 供应商ID
+	FactoryID   *string        `json:"factory_id" gorm:"type:varchar(191)"`           // 工厂ID
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"deleted_at" gorm:"index"`
@@ -60,7 +62,9 @@ type FabricRequest struct {
 	ImageURL    string  `json:"image_url"`
 	ThumbnailURL string `json:"thumbnail_url"`
 	Tags        string  `json:"tags"`
+	DesignerID  string  `json:"designer_id"`
 	SupplierID  string  `json:"supplier_id"`
+	FactoryID   string  `json:"factory_id"`
 }
 
 // FabricUpdateRequest 更新布料请求
@@ -81,7 +85,9 @@ type FabricUpdateRequest struct {
 	ThumbnailURL string `json:"thumbnail_url"`
 	Tags        string  `json:"tags"`
 	Status      int     `json:"status"`
+	DesignerID  string  `json:"designer_id"`
 	SupplierID  string  `json:"supplier_id"`
+	FactoryID   string  `json:"factory_id"`
 }
 
 // FabricSearchRequest 布料搜索请求
@@ -93,7 +99,7 @@ type FabricSearchRequest struct {
 	MinPrice float64 `json:"min_price" form:"min_price"`      // 最低价格
 	MaxPrice float64 `json:"max_price" form:"max_price"`      // 最高价格
 	MinStock int     `json:"min_stock" form:"min_stock"`      // 最低库存
-	Status   int     `json:"status" form:"status"`            // 状态筛选
+	Status   *int    `json:"status" form:"status"`            // 状态筛选 (指针类型，以便区分 0 和未提供)
 	Page     int     `json:"page" form:"page"`                // 页码
 	PageSize int     `json:"page_size" form:"page_size"`      // 每页数量
 }
@@ -117,25 +123,17 @@ type FabricResponse struct {
 	ThumbnailURL string   `json:"thumbnail_url"`
 	Tags        string    `json:"tags"`
 	Status      int       `json:"status"`
+	DesignerID  *string   `json:"designer_id"`
 	SupplierID  *string   `json:"supplier_id"`
+	FactoryID   *string   `json:"factory_id"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // FabricListResponse 布料列表响应
 type FabricListResponse struct {
-	Total   int64            `json:"total"`
-	Page    int              `json:"page"`
-	PageSize int             `json:"page_size"`
-	Fabrics []FabricResponse `json:"fabrics"`
+	Total    int64            `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
+	Fabrics  []FabricResponse `json:"fabrics"`
 }
-
-// FabricCategoryResponse 布料分类响应
-type FabricCategoryResponse struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Icon        string `json:"icon"`
-	Sort        int    `json:"sort"`
-	Status      int    `json:"status"`
-} 

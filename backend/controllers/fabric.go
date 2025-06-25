@@ -21,27 +21,61 @@ func NewFabricController(fabricService *services.FabricService) *FabricControlle
 
 // CreateFabric 创建布料
 // @Summary 创建布料
-// @Description 创建新的布料记录
+// @Description 创建新的布料记录（仅设计师和供应商可创建）
 // @Tags 布料管理
 // @Accept json
 // @Produce json
 // @Param fabric body models.FabricRequest true "布料信息"
 // @Success 201 {object} models.Fabric
 // @Router /api/fabrics [post]
-func (c *FabricController) CreateFabric(ctx *gin.Context) {
+func (fc *FabricController) CreateFabric(c *gin.Context) {
 	var req models.FabricRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	fabric, err := c.fabricService.CreateFabric(&req)
+	// 获取当前用户信息
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		return
+	}
+
+	// 获取用户角色
+	userRole, exists := c.Get("user_role")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户角色未找到"})
+		return
+	}
+
+	// 根据用户角色设置相应的ID字段
+	switch userRole.(string) {
+	case "designer":
+		userIDStr := userID.(string)
+		req.DesignerID = userIDStr
+	case "supplier":
+		userIDStr := userID.(string)
+		req.SupplierID = userIDStr
+	case "factory":
+		userIDStr := userID.(string)
+		req.FactoryID = userIDStr
+	default:
+		c.JSON(http.StatusForbidden, gin.H{"error": "用户角色不允许创建布料"})
+		return
+	}
+
+	// 创建布料
+	fabric, err := fc.fabricService.CreateFabric(&req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, fabric)
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "布料创建成功",
+		"fabric":  fabric,
+	})
 }
 
 // GetFabricByID 根据ID获取布料
@@ -302,38 +336,4 @@ func (c *FabricController) GetFabricStatistics(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, stats)
-}
-
-// CreateFabricPublic 公开创建布料接口（无需认证）
-// @Summary 公开创建布料
-// @Description 创建新的布料记录（无需认证）
-// @Tags 布料管理
-// @Accept json
-// @Produce json
-// @Param fabric body models.FabricRequest true "布料信息"
-// @Success 201 {object} models.Fabric
-// @Router /api/fabrics/create [post]
-func (c *FabricController) CreateFabricPublic(ctx *gin.Context) {
-	var req models.FabricRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// 验证必填字段
-	if req.Name == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "布料名称不能为空"})
-		return
-	}
-
-	fabric, err := c.fabricService.CreateFabric(&req)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "布料创建成功",
-		"fabric": fabric,
-	})
 } 

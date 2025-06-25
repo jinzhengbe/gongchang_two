@@ -399,14 +399,21 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 
 // GetOrdersByDesignerID 根据设计师ID获取订单列表
 func (c *OrderController) GetOrdersByDesignerID(ctx *gin.Context) {
-	designerID := ctx.Query("designer_id")
+	// 从 JWT token 中获取设计师 ID
+	designerID := ctx.GetString("user_id")
 	if designerID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "设计师ID不能为空"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
 		return
 	}
 
+	log.Printf("Getting orders for designer ID: %s", designerID)
+
+	// 获取查询参数
+	status := ctx.Query("status")
 	pageStr := ctx.DefaultQuery("page", "1")
-	pageSizeStr := ctx.DefaultQuery("page_size", "10")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "10")
+
+	// 转换分页参数
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
 		page = 1
@@ -415,30 +422,158 @@ func (c *OrderController) GetOrdersByDesignerID(ctx *gin.Context) {
 	if err != nil || pageSize < 1 {
 		pageSize = 10
 	}
-	offset := (page - 1) * pageSize
 
-	orders := []models.Order{}
-	err = c.DB.Where("designer_id = ?", designerID).
-		Order("id desc").
-		Offset(offset).
-		Limit(pageSize).
-		Find(&orders).Error
+	// 获取设计师的订单列表
+	orders, err := c.orderService.GetOrdersByUserID(designerID, status, page, pageSize)
 	if err != nil {
+		log.Printf("Error getting designer orders: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	total := int64(0)
-	err = c.DB.Model(&models.Order{}).Where("designer_id = ?", designerID).Count(&total).Error
+	// 获取总数
+	total, err := c.orderService.GetOrdersCount(designerID, status)
 	if err != nil {
+		log.Printf("Error getting designer orders count: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	log.Printf("Found %d orders for designer %s", total, designerID)
+
+	// 组装返回格式
+	orderList := make([]gin.H, 0, len(orders))
+	for _, order := range orders {
+		orderList = append(orderList, gin.H{
+			"id": order.ID,
+			"title": order.Title,
+			"description": order.Description,
+			"fabric": order.Fabric,
+			"quantity": order.Quantity,
+			"factory_id": order.FactoryID,
+			"status": order.Status,
+			"attachments": order.Attachments,
+			"models": order.Models,
+			"images": order.Images,
+			"videos": order.Videos,
+			"createTime": order.CreatedAt,
+			"updated_at": order.UpdatedAt,
+		})
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
+		"orders": orderList,
 		"total": total,
 		"page": page,
-		"page_size": pageSize,
-		"orders": orders,
+		"pageSize": pageSize,
+	})
+}
+
+// UpdateOrder 更新订单
+func (c *OrderController) UpdateOrder(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	var req models.OrderUpdateRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 获取当前用户ID
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	// 更新订单
+	if err := c.orderService.UpdateOrder(uint(orderID), &req); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Order updated successfully"})
+}
+
+// DeleteOrder 删除订单
+func (c *OrderController) DeleteOrder(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID"})
+		return
+	}
+
+	// 获取当前用户ID
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	// 删除订单
+	if err := c.orderService.DeleteOrder(uint(orderID)); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully"})
+}
+
+// GetPublicOrders 获取公开订单列表（无需认证）
+func (c *OrderController) GetPublicOrders(ctx *gin.Context) {
+	// 获取查询参数
+	pageStr := ctx.DefaultQuery("page", "1")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "10")
+
+	// 转换分页参数
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	// 获取公开订单列表
+	orders, err := c.orderService.GetPublicOrders(page, pageSize)
+	if err != nil {
+		log.Printf("Error getting public orders: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 获取总数
+	total, err := c.orderService.GetPublicOrdersCount()
+	if err != nil {
+		log.Printf("Error getting public orders count: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 组装返回格式
+	orderList := make([]gin.H, 0, len(orders))
+	for _, order := range orders {
+		orderList = append(orderList, gin.H{
+			"id": order.ID,
+			"title": order.Title,
+			"description": order.Description,
+			"fabric": order.Fabric,
+			"quantity": order.Quantity,
+			"factory": order.Factory,
+			"status": order.Status,
+			"createTime": order.CreateTime,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"orders": orderList,
+		"total": total,
+		"page": page,
+		"pageSize": pageSize,
 	})
 } 

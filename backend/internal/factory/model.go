@@ -23,31 +23,22 @@ type Factory struct {
 	DeletedAt   gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
 
+/*
 // RegisterRequest 工厂注册请求
 type RegisterRequest struct {
-	Name        string `json:"name"`
-	Username    string `json:"username" binding:"required,min=4,max=20"`
-	Password    string `json:"password" binding:"required,min=6,max=20"`
-	Address     string `json:"address"`
-	Contact     string `json:"contact"`
-	Phone       string `json:"phone"`
-	Email       string `json:"email" binding:"omitempty,email"`
-	License     string `json:"license"`
-	Description string `json:"description"`
+	// ...
 }
 
 // LoginRequest 工厂登录请求
 type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Role     string `json:"role" binding:"required"`
+	// ...
 }
 
 // LoginResponse 工厂登录响应
 type LoginResponse struct {
-	Token   string  `json:"token"`
-	Factory Factory `json:"factory"`
+	// ...
 }
+*/
 
 // Order 订单模型
 type Order struct {

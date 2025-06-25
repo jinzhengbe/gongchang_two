@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"log"
+	"errors"
 )
 
 type UserController struct {
@@ -21,86 +22,63 @@ func NewUserController(userService *services.UserService) *UserController {
 	}
 }
 
-func (c *UserController) Register(ctx *gin.Context) {
+// Register a new user
+func (uc *UserController) Register(c *gin.Context) {
 	var req models.RegisterRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
 		return
 	}
 
-	// 创建用户对象
-	user := &models.User{
-		Username: req.Username,
-		Password: req.Password,
-		Email:    req.Email,
-		Role:     models.UserRole(req.Role),
-	}
-
-	// 使用 UserService 注册用户
-	if err := c.userService.Register(user); err != nil {
-		if err == services.ErrUsernameExists {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
+	// 统一注册服务
+	err := uc.userService.Register(req)
+	if err != nil {
+		if errors.Is(err, services.ErrUsernameExists) || errors.Is(err, services.ErrEmailExists) {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user: " + err.Error()})
 		}
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "user registered successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
-func (c *UserController) Login(ctx *gin.Context) {
+// Login a user
+func (uc *UserController) Login(c *gin.Context) {
 	var req models.LoginRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		log.Printf("Login request binding error: %v", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
 		return
 	}
 
-	log.Printf("Login attempt for user: %s, type: %s", req.Username, req.UserType)
-
-	// 验证用户类型
-	if req.UserType != string(models.RoleDesigner) && 
-	   req.UserType != string(models.RoleFactory) && 
-	   req.UserType != string(models.RoleSupplier) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user type"})
-		return
-	}
-
-	user, err := c.userService.Login(req.Username, req.Password)
+	// 统一登录服务
+	user, profile, err := uc.userService.Login(req.Username, req.Password)
 	if err != nil {
-		log.Printf("Login failed for user %s: %v", req.Username, err)
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 验证用户类型是否匹配
-	if string(user.Data.User.Role) != req.UserType {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "user type mismatch"})
+	// 加载配置以获取JWT密钥
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Printf("Failed to load configuration for JWT: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
 	// 生成JWT token
-	cfg, err := config.LoadConfig()
+	token, err := middleware.GenerateToken(user.ID, user.Role, cfg.JWT.Secret)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load configuration"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.Data.User.ID, user.Data.User.Role, cfg.JWT.Secret)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"user": gin.H{
-			"id":       user.Data.User.ID,
-			"username": user.Data.User.Username,
-			"email":    user.Data.User.Email,
-			"role":     user.Data.User.Role,
-		},
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful",
+		"token":   token,
+		"user":    user,
+		"profile": profile,
 	})
 }
 
@@ -139,4 +117,104 @@ func (c *UserController) DeleteUser(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
+// GetUserProfile 获取当前用户信息
+func (c *UserController) GetUserProfile(ctx *gin.Context) {
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	user, err := c.userService.GetUserByID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"user": user,
+	})
+}
+
+// UpdateUserProfile 更新当前用户信息
+func (c *UserController) UpdateUserProfile(ctx *gin.Context) {
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	var req models.UpdateProfileRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误: " + err.Error()})
+		return
+	}
+
+	user, err := c.userService.GetUserByID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+		return
+	}
+
+	// 更新用户信息
+	if req.Username != "" {
+		user.Username = req.Username
+	}
+	if req.Email != "" {
+		user.Email = req.Email
+	}
+
+	if err := c.userService.UpdateUser(user); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新失败: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "用户信息更新成功",
+		"user":    user,
+	})
+}
+
+// RefreshToken 刷新Token
+func (c *UserController) RefreshToken(ctx *gin.Context) {
+	// 从请求头获取当前token
+	token := ctx.GetHeader("Authorization")
+	if token == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "缺少认证token"})
+		return
+	}
+
+	// 移除Bearer前缀
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	// 验证token并获取用户信息
+	claims, err := middleware.ValidateToken(token)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "无效的token"})
+		return
+	}
+
+	// 加载配置以获取JWT密钥
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Printf("Failed to load configuration for JWT: %v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "无法生成新token"})
+		return
+	}
+
+	// 生成新的JWT token
+	newToken, err := middleware.GenerateToken(claims.UserID, claims.Role, cfg.JWT.Secret)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "无法生成新token"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Token刷新成功",
+		"token":   newToken,
+	})
 } 

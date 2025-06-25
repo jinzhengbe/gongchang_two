@@ -4,6 +4,7 @@ import (
 	"gongChang/models"
 	"gorm.io/gorm"
 	"errors"
+	"log"
 )
 
 type FabricService struct {
@@ -16,6 +17,8 @@ func NewFabricService(db *gorm.DB) *FabricService {
 
 // CreateFabric 创建布料
 func (s *FabricService) CreateFabric(req *models.FabricRequest) (*models.Fabric, error) {
+	log.Printf("CreateFabric service called with req.DesignerID=%s, req.SupplierID=%s, req.FactoryID=%s", req.DesignerID, req.SupplierID, req.FactoryID)
+	
 	fabric := &models.Fabric{
 		Name:         req.Name,
 		Category:     req.Category,
@@ -35,14 +38,32 @@ func (s *FabricService) CreateFabric(req *models.FabricRequest) (*models.Fabric,
 		Status:       1, // 默认启用
 	}
 
-	if req.SupplierID != "" {
-		fabric.SupplierID = &req.SupplierID
+	// 设置设计师ID
+	if req.DesignerID != "" {
+		fabric.DesignerID = &req.DesignerID
+		log.Printf("CreateFabric service: setting fabric.DesignerID=%s", *fabric.DesignerID)
 	}
 
+	// 设置供应商ID
+	if req.SupplierID != "" {
+		fabric.SupplierID = &req.SupplierID
+		log.Printf("CreateFabric service: setting fabric.SupplierID=%s", *fabric.SupplierID)
+	}
+
+	// 设置工厂ID
+	if req.FactoryID != "" {
+		fabric.FactoryID = &req.FactoryID
+		log.Printf("CreateFabric service: setting fabric.FactoryID=%s", *fabric.FactoryID)
+	}
+
+	log.Printf("CreateFabric service: final fabric.DesignerID=%v, fabric.SupplierID=%v, fabric.FactoryID=%v", fabric.DesignerID, fabric.SupplierID, fabric.FactoryID)
+
 	if err := s.db.Create(fabric).Error; err != nil {
+		log.Printf("CreateFabric service: database error: %v", err)
 		return nil, err
 	}
 
+	log.Printf("CreateFabric service: fabric created successfully with ID=%d", fabric.ID)
 	return fabric, nil
 }
 
@@ -111,8 +132,14 @@ func (s *FabricService) UpdateFabric(id uint, req *models.FabricUpdateRequest) (
 	if req.Status >= 0 {
 		fabric.Status = req.Status
 	}
+	if req.DesignerID != "" {
+		fabric.DesignerID = &req.DesignerID
+	}
 	if req.SupplierID != "" {
 		fabric.SupplierID = &req.SupplierID
+	}
+	if req.FactoryID != "" {
+		fabric.FactoryID = &req.FactoryID
 	}
 
 	if err := s.db.Save(fabric).Error; err != nil {
@@ -169,8 +196,8 @@ func (s *FabricService) SearchFabrics(req *models.FabricSearchRequest) (*models.
 	}
 
 	// 状态筛选
-	if req.Status >= 0 {
-		query = query.Where("status = ?", req.Status)
+	if req.Status != nil {
+		query = query.Where("status = ?", *req.Status)
 	}
 
 	// 获取总数
@@ -222,7 +249,9 @@ func (s *FabricService) SearchFabrics(req *models.FabricSearchRequest) (*models.
 			ThumbnailURL: fabric.ThumbnailURL,
 			Tags:         fabric.Tags,
 			Status:       fabric.Status,
+			DesignerID:   fabric.DesignerID,
 			SupplierID:   fabric.SupplierID,
+			FactoryID:    fabric.FactoryID,
 			CreatedAt:    fabric.CreatedAt,
 			UpdatedAt:    fabric.UpdatedAt,
 		}
@@ -263,7 +292,9 @@ func (s *FabricService) GetAllFabrics() ([]models.FabricResponse, error) {
 			ThumbnailURL: fabric.ThumbnailURL,
 			Tags:         fabric.Tags,
 			Status:       fabric.Status,
+			DesignerID:   fabric.DesignerID,
 			SupplierID:   fabric.SupplierID,
+			FactoryID:    fabric.FactoryID,
 			CreatedAt:    fabric.CreatedAt,
 			UpdatedAt:    fabric.UpdatedAt,
 		}
@@ -283,22 +314,24 @@ func (s *FabricService) GetFabricCategories() ([]models.FabricCategory, error) {
 
 // GetFabricsByCategory 根据分类获取布料
 func (s *FabricService) GetFabricsByCategory(category string, page, pageSize int) (*models.FabricListResponse, error) {
+	status := 1
 	req := &models.FabricSearchRequest{
 		Category: category,
 		Page:     page,
 		PageSize: pageSize,
-		Status:   1, // 只获取可用的布料
+		Status:   &status,
 	}
 	return s.SearchFabrics(req)
 }
 
 // GetFabricsByMaterial 根据材质获取布料
 func (s *FabricService) GetFabricsByMaterial(material string, page, pageSize int) (*models.FabricListResponse, error) {
+	status := 1
 	req := &models.FabricSearchRequest{
 		Material: material,
 		Page:     page,
 		PageSize: pageSize,
-		Status:   1, // 只获取可用的布料
+		Status:   &status,
 	}
 	return s.SearchFabrics(req)
 }

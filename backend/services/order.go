@@ -218,13 +218,86 @@ func (s *OrderService) GetOrdersByUserID(userID string, status string, page int,
 }
 
 func (s *OrderService) GetOrdersCount(userID string, status string) (int64, error) {
-	var total int64
-	query := s.db.Model(&models.Order{}).Where("designer_id = ?", userID)
-	
+	query := s.db.Model(&models.Order{}).Where("customer_id = ?", userID)
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
+	var count int64
+	err := query.Count(&count).Error
+	return count, err
+}
 
-	err := query.Count(&total).Error
-	return total, err
+func (s *OrderService) UpdateOrder(orderID uint, req *models.OrderUpdateRequest) error {
+	order := &models.Order{
+		Title:             req.Title,
+		Description:       req.Description,
+		Fabric:            req.Fabric,
+		Quantity:          req.Quantity,
+		PaymentStatus:     req.PaymentStatus,
+		ShippingAddress:   req.ShippingAddress,
+		OrderType:         req.OrderType,
+		Fabrics:           req.Fabrics,
+		DeliveryDate:      req.DeliveryDate,
+		OrderDate:         req.OrderDate,
+		SpecialRequirements: req.SpecialRequirements,
+	}
+
+	if req.Status != "" {
+		order.Status = models.OrderStatus(req.Status)
+	}
+
+	// 处理文件关联
+	if req.Attachments != nil && len(req.Attachments) > 0 {
+		attachmentsJSON, _ := json.Marshal(req.Attachments)
+		jsonData := datatypes.JSON(attachmentsJSON)
+		order.Attachments = &jsonData
+	}
+
+	if req.Models != nil && len(req.Models) > 0 {
+		modelsJSON, _ := json.Marshal(req.Models)
+		jsonData := datatypes.JSON(modelsJSON)
+		order.Models = &jsonData
+	}
+
+	if req.Images != nil && len(req.Images) > 0 {
+		imagesJSON, _ := json.Marshal(req.Images)
+		jsonData := datatypes.JSON(imagesJSON)
+		order.Images = &jsonData
+	}
+
+	if req.Videos != nil && len(req.Videos) > 0 {
+		videosJSON, _ := json.Marshal(req.Videos)
+		jsonData := datatypes.JSON(videosJSON)
+		order.Videos = &jsonData
+	}
+
+	return s.db.Model(&models.Order{}).Where("id = ?", orderID).Updates(order).Error
+}
+
+func (s *OrderService) DeleteOrder(orderID uint) error {
+	return s.db.Delete(&models.Order{}, orderID).Error
+}
+
+func (s *OrderService) GetPublicOrders(page, pageSize int) ([]models.PublicOrder, error) {
+	var orders []models.PublicOrder
+	offset := (page - 1) * pageSize
+	
+	err := s.db.Model(&models.Order{}).
+		Select("orders.id, orders.title, orders.description, orders.fabric, orders.quantity, factory_profiles.company_name as factory, orders.status, orders.created_at as create_time").
+		Joins("LEFT JOIN factory_profiles ON orders.factory_id = factory_profiles.user_id").
+		Where("orders.status = ?", models.OrderStatusPublished).
+		Order("orders.created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&orders).Error
+	
+	return orders, err
+}
+
+func (s *OrderService) GetPublicOrdersCount() (int64, error) {
+	var count int64
+	err := s.db.Model(&models.Order{}).
+		Where("status = ?", models.OrderStatusPublished).
+		Count(&count).Error
+	return count, err
 } 

@@ -79,7 +79,7 @@ func AuthMiddleware() gin.HandlerFunc {
 				c.Set("user_id", userID)
 			}
 			if role, ok := claims["role"].(string); ok {
-				c.Set("role", role)
+				c.Set("user_role", role)
 			}
 		}
 
@@ -99,4 +99,25 @@ func GenerateToken(userID string, role models.UserRole, secret string) (string, 
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
+}
+
+func ValidateToken(tokenString string) (*Claims, error) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(cfg.JWT.Secret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, jwt.ErrSignatureInvalid
 } 

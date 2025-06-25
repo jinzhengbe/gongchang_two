@@ -124,3 +124,22 @@ type OrderStatistics struct {
 		Count int64  `json:"count"`
 	} `json:"trendData"`
 } 
+
+type OrderUpdateRequest struct {
+	Title             string    `json:"title"`
+	Description       string    `json:"description"`
+	Fabric            string    `json:"fabric"`
+	Quantity          int       `json:"quantity"`
+	Status            string    `json:"status"`
+	PaymentStatus     string    `json:"payment_status"`
+	ShippingAddress   string    `json:"shipping_address"`
+	OrderType         string    `json:"orderType"`
+	Fabrics           string    `json:"fabrics"`
+	DeliveryDate      *time.Time `json:"deliveryDate"`
+	OrderDate         *time.Time `json:"order_date"`
+	SpecialRequirements string  `json:"specialRequirements"`
+	Attachments       []string  `json:"attachments"`
+	Models            []string  `json:"models"`
+	Images            []string  `json:"images"`
+	Videos            []string  `json:"videos"`
+} 

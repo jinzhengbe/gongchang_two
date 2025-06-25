@@ -32,20 +32,13 @@ func SetupFabricRoutes(router *gin.Engine, fabricController *controllers.FabricC
 		publicFabricGroup.GET("/statistics", fabricController.GetFabricStatistics)
 	}
 
-	// 需要认证的路由 - 管理员和供应商可以管理布料
+	// 需要认证的路由 - 设计师和供应商可以管理布料
 	authFabricGroup := router.Group("/api/fabrics")
 	authFabricGroup.Use(middleware.AuthMiddleware())
 	{
-		// 创建布料
-		authFabricGroup.POST("", fabricController.CreateFabric)
-		
-		// 更新布料
+		// authFabricGroup.POST("", fabricController.CreateFabric)  // 注释掉，避免与router.go中的路由冲突
 		authFabricGroup.PUT("/:id", fabricController.UpdateFabric)
-		
-		// 删除布料
 		authFabricGroup.DELETE("/:id", fabricController.DeleteFabric)
-		
-		// 更新布料库存
 		authFabricGroup.PUT("/:id/stock", fabricController.UpdateFabricStock)
 	}
 } 

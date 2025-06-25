@@ -2,9 +2,8 @@ package factory
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"gongChang/models"
 	"gongChang/services"
+	"net/http"
 )
 
 type Handler struct {
@@ -16,6 +15,7 @@ func NewHandler(service *Service, userService *services.UserService) *Handler {
 	return &Handler{service: service, userService: userService}
 }
 
+/*
 // Register 工厂注册
 // @Summary 工厂注册
 // @Description 注册新的工厂账号
@@ -26,22 +26,17 @@ func NewHandler(service *Service, userService *services.UserService) *Handler {
 // @Success 200 {object} Response
 // @Router /api/factory/register [post]
 func (h *Handler) Register(c *gin.Context) {
-	var req RegisterRequest
+	var req models.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 创建用户对象，注册到 users 表
-	user := &models.User{
-		Username: req.Username,
-		Password: req.Password,
-		Email:    req.Email,
-		Role:     models.RoleFactory,
-	}
+	// 确保角色是 factory
+	req.Role = "factory"
 
 	// 使用 UserService 注册用户
-	if err := h.userService.Register(user); err != nil {
+	if err := h.userService.Register(req); err != nil {
 		if err == services.ErrUsernameExists {
 			c.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
 		} else {
@@ -77,6 +72,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, resp)
 }
+*/
 
 // GetFactoryOrders 获取工厂的订单列表
 // @Summary 获取工厂的订单列表

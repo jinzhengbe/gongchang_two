@@ -12,6 +12,7 @@ import (
 // Custom error types
 var (
 	ErrUsernameExists = errors.New("username already exists")
+	ErrEmailExists    = errors.New("email already exists")
 )
 
 type UserService struct {
@@ -24,40 +25,75 @@ func NewUserService(db *gorm.DB) *UserService {
 	}
 }
 
-func (s *UserService) Register(user *models.User) error {
-	// 检查用户名是否已存在
+func (s *UserService) Register(req models.RegisterRequest) error {
+	// 使用事务确保数据一致性
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		// 1. 检查用户名和邮箱是否已存在
 	var existingUser models.User
-	if err := s.db.Where("username = ?", user.Username).First(&existingUser).Error; err == nil {
+		if err := tx.Where("username = ?", req.Username).First(&existingUser).Error; err == nil {
 		return ErrUsernameExists
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
+		if err := tx.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
+			return ErrEmailExists
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 
-	// 生成唯一 ID
-	user.ID = uuid.New().String()
-
-	// 加密密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		// 2. 创建 User 对象
+		hashedPassword, err := HashPassword(req.Password)
 	if err != nil {
 		return err
 	}
-	user.Password = string(hashedPassword)
+		user := &models.User{
+			ID:       uuid.New().String(),
+			Username: req.Username,
+			Password: hashedPassword,
+			Email:    req.Email,
+			Role:     models.UserRole(req.Role),
+		}
 
-	// 创建用户
-	return s.db.Create(user).Error
+		if err := tx.Create(user).Error; err != nil {
+			return err
+		}
+
+		// 3. 根据角色创建对应的 Profile
+		switch user.Role {
+		case models.RoleDesigner:
+			profile := models.DesignerProfile{UserID: user.ID, CompanyName: req.CompanyName, Bio: req.Bio}
+			if err := tx.Create(&profile).Error; err != nil {
+				return err
+			}
+		case models.RoleFactory:
+			profile := models.FactoryProfile{UserID: user.ID, CompanyName: req.CompanyName, Address: req.Address}
+			if err := tx.Create(&profile).Error; err != nil {
+				return err
+			}
+		case models.RoleSupplier:
+			profile := models.SupplierProfile{UserID: user.ID, CompanyName: req.CompanyName, MainProducts: req.MainProducts}
+			if err := tx.Create(&profile).Error; err != nil {
+				return err
+			}
+		default:
+			return errors.New("invalid user role")
+		}
+
+		return nil
+	})
 }
 
-func (s *UserService) Login(username, password string) (*models.LoginResponse, error) {
+func (s *UserService) Login(username, password string) (*models.User, interface{}, error) {
 	log.Printf("Attempting login for user: %s", username)
 	
 	var user models.User
 	if err := s.db.Where("username = ?", username).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Printf("User not found: %s", username)
-			return nil, errors.New("user not found")
+			return nil, nil, errors.New("user not found")
 		}
 		log.Printf("Database error: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	log.Printf("User found, stored password hash: %s", user.Password)
@@ -66,49 +102,37 @@ func (s *UserService) Login(username, password string) (*models.LoginResponse, e
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		log.Printf("Password verification failed: %v", err)
-		return nil, errors.New("invalid password")
+		return nil, nil, errors.New("invalid password")
 	}
 
-	log.Printf("Password verified successfully")
+	log.Printf("Password verified successfully for user %s with role %s", username, user.Role)
 
 	// 根据用户角色获取相应的档案信息
 	var profile interface{}
+	var err error
 	switch user.Role {
 	case models.RoleDesigner:
 		var designerProfile models.DesignerProfile
-		if err := s.db.Where("user_id = ?", user.ID).First(&designerProfile).Error; err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
-			}
-		} else {
+		err = s.db.Where("user_id = ?", user.ID).First(&designerProfile).Error
 			profile = designerProfile
-		}
 	case models.RoleFactory:
 		var factoryProfile models.FactoryProfile
-		if err := s.db.Where("user_id = ?", user.ID).First(&factoryProfile).Error; err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
-			}
-		} else {
+		err = s.db.Where("user_id = ?", user.ID).First(&factoryProfile).Error
 			profile = factoryProfile
-		}
 	case models.RoleSupplier:
 		var supplierProfile models.SupplierProfile
-		if err := s.db.Where("user_id = ?", user.ID).First(&supplierProfile).Error; err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, err
-			}
-		} else {
+		err = s.db.Where("user_id = ?", user.ID).First(&supplierProfile).Error
 			profile = supplierProfile
-		}
+	default:
+		log.Printf("User %s has an unknown role: %s", username, user.Role)
 	}
 
-	return &models.LoginResponse{
-		Data: models.LoginData{
-			User:    user,
-			Profile: profile,
-		},
-	}, nil
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("Failed to retrieve profile for user %s: %v", username, err)
+		return nil, nil, err
+	}
+
+	return &user, profile, nil
 }
 
 func (s *UserService) GetUserByID(userID string) (*models.User, error) {

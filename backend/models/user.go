@@ -56,21 +56,21 @@ type SupplierProfile struct {
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	UserType string `json:"user_type" binding:"required,oneof=designer factory supplier"`
-}
-
-type LoginData struct {
-	User    User        `json:"user"`
-	Profile interface{} `json:"profile"`
-}
-
-type LoginResponse struct {
-	Data LoginData `json:"data"`
 }
 
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Role     string `json:"role" binding:"required,oneof=designer factory supplier"`
+	Username     string `json:"username" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	Email        string `json:"email" binding:"required,email"`
+	Role         string `json:"role" binding:"required,oneof=designer factory supplier"`
+	CompanyName  string `json:"company_name"`
+	Address      string `json:"address"`
+	Bio          string `json:"bio"`
+	MainProducts string `json:"main_products"`
+}
+
+type UpdateProfileRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
 } 
