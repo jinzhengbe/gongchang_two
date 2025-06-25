@@ -300,4 +300,100 @@ func (s *OrderService) GetPublicOrdersCount() (int64, error) {
 		Where("status = ?", models.OrderStatusPublished).
 		Count(&count).Error
 	return count, err
+}
+
+// AddFabricToOrder 添加布料到订单
+func (s *OrderService) AddFabricToOrder(orderID uint, req *models.AddFabricToOrderRequest, fabricService *FabricService) (*models.AddFabricToOrderResponse, error) {
+	// 使用事务确保数据一致性
+	var response *models.AddFabricToOrderResponse
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// 1. 验证订单是否存在
+		var order models.Order
+		if err := tx.First(&order, orderID).Error; err != nil {
+			return err
+		}
+
+		// 2. 创建布料请求
+		fabricReq := &models.FabricRequest{
+			Name:         req.Name,
+			Category:     req.Category,
+			Material:     req.Material,
+			Color:        req.Color,
+			Pattern:      req.Pattern,
+			Weight:       req.Weight,
+			Width:        req.Width,
+			Price:        req.Price,
+			Unit:         req.Unit,
+			Stock:        req.Stock,
+			MinOrder:     req.MinOrder,
+			Description:  req.Description,
+			ImageURL:     req.ImageURL,
+			ThumbnailURL: req.ThumbnailURL,
+			Tags:         req.Tags,
+		}
+
+		// 3. 创建布料
+		fabric, err := fabricService.CreateFabric(fabricReq)
+		if err != nil {
+			return err
+		}
+
+		// 4. 更新订单的Fabrics字段
+		var fabricIDList models.FabricIDList
+		if err := fabricIDList.FromCommaString(order.Fabrics); err != nil {
+			// 如果解析失败，创建空列表
+			fabricIDList = make(models.FabricIDList, 0)
+		}
+
+		// 添加新布料ID
+		fabricIDList.AddFabricID(fabric.ID)
+
+		// 更新订单的Fabrics字段
+		newFabricsStr := fabricIDList.ToCommaString()
+		if err := tx.Model(&order).Update("fabrics", newFabricsStr).Error; err != nil {
+			return err
+		}
+
+		// 5. 构建响应
+		response = &models.AddFabricToOrderResponse{
+			Message:           "布料添加成功",
+			Fabric:            fabric,
+			OrderID:           orderID,
+			AssociationCreated: true,
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+// GetOrderFabrics 获取订单关联的布料列表
+func (s *OrderService) GetOrderFabrics(orderID uint) ([]models.Fabric, error) {
+	// 1. 获取订单
+	var order models.Order
+	if err := s.db.First(&order, orderID).Error; err != nil {
+		return nil, err
+	}
+
+	// 2. 解析Fabrics字段
+	var fabricIDList models.FabricIDList
+	if err := fabricIDList.FromCommaString(order.Fabrics); err != nil {
+		// 如果解析失败，返回空列表
+		return make([]models.Fabric, 0), nil
+	}
+
+	// 3. 如果没有布料ID，返回空列表
+	if len(fabricIDList) == 0 {
+		return make([]models.Fabric, 0), nil
+	}
+
+	// 4. 查询布料信息
+	var fabrics []models.Fabric
+	err := s.db.Where("id IN ?", fabricIDList).Find(&fabrics).Error
+	return fabrics, err
 } 

@@ -124,6 +124,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
 				orderGroup.GET("/search", orderController.SearchOrders)
 				orderGroup.GET("/statistics", orderController.GetOrderStatistics)
+				orderGroup.POST("/:orderId/add-fabric", orderController.AddFabricToOrder)
 			}
 
 			// 工厂订单路由

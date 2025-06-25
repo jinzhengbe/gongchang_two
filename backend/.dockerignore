@@ -1,0 +1,13 @@
+# 排除有权限问题的目录
+../certbot/
+../data/
+../letsencrypt/
+../ssl/
+
+# 排除其他不需要的文件
+*.log
+*.tmp
+.DS_Store
+.git/
+.gitignore
+README.md 

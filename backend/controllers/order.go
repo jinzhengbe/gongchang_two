@@ -576,4 +576,72 @@ func (c *OrderController) GetPublicOrders(ctx *gin.Context) {
 		"page": page,
 		"pageSize": pageSize,
 	})
+}
+
+// AddFabricToOrder 添加布料到订单
+// @Summary 添加布料到订单
+// @Description 创建新布料并关联到指定订单
+// @Tags 订单管理
+// @Accept json
+// @Produce json
+// @Param orderId path int true "订单ID"
+// @Param request body models.AddFabricToOrderRequest true "布料信息"
+// @Success 201 {object} models.AddFabricToOrderResponse
+// @Router /api/orders/{orderId}/add-fabric [post]
+func (c *OrderController) AddFabricToOrder(ctx *gin.Context) {
+	// 获取订单ID
+	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		return
+	}
+
+	// 绑定请求数据
+	var req models.AddFabricToOrderRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 验证订单ID一致性
+	if uint(orderID) != req.OrderID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "URL中的订单ID与请求体中的订单ID不一致"})
+		return
+	}
+
+	// 获取当前用户角色
+	userRole, exists := ctx.Get("user_role")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "用户角色未找到"})
+		return
+	}
+
+	// 验证权限：只有设计师和供应商可以添加布料
+	switch userRole.(string) {
+	case "designer", "supplier":
+		// 允许操作
+	default:
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "用户角色不允许添加布料"})
+		return
+	}
+
+	// 创建布料服务实例
+	fabricService := services.NewFabricService(c.DB)
+
+	// 根据用户角色设置相应的ID字段
+	switch userRole.(string) {
+	case "designer":
+		// 设计师角色，在服务层处理设计师ID设置
+	case "supplier":
+		// 供应商角色，在服务层处理供应商ID设置
+	}
+
+	// 调用服务层方法
+	response, err := c.orderService.AddFabricToOrder(uint(orderID), &req, fabricService)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, response)
 } 

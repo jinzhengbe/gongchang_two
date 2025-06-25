@@ -1,0 +1,10 @@
+certbot/
+data/
+letsencrypt/
+ssl/
+*.log
+*.tmp
+.DS_Store
+.git/
+.gitignore
+README.md 
