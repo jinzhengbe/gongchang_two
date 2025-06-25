@@ -143,3 +143,33 @@ type OrderUpdateRequest struct {
 	Images            []string  `json:"images"`
 	Videos            []string  `json:"videos"`
 } 
+
+// OrderDetailResponse 订单详情响应（包含布料详细信息）
+type OrderDetailResponse struct {
+	ID                 uint                    `json:"id"`
+	Title              string                  `json:"title"`
+	Description        string                  `json:"description"`
+	Fabric             string                  `json:"fabric"`
+	Quantity           int                     `json:"quantity"`
+	FactoryID          *string                 `json:"factory_id"`
+	Status             OrderStatus             `json:"status"`
+	DesignerID         string                  `json:"designer_id"`
+	CustomerID         string                  `json:"customer_id"`
+	UnitPrice          float64                 `json:"unit_price"`
+	TotalPrice         float64                 `json:"total_price"`
+	PaymentStatus      string                  `json:"payment_status"`
+	ShippingAddress    string                  `json:"shipping_address"`
+	OrderType          string                  `json:"order_type"`
+	Fabrics            []Fabric                `json:"fabrics"`           // 布料详细信息数组
+	FabricsIDs         string                  `json:"fabrics_ids"`       // 原始布料ID字符串
+	DeliveryDate       *time.Time              `json:"delivery_date"`
+	OrderDate          *time.Time              `json:"order_date"`
+	SpecialRequirements string                 `json:"special_requirements"`
+	Attachments        []string                `json:"attachments"`
+	Models             []string                `json:"models"`
+	Images             []string                `json:"images"`
+	Videos             []string                `json:"videos"`
+	Files              []File                  `json:"files"`
+	CreatedAt          *time.Time              `json:"created_at"`
+	UpdatedAt          *time.Time              `json:"updated_at"`
+} 

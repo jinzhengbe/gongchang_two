@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/datatypes"
@@ -251,6 +253,69 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		json.Unmarshal(*order.Videos, &videos)
 	}
 
+	// 查询布料详细信息
+	var fabrics []map[string]interface{}
+	fabricsIDs := order.Fabrics
+	if fabricsIDs != "" {
+		// 解析布料ID字符串
+		parts := strings.Split(fabricsIDs, ",")
+		if len(parts) > 0 {
+			// 构建ID查询条件
+			var fabricIDs []string
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if part != "" {
+					fabricIDs = append(fabricIDs, part)
+				}
+			}
+			
+			if len(fabricIDs) > 0 {
+				// 查询布料信息
+				rows, err := c.DB.Raw("SELECT id, name, category, material, color, pattern, weight, width, price, unit, stock, min_order, description, image_url, thumbnail_url, tags, status, designer_id, supplier_id, factory_id, created_at, updated_at FROM fabrics WHERE id IN (?)", fabricIDs).Rows()
+				if err == nil {
+					defer rows.Close()
+					for rows.Next() {
+						var fabric map[string]interface{}
+						fabric = make(map[string]interface{})
+						var id uint
+						var name, category, material, color, pattern, unit, description, imageURL, thumbnailURL, tags string
+						var weight, width, price float64
+						var stock, minOrder, status int
+						var designerID, supplierID, factoryID *string
+						var createdAt, updatedAt time.Time
+						
+						rows.Scan(&id, &name, &category, &material, &color, &pattern, &weight, &width, &price, &unit, &stock, &minOrder, &description, &imageURL, &thumbnailURL, &tags, &status, &designerID, &supplierID, &factoryID, &createdAt, &updatedAt)
+						
+						fabric["id"] = id
+						fabric["name"] = name
+						fabric["category"] = category
+						fabric["material"] = material
+						fabric["color"] = color
+						fabric["pattern"] = pattern
+						fabric["weight"] = weight
+						fabric["width"] = width
+						fabric["price"] = price
+						fabric["unit"] = unit
+						fabric["stock"] = stock
+						fabric["min_order"] = minOrder
+						fabric["description"] = description
+						fabric["image_url"] = imageURL
+						fabric["thumbnail_url"] = thumbnailURL
+						fabric["tags"] = tags
+						fabric["status"] = status
+						fabric["designer_id"] = designerID
+						fabric["supplier_id"] = supplierID
+						fabric["factory_id"] = factoryID
+						fabric["created_at"] = createdAt
+						fabric["updated_at"] = updatedAt
+						
+						fabrics = append(fabrics, fabric)
+					}
+				}
+			}
+		}
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"id": order.ID,
 		"title": order.Title,
@@ -273,7 +338,8 @@ func (c *OrderController) GetOrderByID(ctx *gin.Context) {
 		"payment_status": order.PaymentStatus,
 		"shipping_address": order.ShippingAddress,
 		"order_type": order.OrderType,
-		"fabrics": order.Fabrics,
+		"fabrics": fabrics,
+		"fabrics_ids": fabricsIDs,
 		"delivery_date": order.DeliveryDate,
 		"order_date": order.OrderDate,
 		"special_requirements": order.SpecialRequirements,
