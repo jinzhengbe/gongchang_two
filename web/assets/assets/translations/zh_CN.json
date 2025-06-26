@@ -222,15 +222,10 @@
     "fabrics": "面料",
     "status": {
       "label": "状态",
-      "unknown": "未知",
-      "created": "已创建",
-      "designer_confirmed": "设计师已确认",
-      "factory_confirmed": "工厂已确认",
-      "in_production": "生产中",
+      "draft": "草稿",
+      "published": "已发布",
       "completed": "已完成",
-      "shipped": "已发货",
-      "cancelled": "已取消",
-      "published": "已发布"
+      "cancelled": "已取消"
     },
     "image_count": "图片数量",
     "image_url": "图片URL",
@@ -250,7 +245,12 @@
     "models": "模型文件",
     "videos": "视频",
     "files": "文件",
-    "3d_models": "3D模型文件"
+    "3d_models": "3D模型文件",
+    "detail": {
+      "basic_info": "基本信息",
+      "title": "订单标题",
+      "description": "订单描述"
+    }
   },
   "home": {
     "title": "首页",
@@ -335,12 +335,19 @@
     "basic_info": "基本信息",
     "name": "布料名称",
     "material": "材质",
+    "color": "颜色",
+    "pattern": "图案",
+    "weight": "克重",
+    "width": "门幅",
     "price": "价格",
+    "unit": "单位",
+    "stock": "库存",
+    "min_order": "最小起订量",
+    "description": "布料说明",
+    "image_url": "图片URL",
     "supplier": "供应商",
-    "supplier_info": "供应商信息",
     "supplier_id": "供应商ID",
     "supplier_name": "供应商名称",
-    "description": "布料说明",
     "usage_tips": "使用建议",
     "select": "选择布料",
     "no_fabrics": "暂无布料"
