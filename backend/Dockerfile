@@ -6,13 +6,13 @@ WORKDIR /app
 RUN apk add --no-cache gcc musl-dev wget
 
 # 复制 Go 模块文件
-COPY go.mod go.sum ./
+COPY backend/go.mod backend/go.sum ./
 
 # 下载依赖
 RUN go mod download
 
-# 复制项目文件
-COPY . .
+# 复制backend目录的内容
+COPY backend/ .
 
 # 设置环境变量
 ENV GO111MODULE=on

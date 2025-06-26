@@ -1,12 +1,10 @@
 package services
 
 import (
-	"gongChang/models"
-	"gorm.io/gorm"
-	"gorm.io/datatypes"
 	"encoding/json"
-	"strings"
-	"path/filepath"
+	"gongChang/models"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type OrderService struct {
@@ -75,67 +73,28 @@ func (s *OrderService) GetOrderByID(orderID uint) (*models.Order, error) {
 		return nil, err
 	}
 
-	// 处理文件关联
-	if len(order.Files) > 0 {
-		// 将文件按类型分类
-		var attachments, models, images, videos []string
-		for _, file := range order.Files {
-			ext := strings.ToLower(filepath.Ext(file.Name))
-			switch {
-			case strings.HasPrefix(ext, ".doc") || strings.HasPrefix(ext, ".pdf") || strings.HasPrefix(ext, ".txt"):
-				attachments = append(attachments, file.ID)
-			case strings.HasPrefix(ext, ".stl") || strings.HasPrefix(ext, ".obj") || strings.HasPrefix(ext, ".3ds"):
-				models = append(models, file.ID)
-			case strings.HasPrefix(ext, ".jpg") || strings.HasPrefix(ext, ".png") || strings.HasPrefix(ext, ".gif"):
-				images = append(images, file.ID)
-			case strings.HasPrefix(ext, ".mp4") || strings.HasPrefix(ext, ".avi") || strings.HasPrefix(ext, ".mov"):
-				videos = append(videos, file.ID)
-			}
-		}
-
-		// 更新 JSON 字段
-		if len(attachments) > 0 {
-			jsonData, _ := json.Marshal(attachments)
-			order.Attachments = (*datatypes.JSON)(&jsonData)
-		} else {
-			emptyArray := []string{}
-			jsonData, _ := json.Marshal(emptyArray)
-			order.Attachments = (*datatypes.JSON)(&jsonData)
-		}
-
-		if len(models) > 0 {
-			jsonData, _ := json.Marshal(models)
-			order.Models = (*datatypes.JSON)(&jsonData)
-		} else {
-			emptyArray := []string{}
-			jsonData, _ := json.Marshal(emptyArray)
-			order.Models = (*datatypes.JSON)(&jsonData)
-		}
-
-		if len(images) > 0 {
-			jsonData, _ := json.Marshal(images)
-			order.Images = (*datatypes.JSON)(&jsonData)
-		} else {
-			emptyArray := []string{}
-			jsonData, _ := json.Marshal(emptyArray)
-			order.Images = (*datatypes.JSON)(&jsonData)
-		}
-
-		if len(videos) > 0 {
-			jsonData, _ := json.Marshal(videos)
-			order.Videos = (*datatypes.JSON)(&jsonData)
-		} else {
-			emptyArray := []string{}
-			jsonData, _ := json.Marshal(emptyArray)
-			order.Videos = (*datatypes.JSON)(&jsonData)
-		}
-	} else {
-		// 如果没有文件，设置空数组
+	// 如果数据库中的JSON字段为空，则设置为空数组
+	if order.Attachments == nil {
 		emptyArray := []string{}
 		jsonData, _ := json.Marshal(emptyArray)
 		order.Attachments = (*datatypes.JSON)(&jsonData)
+	}
+
+	if order.Models == nil {
+		emptyArray := []string{}
+		jsonData, _ := json.Marshal(emptyArray)
 		order.Models = (*datatypes.JSON)(&jsonData)
+	}
+
+	if order.Images == nil {
+		emptyArray := []string{}
+		jsonData, _ := json.Marshal(emptyArray)
 		order.Images = (*datatypes.JSON)(&jsonData)
+	}
+
+	if order.Videos == nil {
+		emptyArray := []string{}
+		jsonData, _ := json.Marshal(emptyArray)
 		order.Videos = (*datatypes.JSON)(&jsonData)
 	}
 
@@ -246,27 +205,51 @@ func (s *OrderService) UpdateOrder(orderID uint, req *models.OrderUpdateRequest)
 		order.Status = models.OrderStatus(req.Status)
 	}
 
-	// 处理文件关联
-	if req.Attachments != nil && len(req.Attachments) > 0 {
+	// 处理文件关联 - 总是更新这些字段，即使为空
+	if req.Attachments != nil {
 		attachmentsJSON, _ := json.Marshal(req.Attachments)
+		jsonData := datatypes.JSON(attachmentsJSON)
+		order.Attachments = &jsonData
+	} else {
+		// 如果请求中没有attachments字段，设置为空数组
+		emptyArray := []string{}
+		attachmentsJSON, _ := json.Marshal(emptyArray)
 		jsonData := datatypes.JSON(attachmentsJSON)
 		order.Attachments = &jsonData
 	}
 
-	if req.Models != nil && len(req.Models) > 0 {
+	if req.Models != nil {
 		modelsJSON, _ := json.Marshal(req.Models)
+		jsonData := datatypes.JSON(modelsJSON)
+		order.Models = &jsonData
+	} else {
+		// 如果请求中没有models字段，设置为空数组
+		emptyArray := []string{}
+		modelsJSON, _ := json.Marshal(emptyArray)
 		jsonData := datatypes.JSON(modelsJSON)
 		order.Models = &jsonData
 	}
 
-	if req.Images != nil && len(req.Images) > 0 {
+	if req.Images != nil {
 		imagesJSON, _ := json.Marshal(req.Images)
+		jsonData := datatypes.JSON(imagesJSON)
+		order.Images = &jsonData
+	} else {
+		// 如果请求中没有images字段，设置为空数组
+		emptyArray := []string{}
+		imagesJSON, _ := json.Marshal(emptyArray)
 		jsonData := datatypes.JSON(imagesJSON)
 		order.Images = &jsonData
 	}
 
-	if req.Videos != nil && len(req.Videos) > 0 {
+	if req.Videos != nil {
 		videosJSON, _ := json.Marshal(req.Videos)
+		jsonData := datatypes.JSON(videosJSON)
+		order.Videos = &jsonData
+	} else {
+		// 如果请求中没有videos字段，设置为空数组
+		emptyArray := []string{}
+		videosJSON, _ := json.Marshal(emptyArray)
 		jsonData := datatypes.JSON(videosJSON)
 		order.Videos = &jsonData
 	}
