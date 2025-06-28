@@ -173,3 +173,16 @@ type OrderDetailResponse struct {
 	CreatedAt          *time.Time              `json:"created_at"`
 	UpdatedAt          *time.Time              `json:"updated_at"`
 } 
+
+// RemoveFileFromOrderRequest 从订单移除文件的请求
+type RemoveFileFromOrderRequest struct {
+	FileID   string `json:"fileId" binding:"required"`   // 文件ID（UUID格式）
+	FileType string `json:"fileType" binding:"required"` // 文件类型：image, attachment, model, video
+}
+
+// RemoveFileFromOrderResponse 从订单移除文件的响应
+type RemoveFileFromOrderResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Order   *Order `json:"order,omitempty"`
+} 

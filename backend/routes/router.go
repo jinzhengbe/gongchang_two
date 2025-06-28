@@ -124,8 +124,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
 				orderGroup.GET("/search", orderController.SearchOrders)
 				orderGroup.GET("/statistics", orderController.GetOrderStatistics)
-				orderGroup.POST("/:orderId/add-fabric", orderController.AddFabricToOrder)
-				orderGroup.POST("/:orderId/add-file", fileController.AddFileToOrder)
+				orderGroup.POST("/:id/add-fabric", orderController.AddFabricToOrder)
+				orderGroup.DELETE("/:id/remove-fabric", orderController.RemoveFabricFromOrder)
+				orderGroup.POST("/:id/add-file", fileController.AddFileToOrder)
+				orderGroup.DELETE("/:id/remove-file", orderController.RemoveFileFromOrder)
 			}
 
 			// 工厂订单路由

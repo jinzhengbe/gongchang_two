@@ -650,13 +650,13 @@ func (c *OrderController) GetPublicOrders(ctx *gin.Context) {
 // @Tags 订单管理
 // @Accept json
 // @Produce json
-// @Param orderId path int true "订单ID"
+// @Param id path int true "订单ID"
 // @Param request body models.AddFabricToOrderRequest true "布料信息"
 // @Success 201 {object} models.AddFabricToOrderResponse
-// @Router /api/orders/{orderId}/add-fabric [post]
+// @Router /api/orders/{id}/add-fabric [post]
 func (c *OrderController) AddFabricToOrder(ctx *gin.Context) {
 	// 获取订单ID
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
@@ -710,4 +710,107 @@ func (c *OrderController) AddFabricToOrder(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, response)
+}
+
+// RemoveFabricFromOrder 从订单移除布料
+// @Summary 从订单移除布料
+// @Description 从指定订单中移除指定的布料
+// @Tags 订单管理
+// @Accept json
+// @Produce json
+// @Param id path int true "订单ID"
+// @Param request body models.RemoveFabricFromOrderRequest true "移除布料请求"
+// @Success 200 {object} models.RemoveFabricFromOrderResponse
+// @Router /api/orders/{id}/remove-fabric [delete]
+func (c *OrderController) RemoveFabricFromOrder(ctx *gin.Context) {
+	// 获取订单ID
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		return
+	}
+
+	// 绑定请求参数
+	var req models.RemoveFabricFromOrderRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误: " + err.Error()})
+		return
+	}
+
+	// 验证布料ID
+	if req.FabricID == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "布料ID不能为空"})
+		return
+	}
+
+	// 创建布料服务实例
+	fabricService := services.NewFabricService(c.orderService.GetDB())
+
+	// 调用服务层方法
+	response, err := c.orderService.RemoveFabricFromOrder(uint(orderID), &req, fabricService)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+// RemoveFileFromOrder 从订单移除文件
+// @Summary 从订单移除文件
+// @Description 从指定订单中移除指定的文件（图片、附件、模型或视频）
+// @Tags 订单管理
+// @Accept json
+// @Produce json
+// @Param id path int true "订单ID"
+// @Param request body models.RemoveFileFromOrderRequest true "移除文件请求"
+// @Success 200 {object} models.RemoveFileFromOrderResponse
+// @Router /api/orders/{id}/remove-file [delete]
+func (c *OrderController) RemoveFileFromOrder(ctx *gin.Context) {
+	// 获取订单ID
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		return
+	}
+
+	// 绑定请求参数
+	var req models.RemoveFileFromOrderRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误: " + err.Error()})
+		return
+	}
+
+	// 验证文件ID
+	if req.FileID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "文件ID不能为空"})
+		return
+	}
+
+	// 验证文件类型
+	if req.FileType == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "文件类型不能为空"})
+		return
+	}
+
+	// 验证文件类型是否有效
+	validTypes := map[string]bool{
+		"image":       true,
+		"attachment":  true,
+		"model":       true,
+		"video":       true,
+	}
+	if !validTypes[req.FileType] {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件类型，支持的类型：image, attachment, model, video"})
+		return
+	}
+
+	// 调用服务层方法
+	response, err := c.orderService.RemoveFileFromOrder(uint(orderID), &req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
 } 

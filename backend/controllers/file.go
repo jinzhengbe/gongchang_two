@@ -101,7 +101,7 @@ func (c *FileController) UploadFile(ctx *gin.Context) {
 
 // GetOrderFiles 获取订单的所有文件
 func (c *FileController) GetOrderFiles(ctx *gin.Context) {
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
@@ -271,17 +271,17 @@ func (c *FileController) GetBatchFileDetails(ctx *gin.Context) {
 // @Tags 文件管理
 // @Accept multipart/form-data
 // @Produce json
-// @Param orderId path int true "订单ID"
+// @Param id path int true "订单ID"
 // @Param file formData file true "上传的文件"
 // @Param type formData string true "文件类型" Enums(image,attachment,model,video)
 // @Param description formData string false "文件描述"
 // @Success 200 {object} models.AddFileToOrderResponse
-// @Router /api/orders/{orderId}/add-file [post]
+// @Router /api/orders/{id}/add-file [post]
 func (c *FileController) AddFileToOrder(ctx *gin.Context) {
 	log.Printf("Starting add file to order process...")
 	
 	// 获取订单ID
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		log.Printf("Invalid order ID: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})

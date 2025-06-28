@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"gongChang/models"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -404,4 +405,179 @@ func (s *OrderService) GetOrderFabrics(orderID uint) ([]models.Fabric, error) {
 	var fabrics []models.Fabric
 	err := s.db.Where("id IN ?", fabricIDList).Find(&fabrics).Error
 	return fabrics, err
+}
+
+// RemoveFabricFromOrder 从订单移除布料
+func (s *OrderService) RemoveFabricFromOrder(orderID uint, req *models.RemoveFabricFromOrderRequest, fabricService *FabricService) (*models.RemoveFabricFromOrderResponse, error) {
+	var response *models.RemoveFabricFromOrderResponse
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// 1. 检查订单是否存在
+		var order models.Order
+		if err := tx.First(&order, orderID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return fmt.Errorf("订单不存在")
+			}
+			return err
+		}
+
+		// 2. 检查布料是否存在
+		var fabric models.Fabric
+		if err := tx.First(&fabric, req.FabricID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return fmt.Errorf("布料不存在")
+			}
+			return err
+		}
+
+		// 3. 解析订单的布料ID列表
+		var fabricIDList models.FabricIDList
+		if err := fabricIDList.FromCommaString(order.Fabrics); err != nil {
+			// 如果解析失败，创建空列表
+			fabricIDList = make(models.FabricIDList, 0)
+		}
+
+		// 4. 检查订单是否包含该布料
+		if !fabricIDList.ContainsFabricID(req.FabricID) {
+			return fmt.Errorf("订单中不包含该布料")
+		}
+
+		// 5. 从列表中移除布料ID
+		fabricIDList.RemoveFabricID(req.FabricID)
+
+		// 6. 更新订单的布料字段
+		newFabricsStr := fabricIDList.ToCommaString()
+		if err := tx.Model(&order).Update("fabrics", newFabricsStr).Error; err != nil {
+			return err
+		}
+
+		// 7. 构建响应
+		response = &models.RemoveFabricFromOrderResponse{
+			Success: true,
+			Message: "布料已从订单中移除",
+			Order:   &order,
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+// RemoveFileFromOrder 从订单移除文件
+func (s *OrderService) RemoveFileFromOrder(orderID uint, req *models.RemoveFileFromOrderRequest) (*models.RemoveFileFromOrderResponse, error) {
+	var response *models.RemoveFileFromOrderResponse
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// 1. 检查订单是否存在
+		var order models.Order
+		if err := tx.First(&order, orderID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return fmt.Errorf("订单不存在")
+			}
+			return err
+		}
+
+		// 2. 检查文件是否存在
+		var file models.File
+		if err := tx.Where("id = ?", req.FileID).First(&file).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return fmt.Errorf("文件不存在")
+			}
+			return err
+		}
+
+		// 3. 根据文件类型更新订单的相应字段
+		var existingFiles []string
+		var fieldName string
+
+		switch req.FileType {
+		case "image":
+			if order.Images != nil {
+				json.Unmarshal(*order.Images, &existingFiles)
+			}
+			fieldName = "images"
+		case "attachment":
+			if order.Attachments != nil {
+				json.Unmarshal(*order.Attachments, &existingFiles)
+			}
+			fieldName = "attachments"
+		case "model":
+			if order.Models != nil {
+				json.Unmarshal(*order.Models, &existingFiles)
+			}
+			fieldName = "models"
+		case "video":
+			if order.Videos != nil {
+				json.Unmarshal(*order.Videos, &existingFiles)
+			}
+			fieldName = "videos"
+		default:
+			return fmt.Errorf("不支持的文件类型: %s", req.FileType)
+		}
+
+		// 4. 从数组中移除指定的文件ID
+		var newFiles []string
+		found := false
+		for _, fileID := range existingFiles {
+			if fileID == req.FileID {
+				found = true
+			} else {
+				newFiles = append(newFiles, fileID)
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("订单中不包含该文件")
+		}
+
+		// 5. 更新订单的相应字段
+		var jsonData datatypes.JSON
+		if len(newFiles) > 0 {
+			jsonBytes, _ := json.Marshal(newFiles)
+			jsonData = datatypes.JSON(jsonBytes)
+		} else {
+			// 如果数组为空，设置为空数组
+			emptyArray := []string{}
+			jsonBytes, _ := json.Marshal(emptyArray)
+			jsonData = datatypes.JSON(jsonBytes)
+		}
+
+		// 6. 更新订单
+		updateData := map[string]interface{}{
+			fieldName: jsonData,
+		}
+		if err := tx.Model(&order).Updates(updateData).Error; err != nil {
+			return err
+		}
+
+		// 7. 重新获取更新后的订单
+		if err := tx.First(&order, orderID).Error; err != nil {
+			return err
+		}
+
+		// 8. 构建响应
+		response = &models.RemoveFileFromOrderResponse{
+			Success: true,
+			Message: fmt.Sprintf("文件已从订单的%s中移除", req.FileType),
+			Order:   &order,
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+// GetDB 获取数据库连接
+func (s *OrderService) GetDB() *gorm.DB {
+	return s.db
 } 

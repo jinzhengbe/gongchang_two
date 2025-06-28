@@ -127,4 +127,16 @@ func (f *FabricIDList) ToCommaString() string {
 		strParts[i] = strconv.FormatUint(uint64(id), 10)
 	}
 	return strings.Join(strParts, ",")
+}
+
+// RemoveFabricFromOrderRequest 从订单移除布料的请求
+type RemoveFabricFromOrderRequest struct {
+	FabricID uint `json:"fabricId" binding:"required"`
+}
+
+// RemoveFabricFromOrderResponse 从订单移除布料的响应
+type RemoveFabricFromOrderResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Order   *Order `json:"order,omitempty"`
 } 
