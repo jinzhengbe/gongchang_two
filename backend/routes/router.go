@@ -45,6 +45,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	orderService := services.NewOrderService(db)
 	fileService := services.NewFileService(db, "./uploads")
 	fabricService := services.NewFabricService(db)
+	jiedanService := services.NewJiedanService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
@@ -53,6 +54,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	fileController := controllers.NewFileController(fileService, "./uploads", cfg)
 	factoryController := &controllers.FactoryController{DB: db}
 	fabricController := controllers.NewFabricController(fabricService)
+	jiedanController := controllers.NewJiedanController(jiedanService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -163,6 +165,24 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				fabricGroup.DELETE("/:id", fabricController.DeleteFabric)
 				fabricGroup.PUT("/:id/stock", fabricController.UpdateFabricStock)
 			}
+
+			// 接单管理路由（需要认证）
+			jiedanGroup := authRequiredGroup.Group("/jiedan")
+			{
+				jiedanGroup.POST("", jiedanController.CreateJiedan)
+				jiedanGroup.GET("/:id", jiedanController.GetJiedanByID)
+				jiedanGroup.PUT("/:id", jiedanController.UpdateJiedan)
+				jiedanGroup.DELETE("/:id", jiedanController.DeleteJiedan)
+				jiedanGroup.POST("/:id/accept", jiedanController.AcceptJiedan)
+				jiedanGroup.POST("/:id/reject", jiedanController.RejectJiedan)
+			}
+
+			// 订单接单相关路由
+			orderGroup.GET("/:orderId/jiedans", jiedanController.GetJiedansByOrderID)
+			
+			// 工厂接单相关路由
+			authRequiredGroup.GET("/factories/:factoryId/jiedans", jiedanController.GetJiedansByFactoryID)
+			authRequiredGroup.GET("/factories/:factoryId/jiedan-statistics", jiedanController.GetJiedanStatistics)
 		}
 	}
 

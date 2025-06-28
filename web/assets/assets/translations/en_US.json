@@ -59,7 +59,8 @@
       "designer": "Designer Login",
       "designer_no_account": "Register",
       "factory": {
-        "title": "Factory Login"
+        "title": "Factory Login",
+        "no_account": "Don't have an account? Click to register"
       },
       "supplier": "Supplier Login"
     },
@@ -228,7 +229,8 @@
       "completed": "Completed",
       "shipped": "Shipped",
       "cancelled": "Cancelled",
-      "published": "Published"
+      "published": "Published",
+      "draft": "Draft"
     },
     "image_count": "Image Count",
     "image_url": "Image URL",
@@ -247,7 +249,24 @@
     "downloading": "Downloading...",
     "models": "Model Files",
     "videos": "Videos",
-    "files": "Files"
+    "files": "Files",
+    "detail": {
+      "title": "Order Details",
+      "basic_info": "Basic Information",
+      "order_id": "Order ID",
+      "title": "Order Title",
+      "description": "Order Description",
+      "quantity": "Quantity",
+      "status": "Status",
+      "create_time": "Create Time",
+      "update_time": "Update Time",
+      "factory": "Factory",
+      "files": "Files",
+      "attachments": "Attachments",
+      "images": "Images",
+      "models": "Models",
+      "videos": "Videos"
+    }
   },
   "home": {
     "title": "Home",
@@ -312,11 +331,45 @@
       "active": "Active",
       "busy": "Busy",
       "inactive": "Inactive"
+    },
+    "order": {
+      "detail": {
+        "title": "Order Details",
+        "basic_info": "Basic Information",
+        "order_id": "Order ID",
+        "title": "Order Title",
+        "description": "Order Description",
+        "quantity": "Quantity",
+        "status": "Status",
+        "create_time": "Create Time",
+        "update_time": "Update Time",
+        "factory": "Factory",
+        "files": "Files",
+        "attachments": "Attachments",
+        "images": "Images",
+        "models": "Models",
+        "videos": "Videos",
+        "no_fabrics": "No fabric information",
+        "fabric": {
+          "name": "Name",
+          "material": "Material",
+          "price": "Price",
+          "supplier": "Supplier",
+          "unknown": "Unknown"
+        },
+        "file": {
+          "size": "Size"
+        },
+        "preview": {
+          "title": "Notice",
+          "not_supported": "This file type is not supported for preview"
+        }
+      }
     }
   },
   "common": {
-    "load_more": "Load More",
-    "error": "Error",
-    "unknown_error": "Unknown Error"
+    "cancel": "Cancel",
+    "close": "Close",
+    "load_more": "Load More"
   }
 } 

@@ -56,7 +56,7 @@
       "designer_no_account": "Đăng ký",
       "factory": {
         "title": "Factory Login",
-        "no_account": "Don't have an account? Click to register"
+        "no_account": "Chưa có tài khoản? Đăng ký ngay"
       },
       "supplier": "Đăng nhập nhà cung cấp"
     },
@@ -219,10 +219,11 @@
       "production": "Sản xuất"
     },
     "status": {
-      "published": "Đã đăng",
-      "in_progress": "Đang thực hiện",
+      "published": "Đã xuất bản",
+      "in_progress": "Đang tiến hành",
       "completed": "Hoàn thành",
       "cancelled": "Đã hủy",
+      "draft": "Bản nháp",
       "unknown": "Không xác định"
     },
     "instruction_date": {
@@ -236,6 +237,23 @@
     "expected_out_date": {
       "title": "Ngày dự kiến xuất kho",
       "required": "Vui lòng chọn ngày dự kiến xuất kho"
+    },
+    "detail": {
+      "title": "Chi tiết đơn hàng",
+      "basic_info": "Thông tin cơ bản",
+      "order_id": "ID đơn hàng",
+      "title": "Tiêu đề đơn hàng",
+      "description": "Mô tả đơn hàng",
+      "quantity": "Số lượng",
+      "status": "Trạng thái",
+      "create_time": "Thời gian tạo",
+      "update_time": "Thời gian cập nhật",
+      "factory": "Nhà máy",
+      "files": "Tệp tin",
+      "attachments": "Tệp đính kèm",
+      "images": "Hình ảnh",
+      "models": "Mô hình",
+      "videos": "Video"
     }
   },
   "home": {
@@ -295,6 +313,45 @@
     "completed_orders": "Đơn hàng hoàn thành",
     "pieces": "chiếc",
     "people": "người",
-    "view_details": "Xem chi tiết"
+    "view_details": "Xem chi tiết",
+    "order": {
+      "detail": {
+        "title": "Chi tiết đơn hàng",
+        "basic_info": "Thông tin cơ bản",
+        "order_id": "ID đơn hàng",
+        "title": "Tiêu đề đơn hàng",
+        "description": "Mô tả đơn hàng",
+        "quantity": "Số lượng",
+        "status": "Trạng thái",
+        "create_time": "Thời gian tạo",
+        "update_time": "Thời gian cập nhật",
+        "factory": "Nhà máy",
+        "files": "Tệp tin",
+        "attachments": "Tệp đính kèm",
+        "images": "Hình ảnh",
+        "models": "Mô hình",
+        "videos": "Video",
+        "no_fabrics": "Không có thông tin vải",
+        "fabric": {
+          "name": "Tên",
+          "material": "Chất liệu",
+          "price": "Giá",
+          "supplier": "Nhà cung cấp",
+          "unknown": "Không xác định"
+        },
+        "file": {
+          "size": "Kích thước"
+        },
+        "preview": {
+          "title": "Thông báo",
+          "not_supported": "Loại tệp này không hỗ trợ xem trước"
+        }
+      }
+    }
+  },
+  "common": {
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "load_more": "Tải thêm"
   }
 } 

@@ -26,4 +26,25 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `videos` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_orders_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 接单表
+CREATE TABLE IF NOT EXISTS `jiedan` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint unsigned NOT NULL COMMENT '订单ID',
+  `factory_id` varchar(191) NOT NULL COMMENT '工厂ID',
+  `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT '状态：pending-待处理, accepted-已同意, rejected-已拒绝',
+  `jiedan_time` datetime(3) DEFAULT NULL COMMENT '接单时间',
+  `agree_time` datetime(3) DEFAULT NULL COMMENT '同意时间',
+  `agree_user_id` varchar(191) DEFAULT NULL COMMENT '同意的用户ID',
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_jiedan_order_id` (`order_id`),
+  KEY `idx_jiedan_factory_id` (`factory_id`),
+  KEY `idx_jiedan_status` (`status`),
+  KEY `idx_jiedan_deleted_at` (`deleted_at`),
+  CONSTRAINT `fk_jiedan_order_id` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  UNIQUE KEY `uk_order_factory` (`order_id`, `factory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='接单表'; 

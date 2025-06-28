@@ -1,5 +1,13 @@
 # API 文档
 
+## 文档索引
+
+- [工厂管理](#工厂管理)
+- [订单管理](#订单管理)
+- [文件管理](#文件管理)
+- [布料管理](#布料管理)
+- [接单管理](./jiedan_api.md)
+
 ## 工厂管理
 
 ### 注册工厂
@@ -130,4 +138,54 @@
         }
     ]
 }
-``` 
+```
+
+## 布料管理
+
+### 创建布料
+- **URL**: `/api/fabrics`
+- **方法**: `POST`
+- **请求头**: `Authorization: Bearer <token>`
+- **请求体**:
+```json
+{
+    "name": "布料名称",
+    "type": "布料类型",
+    "color": "颜色",
+    "material": "材质",
+    "weight": 200,
+    "width": 150,
+    "price_per_meter": 25.5,
+    "stock_quantity": 1000,
+    "description": "布料描述"
+}
+```
+
+### 更新布料库存
+- **URL**: `/api/fabrics/:id/stock`
+- **方法**: `PUT`
+- **请求头**: `Authorization: Bearer <token>`
+- **请求体**:
+```json
+{
+    "stock_quantity": 800
+}
+```
+
+## 接单管理
+
+详细的接单管理API文档请参考：[接单管理API文档](./jiedan_api.md)
+
+### 主要功能
+- 工厂对订单进行接单操作
+- 查看接单记录和状态
+- 同意或拒绝接单
+- 接单统计信息
+
+### 核心API
+- `POST /api/jiedan` - 创建接单记录
+- `GET /api/jiedan/{id}` - 获取接单详情
+- `POST /api/jiedan/{id}/accept` - 同意接单
+- `POST /api/jiedan/{id}/reject` - 拒绝接单
+- `GET /api/orders/{orderId}/jiedans` - 获取订单的接单记录
+- `GET /api/factories/{factoryId}/jiedans` - 获取工厂的接单记录

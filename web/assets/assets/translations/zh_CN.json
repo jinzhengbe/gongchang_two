@@ -63,7 +63,8 @@
       "designer": "设计师登录",
       "designer_no_account": "点击注册",
       "factory": {
-        "title": "工厂登录"
+        "title": "工厂登录",
+        "no_account": "没有账号？点击注册"
       },
       "supplier": "供应商登录"
     },
@@ -225,7 +226,8 @@
       "draft": "草稿",
       "published": "已发布",
       "completed": "已完成",
-      "cancelled": "已取消"
+      "cancelled": "已取消",
+      "unknown": "未知"
     },
     "image_count": "图片数量",
     "image_url": "图片URL",
@@ -247,9 +249,21 @@
     "files": "文件",
     "3d_models": "3D模型文件",
     "detail": {
+      "title": "订单详情",
       "basic_info": "基本信息",
+      "order_id": "订单ID",
       "title": "订单标题",
-      "description": "订单描述"
+      "description": "订单描述",
+      "quantity": "数量",
+      "status": "状态",
+      "create_time": "创建时间",
+      "update_time": "更新时间",
+      "factory": "工厂",
+      "files": "文件",
+      "attachments": "附件",
+      "images": "图片",
+      "models": "模型",
+      "videos": "视频"
     }
   },
   "home": {
@@ -323,9 +337,44 @@
     "orders": {
       "title": "订单列表",
       "no_orders": "暂无订单"
+    },
+    "order": {
+      "detail": {
+        "title": "订单详情",
+        "basic_info": "基本信息",
+        "order_id": "订单ID",
+        "title": "订单标题",
+        "description": "订单描述",
+        "quantity": "数量",
+        "status": "状态",
+        "create_time": "创建时间",
+        "update_time": "更新时间",
+        "factory": "工厂",
+        "files": "文件",
+        "attachments": "附件",
+        "images": "图片",
+        "models": "模型",
+        "videos": "视频",
+        "no_fabrics": "暂无布料信息",
+        "fabric": {
+          "name": "名称",
+          "material": "材质",
+          "price": "价格",
+          "supplier": "供应商",
+          "unknown": "未知"
+        },
+        "file": {
+          "size": "大小"
+        },
+        "preview": {
+          "title": "提示",
+          "not_supported": "此文件类型暂不支持预览"
+        }
+      }
     }
   },
   "common": {
+    "cancel": "取消",
     "load_more": "加载更多",
     "error": "错误",
     "unknown_error": "未知错误",

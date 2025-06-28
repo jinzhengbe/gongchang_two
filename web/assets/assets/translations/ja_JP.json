@@ -76,7 +76,42 @@
     "pieces": "個",
     "people": "人",
     "view_details": "詳細を見る",
-    "title": "工場ログイン"
+    "title": "工場ログイン",
+    "no_account": "アカウントをお持ちでない方はこちら",
+    "order": {
+      "detail": {
+        "title": "注文詳細",
+        "basic_info": "基本情報",
+        "order_id": "注文ID",
+        "title": "注文タイトル",
+        "description": "注文説明",
+        "quantity": "数量",
+        "status": "ステータス",
+        "create_time": "作成日時",
+        "update_time": "更新日時",
+        "factory": "工場",
+        "files": "ファイル",
+        "attachments": "添付ファイル",
+        "images": "画像",
+        "models": "モデル",
+        "videos": "動画",
+        "no_fabrics": "生地情報がありません",
+        "fabric": {
+          "name": "名称",
+          "material": "素材",
+          "price": "価格",
+          "supplier": "サプライヤー",
+          "unknown": "不明"
+        },
+        "file": {
+          "size": "サイズ"
+        },
+        "preview": {
+          "title": "お知らせ",
+          "not_supported": "このファイルタイプはプレビューに対応していません"
+        }
+      }
+    }
   },
   "order": {
     "order_no": "注文番号",
@@ -118,13 +153,31 @@
       "published": "公開済み",
       "pending": "処理待ち",
       "accepted": "受付済み",
-      "in_progress": "進行中"
+      "in_progress": "進行中",
+      "draft": "下書き"
     },
     "payment_status": {
       "unpaid": "未払い",
       "paid": "支払済み",
       "refunded": "返金済み",
       "failed": "支払い失敗"
+    },
+    "detail": {
+      "title": "注文詳細",
+      "basic_info": "基本情報",
+      "order_id": "注文ID",
+      "title": "注文タイトル",
+      "description": "注文説明",
+      "quantity": "数量",
+      "status": "ステータス",
+      "create_time": "作成日時",
+      "update_time": "更新日時",
+      "factory": "工場",
+      "files": "ファイル",
+      "attachments": "添付ファイル",
+      "images": "画像",
+      "models": "モデル",
+      "videos": "動画"
     }
   },
   "auth": {
@@ -234,5 +287,10 @@
       "published": "公開済み",
       "in_progress": "進行中"
     }
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "load_more": "もっと見る"
   }
 } 
