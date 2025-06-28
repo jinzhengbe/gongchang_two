@@ -10,11 +10,28 @@ import (
 	"path/filepath"
 	"fmt"
 	"strings"
+	"mime"
 )
 
 const (
 	MaxFileSize = 100 * 1024 * 1024 // 100MB
 )
+
+// 支持的文件类型映射
+var SupportedFileTypes = map[string][]string{
+	"image": {
+		".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg",
+	},
+	"attachment": {
+		".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".zip", ".rar",
+	},
+	"model": {
+		".stl", ".obj", ".fbx", ".dae", ".3ds", ".max", ".blend",
+	},
+	"video": {
+		".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mkv",
+	},
+}
 
 type FileService struct {
 	db         *gorm.DB
@@ -34,21 +51,62 @@ func NewFileService(db *gorm.DB, uploadPath string) *FileService {
 	}
 }
 
-func (s *FileService) SaveFile(file io.Reader, filename string, orderID *uint) (*models.File, error) {
-	log.Printf("Starting SaveFile process for file: %s", filename)
+func (s *FileService) SaveFile(file io.Reader, filename string, orderID *uint, fileType string) (*models.File, error) {
+	log.Printf("Starting SaveFile process for file: %s, type: %s", filename, fileType)
 	if orderID != nil {
 		log.Printf("OrderID provided: %d", *orderID)
 	} else {
 		log.Printf("No OrderID provided")
 	}
 
+	// 获取原始扩展名 - 保持原始大小写
+	originalExt := filepath.Ext(filename)
+	log.Printf("Original extension: %s", originalExt)
+
+	// 验证文件类型（使用小写进行比较）
+	lowerExt := strings.ToLower(originalExt)
+	if fileType != "" {
+		if supportedExts, exists := SupportedFileTypes[fileType]; exists {
+			extSupported := false
+			for _, ext := range supportedExts {
+				if lowerExt == ext {
+					extSupported = true
+					break
+				}
+			}
+			if !extSupported {
+				return nil, fmt.Errorf("不支持的文件类型: %s (支持的类型: %v)", lowerExt, supportedExts)
+			}
+		}
+	}
+
 	// 生成唯一文件名
 	fileID := uuid.New().String()
-	ext := filepath.Ext(filename)
-	if ext == "" {
-		ext = ".txt" // 如果没有扩展名，默认使用.txt
+	
+	// 处理扩展名 - 保持客户端原始扩展名
+	var finalExt string
+	if originalExt == "" {
+		// 只有在没有扩展名时才设置默认扩展名
+		switch fileType {
+		case "image":
+			finalExt = ".jpg"
+		case "attachment":
+			finalExt = ".pdf"
+		case "model":
+			finalExt = ".stl"
+		case "video":
+			finalExt = ".mp4"
+		default:
+			finalExt = ".txt"
+		}
+		log.Printf("No extension found in filename, using default: %s", finalExt)
+	} else {
+		// 保持客户端传过来的原始扩展名
+		finalExt = originalExt
+		log.Printf("Using original extension from client: %s", finalExt)
 	}
-	newFilename := fileID + ext
+	
+	newFilename := fileID + finalExt
 	log.Printf("Generated new filename: %s", newFilename)
 
 	// 确保上传目录存在
@@ -83,6 +141,12 @@ func (s *FileService) SaveFile(file io.Reader, filename string, orderID *uint) (
 	if written > MaxFileSize {
 		log.Printf("File too large: %d bytes (max: %d bytes)", written, MaxFileSize)
 		return nil, fmt.Errorf("文件大小超过限制 (最大 %d MB)", MaxFileSize/1024/1024)
+	}
+
+	// 验证文件内容（可选：检查文件头）
+	if err := s.validateFileContent(tempFile, fileType, finalExt); err != nil {
+		log.Printf("File content validation failed: %v", err)
+		return nil, err
 	}
 
 	// 重命名临时文件为最终文件
@@ -200,4 +264,130 @@ func (s *FileService) GetFilesByIDs(fileIDs []string) ([]models.File, error) {
 	var files []models.File
 	err := s.db.Where("id IN ?", fileIDs).Find(&files).Error
 	return files, err
+}
+
+// GetDB 获取数据库连接
+func (s *FileService) GetDB() *gorm.DB {
+	return s.db
+}
+
+// validateFileContent 验证文件内容
+func (s *FileService) validateFileContent(filePath, fileType, extension string) error {
+	// 读取文件头进行验证
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("无法打开文件进行验证: %v", err)
+	}
+	defer file.Close()
+
+	// 读取前512字节用于文件头检测
+	buffer := make([]byte, 512)
+	_, err = file.Read(buffer)
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("读取文件头失败: %v", err)
+	}
+
+	// 检测MIME类型
+	detectedMIME := mime.TypeByExtension(extension)
+	log.Printf("Detected MIME type for %s: %s", extension, detectedMIME)
+
+	// 根据文件类型进行基本验证
+	switch fileType {
+	case "image":
+		return s.validateImageFile(buffer, extension)
+	case "video":
+		return s.validateVideoFile(buffer, extension)
+	case "attachment":
+		return s.validateAttachmentFile(buffer, extension)
+	case "model":
+		return s.validateModelFile(buffer, extension)
+	default:
+		log.Printf("No specific validation for file type: %s", fileType)
+		return nil
+	}
+}
+
+// validateImageFile 验证图片文件
+func (s *FileService) validateImageFile(buffer []byte, extension string) error {
+	// 检查常见图片文件头
+	imageHeaders := map[string][]byte{
+		".jpg":  {0xFF, 0xD8, 0xFF},
+		".jpeg": {0xFF, 0xD8, 0xFF},
+		".png":  {0x89, 0x50, 0x4E, 0x47},
+		".gif":  {0x47, 0x49, 0x46},
+		".bmp":  {0x42, 0x4D},
+		".webp": {0x52, 0x49, 0x46, 0x46},
+	}
+
+	if header, exists := imageHeaders[extension]; exists {
+		if len(buffer) >= len(header) {
+			for i, b := range header {
+				if buffer[i] != b {
+					return fmt.Errorf("图片文件头验证失败: %s", extension)
+				}
+			}
+			log.Printf("Image file header validated: %s", extension)
+			return nil
+		}
+	}
+	
+	log.Printf("No specific header validation for image type: %s", extension)
+	return nil
+}
+
+// validateVideoFile 验证视频文件
+func (s *FileService) validateVideoFile(buffer []byte, extension string) error {
+	// 检查常见视频文件头
+	videoHeaders := map[string][]byte{
+		".mp4": {0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70}, // MP4
+		".avi": {0x52, 0x49, 0x46, 0x46}, // AVI
+		".mov": {0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70}, // MOV
+	}
+
+	if header, exists := videoHeaders[extension]; exists {
+		if len(buffer) >= len(header) {
+			for i, b := range header {
+				if buffer[i] != b {
+					return fmt.Errorf("视频文件头验证失败: %s", extension)
+				}
+			}
+			log.Printf("Video file header validated: %s", extension)
+			return nil
+		}
+	}
+	
+	log.Printf("No specific header validation for video type: %s", extension)
+	return nil
+}
+
+// validateAttachmentFile 验证附件文件
+func (s *FileService) validateAttachmentFile(buffer []byte, extension string) error {
+	// 检查常见文档文件头
+	docHeaders := map[string][]byte{
+		".pdf": {0x25, 0x50, 0x44, 0x46}, // PDF
+		".zip": {0x50, 0x4B, 0x03, 0x04}, // ZIP
+		".rar": {0x52, 0x61, 0x72, 0x21}, // RAR
+	}
+
+	if header, exists := docHeaders[extension]; exists {
+		if len(buffer) >= len(header) {
+			for i, b := range header {
+				if buffer[i] != b {
+					return fmt.Errorf("附件文件头验证失败: %s", extension)
+				}
+			}
+			log.Printf("Attachment file header validated: %s", extension)
+			return nil
+		}
+	}
+	
+	log.Printf("No specific header validation for attachment type: %s", extension)
+	return nil
+}
+
+// validateModelFile 验证模型文件
+func (s *FileService) validateModelFile(buffer []byte, extension string) error {
+	// 3D模型文件通常没有固定的文件头，这里只做基本检查
+	log.Printf("Model file validation skipped for: %s", extension)
+	return nil
 }

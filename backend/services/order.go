@@ -187,6 +187,12 @@ func (s *OrderService) GetOrdersCount(userID string, status string) (int64, erro
 }
 
 func (s *OrderService) UpdateOrder(orderID uint, req *models.OrderUpdateRequest) error {
+	// 首先获取现有订单数据
+	var existingOrder models.Order
+	if err := s.db.First(&existingOrder, orderID).Error; err != nil {
+		return err
+	}
+
 	order := &models.Order{
 		Title:             req.Title,
 		Description:       req.Description,
@@ -230,16 +236,35 @@ func (s *OrderService) UpdateOrder(orderID uint, req *models.OrderUpdateRequest)
 		order.Models = &jsonData
 	}
 
+	// 处理Images字段 - 实现合并逻辑而不是覆盖
 	if req.Images != nil {
-		imagesJSON, _ := json.Marshal(req.Images)
+		// 获取现有的图片ID列表
+		var existingImages []string
+		if existingOrder.Images != nil {
+			json.Unmarshal(*existingOrder.Images, &existingImages)
+		}
+		
+		// 合并现有图片ID和新图片ID，去重
+		imageMap := make(map[string]bool)
+		for _, img := range existingImages {
+			imageMap[img] = true
+		}
+		for _, img := range req.Images {
+			imageMap[img] = true
+		}
+		
+		// 转换回切片
+		mergedImages := make([]string, 0, len(imageMap))
+		for img := range imageMap {
+			mergedImages = append(mergedImages, img)
+		}
+		
+		imagesJSON, _ := json.Marshal(mergedImages)
 		jsonData := datatypes.JSON(imagesJSON)
 		order.Images = &jsonData
 	} else {
-		// 如果请求中没有images字段，设置为空数组
-		emptyArray := []string{}
-		imagesJSON, _ := json.Marshal(emptyArray)
-		jsonData := datatypes.JSON(imagesJSON)
-		order.Images = &jsonData
+		// 如果请求中没有images字段，保持现有图片不变
+		order.Images = existingOrder.Images
 	}
 
 	if req.Videos != nil {
