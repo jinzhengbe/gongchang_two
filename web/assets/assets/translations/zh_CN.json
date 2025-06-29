@@ -369,6 +369,30 @@
         "preview": {
           "title": "提示",
           "not_supported": "此文件类型暂不支持预览"
+        },
+        "accept_order": {
+          "title": "接单",
+          "message": "接单说明",
+          "message_hint": "请说明工厂承接此订单的能力和优势",
+          "price_quote": "报价",
+          "price_quote_hint": "请输入订单报价",
+          "delivery_date": "预计交货日期",
+          "delivery_date_hint": "请选择预计交货日期",
+          "pending": "审核中",
+          "confirm": {
+            "title": "确认接单",
+            "message": "请填写接单信息",
+            "yes": "确认接单"
+          },
+          "success": {
+            "title": "接单成功",
+            "message": "接单申请已提交，等待设计师确认"
+          },
+          "error": {
+            "title": "接单失败",
+            "message": "接单失败，请稍后重试",
+            "no_user": "用户未登录，请重新登录"
+          }
         }
       }
     }

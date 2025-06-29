@@ -3,8 +3,8 @@
 # 接单管理 API 测试脚本
 # 测试接单相关的所有API接口
 
-BASE_URL="https://aneworders.com/api"
-TOKEN="your_auth_token_here"
+BASE_URL="http://localhost:8008/api"
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOTk0ZWNiMDctNDk5OC00N2VkLTlkNDUtZjc0N2ZiZTlmYjI4Iiwicm9sZSI6ImZhY3RvcnkiLCJleHAiOjE3NTEyMzk0NzMsImlhdCI6MTc1MTE1MzA3M30.JfdPsTSZNEPfvRmOc0bNj2S0euddddhEGqUB7jg9Po4"
 
 # 颜色定义
 RED='\033[0;31m'
@@ -76,7 +76,7 @@ send_request() {
 
 # 测试数据
 ORDER_ID=1
-FACTORY_ID="test_factory_001"
+FACTORY_ID="994ecb07-4998-47ed-9d45-f747fbe9fb28"
 JIEDAN_ID=""
 
 print_title "接单管理 API 测试"
@@ -91,7 +91,7 @@ echo ""
 print_title "1. 创建接单记录测试"
 
 send_request "POST" "$BASE_URL/jiedan" \
-    "{\"order_id\": $ORDER_ID, \"factory_id\": \"$FACTORY_ID\"}" \
+    "{\"order_id\": $ORDER_ID, \"factory_id\": \"$FACTORY_ID\", \"price\": 1500.50}" \
     "201" \
     "创建接单记录"
 
@@ -146,7 +146,13 @@ print_title "6. 拒绝接单测试"
 
 # 先创建另一个接单记录用于拒绝测试
 send_request "POST" "$BASE_URL/jiedan" \
-    "{\"order_id\": $ORDER_ID, \"factory_id\": \"test_factory_002\"}" \
+    "{\"order_id\": $ORDER_ID, \"factory_id\": \"$FACTORY_ID\", \"price\": 1600.00}" \
+    "409" \
+    "创建重复接单记录（应该失败）"
+
+# 创建一个新的接单记录用于拒绝测试（使用不同的订单ID）
+send_request "POST" "$BASE_URL/jiedan" \
+    "{\"order_id\": 2, \"factory_id\": \"$FACTORY_ID\", \"price\": 1800.00}" \
     "201" \
     "创建第二个接单记录用于拒绝测试"
 
@@ -167,7 +173,7 @@ print_title "7. 更新接单记录测试"
 
 if [ -n "$JIEDAN_ID" ]; then
     send_request "PUT" "$BASE_URL/jiedan/$JIEDAN_ID" \
-        "{\"status\": \"accepted\", \"agree_user_id\": \"updated_user_001\"}" \
+        "{\"status\": \"accepted\", \"price\": 1700.00, \"agree_user_id\": \"updated_user_001\"}" \
         "200" \
         "更新接单记录"
 else
@@ -187,7 +193,7 @@ print_title "9. 错误情况测试"
 
 # 9.1 创建重复接单（应该失败）
 send_request "POST" "$BASE_URL/jiedan" \
-    "{\"order_id\": $ORDER_ID, \"factory_id\": \"$FACTORY_ID\"}" \
+    "{\"order_id\": $ORDER_ID, \"factory_id\": \"$FACTORY_ID\", \"price\": 1900.00}" \
     "409" \
     "创建重复接单（应该失败）"
 

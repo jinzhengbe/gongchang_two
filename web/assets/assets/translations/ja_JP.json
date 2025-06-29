@@ -178,6 +178,30 @@
       "images": "画像",
       "models": "モデル",
       "videos": "動画"
+    },
+    "accept_order": {
+      "title": "注文受注",
+      "message": "受注メッセージ",
+      "message_hint": "この注文に対する工場の能力と利点を説明してください",
+      "price_quote": "価格見積もり",
+      "price_quote_hint": "注文の価格見積もりを入力してください",
+      "delivery_date": "納期予定日",
+      "delivery_date_hint": "納期予定日を選択してください",
+      "pending": "審査中",
+      "confirm": {
+        "title": "注文受注確認",
+        "message": "受注情報を入力してください",
+        "yes": "注文受注"
+      },
+      "success": {
+        "title": "受注成功",
+        "message": "受注申請が提出されました。デザイナーの確認をお待ちください"
+      },
+      "error": {
+        "title": "受注失敗",
+        "message": "受注に失敗しました。後でもう一度お試しください",
+        "no_user": "ユーザーがログインしていません。再度ログインしてください"
+      }
     }
   },
   "auth": {

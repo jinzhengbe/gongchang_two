@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `jiedan` (
   `order_id` bigint unsigned NOT NULL COMMENT '订单ID',
   `factory_id` varchar(191) NOT NULL COMMENT '工厂ID',
   `status` varchar(50) NOT NULL DEFAULT 'pending' COMMENT '状态：pending-待处理, accepted-已同意, rejected-已拒绝',
+  `price` decimal(10,2) DEFAULT NULL COMMENT '接单价格',
   `jiedan_time` datetime(3) DEFAULT NULL COMMENT '接单时间',
   `agree_time` datetime(3) DEFAULT NULL COMMENT '同意时间',
   `agree_user_id` varchar(191) DEFAULT NULL COMMENT '同意的用户ID',

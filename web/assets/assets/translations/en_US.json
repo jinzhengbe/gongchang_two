@@ -363,6 +363,30 @@
         "preview": {
           "title": "Notice",
           "not_supported": "This file type is not supported for preview"
+        },
+        "accept_order": {
+          "title": "Accept Order",
+          "message": "Accept Order Message",
+          "message_hint": "Please describe your factory's capability and advantages for this order",
+          "price_quote": "Price Quote",
+          "price_quote_hint": "Please enter the order price quote",
+          "delivery_date": "Estimated Delivery Date",
+          "delivery_date_hint": "Please select the estimated delivery date",
+          "pending": "Under Review",
+          "confirm": {
+            "title": "Confirm Accept Order",
+            "message": "Please fill in the acceptance information",
+            "yes": "Accept Order"
+          },
+          "success": {
+            "title": "Order Accepted",
+            "message": "Acceptance application submitted, waiting for designer confirmation"
+          },
+          "error": {
+            "title": "Accept Order Failed",
+            "message": "Failed to accept order, please try again later",
+            "no_user": "User not logged in, please login again"
+          }
         }
       }
     }

@@ -40,6 +40,7 @@ func (s *JiedanService) CreateJiedan(req *models.CreateJiedanRequest) (*models.J
 		OrderID:    req.OrderID,
 		FactoryID:  req.FactoryID,
 		Status:     models.JiedanStatusPending,
+		Price:      req.Price,
 		JiedanTime: &now,
 	}
 
@@ -172,6 +173,9 @@ func (s *JiedanService) UpdateJiedan(id uint, req *models.UpdateJiedanRequest) (
 	updates := make(map[string]interface{})
 	if req.Status != "" {
 		updates["status"] = req.Status
+	}
+	if req.Price != nil {
+		updates["price"] = req.Price
 	}
 	if req.AgreeUserID != "" {
 		updates["agree_user_id"] = req.AgreeUserID

@@ -130,6 +130,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.DELETE("/:id/remove-fabric", orderController.RemoveFabricFromOrder)
 				orderGroup.POST("/:id/add-file", fileController.AddFileToOrder)
 				orderGroup.DELETE("/:id/remove-file", orderController.RemoveFileFromOrder)
+				orderGroup.GET("/:id/jiedans", jiedanController.GetJiedansByOrderID)
 			}
 
 			// 工厂订单路由
@@ -177,9 +178,6 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				jiedanGroup.POST("/:id/reject", jiedanController.RejectJiedan)
 			}
 
-			// 订单接单相关路由
-			orderGroup.GET("/:orderId/jiedans", jiedanController.GetJiedansByOrderID)
-			
 			// 工厂接单相关路由
 			authRequiredGroup.GET("/factories/:factoryId/jiedans", jiedanController.GetJiedansByFactoryID)
 			authRequiredGroup.GET("/factories/:factoryId/jiedan-statistics", jiedanController.GetJiedanStatistics)

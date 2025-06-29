@@ -14,6 +14,7 @@
 | `order_id` | bigint unsigned | 订单ID，外键关联orders表 |
 | `factory_id` | varchar(191) | 工厂ID |
 | `status` | varchar(50) | 状态：pending-待处理, accepted-已同意, rejected-已拒绝 |
+| `price` | decimal(10,2) | 接单价格 |
 | `jiedan_time` | datetime(3) | 接单时间 |
 | `agree_time` | datetime(3) | 同意时间 |
 | `agree_user_id` | varchar(191) | 同意的用户ID |
@@ -37,7 +38,8 @@ Authorization: Bearer {token}
 ```json
 {
   "order_id": 123,
-  "factory_id": "factory_user_id"
+  "factory_id": "factory_user_id",
+  "price": 1500.50
 }
 ```
 
@@ -48,6 +50,7 @@ Authorization: Bearer {token}
   "order_id": 123,
   "factory_id": "factory_user_id",
   "status": "pending",
+  "price": 1500.50,
   "jiedan_time": "2025-06-28T10:30:00Z",
   "agree_time": null,
   "agree_user_id": null,
@@ -74,6 +77,7 @@ Authorization: Bearer {token}
   "order_id": 123,
   "factory_id": "factory_user_id",
   "status": "pending",
+  "price": 1500.50,
   "jiedan_time": "2025-06-28T10:30:00Z",
   "agree_time": null,
   "agree_user_id": null,
@@ -108,6 +112,7 @@ Authorization: Bearer {token}
     "order_id": 123,
     "factory_id": "factory_user_id",
     "status": "pending",
+    "price": 1500.50,
     "jiedan_time": "2025-06-28T10:30:00Z",
     "agree_time": null,
     "agree_user_id": null,
@@ -150,6 +155,7 @@ Authorization: Bearer {token}
       "order_id": 123,
       "factory_id": "factory_user_id",
       "status": "pending",
+      "price": 1500.50,
       "jiedan_time": "2025-06-28T10:30:00Z",
       "agree_time": null,
       "agree_user_id": null,
@@ -192,6 +198,7 @@ Authorization: Bearer {token}
   "order_id": 123,
   "factory_id": "factory_user_id",
   "status": "accepted",
+  "price": 1500.50,
   "jiedan_time": "2025-06-28T10:30:00Z",
   "agree_time": "2025-06-28T11:00:00Z",
   "agree_user_id": "user_id",
@@ -224,6 +231,7 @@ Authorization: Bearer {token}
   "order_id": 123,
   "factory_id": "factory_user_id",
   "status": "rejected",
+  "price": 1500.50,
   "jiedan_time": "2025-06-28T10:30:00Z",
   "agree_time": null,
   "agree_user_id": null,
@@ -257,6 +265,7 @@ Authorization: Bearer {token}
   "order_id": 123,
   "factory_id": "factory_user_id",
   "status": "accepted",
+  "price": 1500.50,
   "jiedan_time": "2025-06-28T10:30:00Z",
   "agree_time": null,
   "agree_user_id": "user_id",
@@ -337,7 +346,8 @@ curl -X POST "https://aneworders.com/api/jiedan" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{
     "order_id": 123,
-    "factory_id": "factory_user_id"
+    "factory_id": "factory_user_id",
+    "price": 1500.50
   }'
 ```
 

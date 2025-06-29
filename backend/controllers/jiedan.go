@@ -95,11 +95,11 @@ func (c *JiedanController) GetJiedanByID(ctx *gin.Context) {
 // @Tags 接单管理
 // @Accept json
 // @Produce json
-// @Param orderId path int true "订单ID"
+// @Param id path int true "订单ID"
 // @Success 200 {array} models.Jiedan
-// @Router /api/orders/{orderId}/jiedans [get]
+// @Router /api/orders/{id}/jiedans [get]
 func (c *JiedanController) GetJiedansByOrderID(ctx *gin.Context) {
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
@@ -156,6 +156,7 @@ func (c *JiedanController) GetJiedansByFactoryID(ctx *gin.Context) {
 			OrderID:     jiedan.OrderID,
 			FactoryID:   jiedan.FactoryID,
 			Status:      jiedan.Status,
+			Price:       jiedan.Price,
 			JiedanTime:  jiedan.JiedanTime,
 			AgreeTime:   jiedan.AgreeTime,
 			AgreeUserID: jiedan.AgreeUserID,

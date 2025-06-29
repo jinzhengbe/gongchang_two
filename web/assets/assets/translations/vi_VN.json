@@ -345,6 +345,29 @@
         "preview": {
           "title": "Thông báo",
           "not_supported": "Loại tệp này không hỗ trợ xem trước"
+        },
+        "accept_order": {
+          "title": "Nhận đơn hàng",
+          "message": "Tin nhắn nhận đơn hàng",
+          "message_hint": "Vui lòng mô tả khả năng và ưu điểm của nhà máy cho đơn hàng này",
+          "price_quote": "Báo giá",
+          "price_quote_hint": "Vui lòng nhập báo giá đơn hàng",
+          "delivery_date": "Ngày giao hàng dự kiến",
+          "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến",
+          "confirm": {
+            "title": "Xác nhận nhận đơn hàng",
+            "message": "Vui lòng điền thông tin nhận đơn hàng",
+            "yes": "Nhận đơn hàng"
+          },
+          "success": {
+            "title": "Nhận đơn hàng thành công",
+            "message": "Đơn xin nhận đơn hàng đã được gửi, chờ xác nhận của nhà thiết kế"
+          },
+          "error": {
+            "title": "Nhận đơn hàng thất bại",
+            "message": "Nhận đơn hàng thất bại, vui lòng thử lại sau",
+            "no_user": "Người dùng chưa đăng nhập, vui lòng đăng nhập lại"
+          }
         }
       }
     }
