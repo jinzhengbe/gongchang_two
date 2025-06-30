@@ -44,4 +44,44 @@ func (fc *FactoryController) GetFactoryList(c *gin.Context) {
 			"factories": factories,
 		},
 	})
+}
+
+// GetFactoryByUserID 根据用户ID获取工厂信息
+func (fc *FactoryController) GetFactoryByUserID(c *gin.Context) {
+	userID := c.Param("userId")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  "用户ID不能为空",
+		})
+		return
+	}
+
+	var factory models.FactoryProfile
+	err := fc.DB.Where("user_id = ?", userID).First(&factory).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{
+				"code": 404,
+				"msg":  "工厂不存在",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "服务器内部错误",
+		})
+		return
+	}
+
+	// 获取关联的用户信息
+	var user models.User
+	fc.DB.Where("id = ?", factory.UserID).First(&user)
+	factory.User = user
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "success",
+		"data": factory,
+	})
 } 

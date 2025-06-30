@@ -91,6 +91,8 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 
 		// 工厂列表路由（公开）
 		api.GET("/factories", factoryController.GetFactoryList)
+		// 根据用户ID获取单个工厂信息（公开）
+		api.GET("/factories/user/:userId", factoryController.GetFactoryByUserID)
 
 		// 获取最近订单（公开路由）
 		api.GET("/orders/recent", orderController.GetRecentOrders)
