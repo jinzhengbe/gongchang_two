@@ -34,6 +34,8 @@
     },
     "language_change_title": "Change Language",
     "language_change_message": "Are you sure you want to change the language? The app needs to restart for the changes to take full effect.",
+    "language_changed": "Language changed successfully",
+    "language_change_failed": "Failed to change language",
     "contact": "Contact",
     "view_details": "View Details",
     "font_size": "Font Size",
@@ -336,6 +338,50 @@
       "detail": {
         "title": "Order Details",
         "basic_info": "Basic Information",
+        "progress": "Order Progress",
+        "add_progress": "Add Progress",
+        "edit_progress": "Edit Progress",
+        "delete_progress": "Delete Progress",
+        "progress_type": "Progress Type",
+        "progress_status": "Status",
+        "progress_description": "Description",
+        "start_time": "Start Time",
+        "completed_time": "Completed Time",
+        "progress_success": "Progress record saved successfully",
+        "progress_error": "Failed to save progress record",
+        "progress_confirm_delete": "Confirm Delete",
+        "progress_confirm_delete_message": "Are you sure you want to delete the progress record \"{type}\"?",
+        "progress_add_success": "Progress record added successfully",
+        "progress_edit_success": "Progress record updated successfully",
+        "progress_delete_success": "Progress record deleted successfully",
+        "progress_local_mode": "Progress record added successfully (Local Mode)",
+        "progress_no_records": "No progress records",
+        "progress_select_type": "Please select progress type",
+        "progress_select_status": "Please select status",
+        "progress_enter_description": "Please enter progress description",
+        "progress_select_start_time": "Select start time",
+        "progress_select_completed_time": "Select completed time",
+        "progress_types": {
+          "design": "Design Phase",
+          "material": "Material Preparation",
+          "production": "Production Phase",
+          "quality": "Quality Inspection",
+          "packaging": "Packaging Phase",
+          "shipping": "Shipping Phase",
+          "custom": "Custom Phase"
+        },
+        "progress_statuses": {
+          "not_started": "Not Started",
+          "in_progress": "In Progress",
+          "completed": "Completed",
+          "delayed": "Delayed",
+          "on_hold": "On Hold"
+        },
+        "progress_time_info": {
+          "start": "Start",
+          "completed": "Completed"
+        },
+        "files": "File Information",
         "order_id": "Order ID",
         "title": "Order Title",
         "description": "Order Description",
@@ -344,56 +390,80 @@
         "create_time": "Create Time",
         "update_time": "Update Time",
         "factory": "Factory",
-        "files": "Files",
-        "attachments": "Attachments",
-        "images": "Images",
-        "models": "Models",
-        "videos": "Videos",
         "no_fabrics": "No fabric information",
-        "fabric": {
-          "name": "Name",
-          "material": "Material",
-          "price": "Price",
-          "supplier": "Supplier",
-          "unknown": "Unknown"
-        },
-        "file": {
-          "size": "Size"
-        },
-        "preview": {
-          "title": "Notice",
-          "not_supported": "This file type is not supported for preview"
-        },
+        "edit_order": "Edit Order",
+        "add_images": "Add Images",
+        "add_staff": "Add Staff",
         "accept_order": {
           "title": "Accept Order",
-          "message": "Accept Order Message",
-          "message_hint": "Please describe your factory's capability and advantages for this order",
-          "price_quote": "Price Quote",
-          "price_quote_hint": "Please enter the order price quote",
-          "delivery_date": "Estimated Delivery Date",
-          "delivery_date_hint": "Please select the estimated delivery date",
-          "pending": "Under Review",
-          "confirm": {
-            "title": "Confirm Accept Order",
-            "message": "Please fill in the acceptance information",
-            "yes": "Accept Order"
-          },
+          "pending": "Pending",
+          "accepted": "Accepted",
+          "rejected": "Rejected",
+          "cancelled": "Cancelled",
+          "unknown": "Unknown Status",
           "success": {
-            "title": "Order Accepted",
-            "message": "Acceptance application submitted, waiting for designer confirmation"
+            "title": "Order Accepted Successfully",
+            "message": "Your order acceptance request has been submitted, waiting for designer confirmation"
           },
           "error": {
-            "title": "Accept Order Failed",
+            "title": "Failed to Accept Order",
             "message": "Failed to accept order, please try again later",
-            "no_user": "User not logged in, please login again"
-          }
+            "no_user": "Failed to get user information"
+          },
+          "confirm": {
+            "title": "Confirm Accept Order",
+            "message": "Are you sure you want to accept this order?",
+            "yes": "Confirm Accept"
+          },
+          "message": "Acceptance Message",
+          "message_hint": "Please enter acceptance message...",
+          "price_quote": "Price Quote",
+          "price_quote_hint": "Please enter price quote",
+          "delivery_date": "Estimated Delivery Date",
+          "delivery_date_hint": "Please select estimated delivery date"
         }
+      },
+      "edit": {
+        "title": "Edit Order",
+        "basic_info": "Basic Information",
+        "production_info": "Production Information",
+        "notes": "Notes",
+        "title_label": "Order Title",
+        "title_required": "Please enter order title",
+        "description_label": "Order Description",
+        "quantity_label": "Quantity",
+        "quantity_required": "Please enter quantity",
+        "quantity_invalid": "Please enter valid quantity",
+        "expected_start_date": "Expected Start Date",
+        "expected_end_date": "Expected End Date",
+        "priority": "Production Priority",
+        "priority_low": "Low",
+        "priority_medium": "Medium"
       }
     }
   },
   "common": {
     "cancel": "Cancel",
+    "save": "Save",
+    "success": "Success",
+    "error": "Error",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
     "close": "Close",
-    "load_more": "Load More"
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "upload": "Upload",
+    "warning": "Warning"
   }
 } 

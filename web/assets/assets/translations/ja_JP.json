@@ -34,6 +34,8 @@
     },
     "language_change_title": "言語を切り替え",
     "language_change_message": "言語を切り替えますか？切り替え後、アプリを再起動する必要があります。",
+    "language_changed": "言語が正常に変更されました",
+    "language_change_failed": "言語の変更に失敗しました",
     "contact": "連絡先",
     "view_details": "詳細を見る"
   },
@@ -82,6 +84,49 @@
       "detail": {
         "title": "注文詳細",
         "basic_info": "基本情報",
+        "progress": "注文進捗",
+        "add_progress": "進捗追加",
+        "edit_progress": "進捗編集",
+        "delete_progress": "進捗削除",
+        "progress_type": "進捗タイプ",
+        "progress_status": "ステータス",
+        "progress_description": "説明",
+        "start_time": "開始時間",
+        "completed_time": "完了時間",
+        "progress_success": "進捗記録が正常に保存されました",
+        "progress_error": "進捗記録の保存に失敗しました",
+        "progress_confirm_delete": "削除確認",
+        "progress_confirm_delete_message": "進捗記録「{type}」を削除してもよろしいですか？",
+        "progress_add_success": "進捗記録が正常に追加されました",
+        "progress_edit_success": "進捗記録が正常に更新されました",
+        "progress_delete_success": "進捗記録が正常に削除されました",
+        "progress_local_mode": "進捗記録が正常に追加されました（ローカルモード）",
+        "progress_no_records": "進捗記録がありません",
+        "progress_select_type": "進捗タイプを選択してください",
+        "progress_select_status": "ステータスを選択してください",
+        "progress_enter_description": "進捗説明を入力してください",
+        "progress_select_start_time": "開始時間を選択",
+        "progress_select_completed_time": "完了時間を選択",
+        "progress_types": {
+          "design": "デザイン段階",
+          "material": "材料準備",
+          "production": "生産段階",
+          "quality": "品質検査",
+          "packaging": "包装段階",
+          "shipping": "発送段階",
+          "custom": "カスタム段階"
+        },
+        "progress_statuses": {
+          "not_started": "未開始",
+          "in_progress": "進行中",
+          "completed": "完了",
+          "delayed": "遅延",
+          "on_hold": "保留"
+        },
+        "progress_time_info": {
+          "start": "開始",
+          "completed": "完了"
+        },
         "order_id": "注文ID",
         "title": "注文タイトル",
         "description": "注文説明",
@@ -165,6 +210,49 @@
     "detail": {
       "title": "注文詳細",
       "basic_info": "基本情報",
+      "progress": "注文進捗",
+      "add_progress": "進捗追加",
+      "edit_progress": "進捗編集",
+      "delete_progress": "進捗削除",
+      "progress_type": "進捗タイプ",
+      "progress_status": "ステータス",
+      "progress_description": "説明",
+      "start_time": "開始時間",
+      "completed_time": "完了時間",
+      "progress_success": "進捗記録が正常に保存されました",
+      "progress_error": "進捗記録の保存に失敗しました",
+      "progress_confirm_delete": "削除確認",
+      "progress_confirm_delete_message": "進捗記録「{type}」を削除してもよろしいですか？",
+      "progress_add_success": "進捗記録が正常に追加されました",
+      "progress_edit_success": "進捗記録が正常に更新されました",
+      "progress_delete_success": "進捗記録が正常に削除されました",
+      "progress_local_mode": "進捗記録が正常に追加されました（ローカルモード）",
+      "progress_no_records": "進捗記録がありません",
+      "progress_select_type": "進捗タイプを選択してください",
+      "progress_select_status": "ステータスを選択してください",
+      "progress_enter_description": "進捗説明を入力してください",
+      "progress_select_start_time": "開始時間を選択",
+      "progress_select_completed_time": "完了時間を選択",
+      "progress_types": {
+        "design": "デザイン段階",
+        "material": "材料準備",
+        "production": "生産段階",
+        "quality": "品質検査",
+        "packaging": "包装段階",
+        "shipping": "発送段階",
+        "custom": "カスタム段階"
+      },
+      "progress_statuses": {
+        "not_started": "未開始",
+        "in_progress": "進行中",
+        "completed": "完了",
+        "delayed": "遅延",
+        "on_hold": "保留"
+      },
+      "progress_time_info": {
+        "start": "開始",
+        "completed": "完了"
+      },
       "order_id": "注文ID",
       "title": "注文タイトル",
       "description": "注文説明",
@@ -177,7 +265,22 @@
       "attachments": "添付ファイル",
       "images": "画像",
       "models": "モデル",
-      "videos": "動画"
+      "videos": "動画",
+      "no_fabrics": "生地情報がありません",
+      "fabric": {
+        "name": "名称",
+        "material": "素材",
+        "price": "価格",
+        "supplier": "サプライヤー",
+        "unknown": "不明"
+      },
+      "file": {
+        "size": "サイズ"
+      },
+      "preview": {
+        "title": "お知らせ",
+        "not_supported": "このファイルタイプはプレビューに対応していません"
+      }
     },
     "accept_order": {
       "title": "注文受注",
@@ -188,6 +291,10 @@
       "delivery_date": "納期予定日",
       "delivery_date_hint": "納期予定日を選択してください",
       "pending": "審査中",
+      "accepted": "受注済み",
+      "rejected": "拒否済み",
+      "cancelled": "キャンセル済み",
+      "unknown": "不明な状態",
       "confirm": {
         "title": "注文受注確認",
         "message": "受注情報を入力してください",
@@ -314,7 +421,25 @@
   },
   "common": {
     "cancel": "キャンセル",
+    "save": "保存",
+    "success": "成功",
+    "error": "エラー",
+    "loading": "読み込み中...",
+    "confirm": "確認",
+    "delete": "削除",
+    "edit": "編集",
+    "add": "追加",
+    "search": "検索",
+    "filter": "フィルター",
+    "refresh": "更新",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "submit": "送信",
     "close": "閉じる",
+    "yes": "はい",
+    "no": "いいえ",
+    "ok": "OK",
     "load_more": "もっと見る"
   }
 } 

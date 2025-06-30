@@ -192,6 +192,30 @@
     - backend/models/order.go
     - backend/go.mod
 
+### 2025-06-30
+- 新增工厂职工管理功能
+  - 功能描述：完整的工厂职工信息管理系统
+  - 新增数据库表：`factory_employees` 表
+  - 新增API接口：
+    - `POST /api/employees` - 创建职工
+    - `GET /api/employees` - 获取职工列表（支持分页和筛选）
+    - `GET /api/employees/{id}` - 获取单个职工
+    - `PUT /api/employees/{id}` - 更新职工信息
+    - `DELETE /api/employees/{id}` - 删除职工
+    - `GET /api/employees/search` - 搜索职工
+    - `GET /api/employees/statistics` - 获取职工统计
+  - 权限控制：仅工厂角色可以访问职工管理功能
+  - 数据隔离：每个工厂只能管理自己的职工数据
+  - 新增文件：
+    - `backend/models/employee.go` - 职工数据模型
+    - `backend/services/employee.go` - 职工服务层
+    - `backend/controllers/employee.go` - 职工控制器
+    - `backend/middleware/auth.go` - 工厂角色验证中间件
+    - `docs/employee_api.md` - 职工管理API文档
+    - `tests/employee_api_test.sh` - 自动化测试脚本
+    - `deploy_employee_feature.sh` - 一键部署脚本
+  - 测试状态：所有功能已测试通过
+
 ## 开发环境设置
 
 ### 1. 使用 Docker Compose 启动开发环境
@@ -705,4 +729,75 @@ backend/
 ### 2025-05-20
 - 修复 `/api/designer/orders` 查询逻辑，原先用 factory_id 查询，现已改为 designer_id。
 - 增加日志输出，便于排查用户订单查询问题。
-- 测试通过，Flutter端和接口均能正确查到当前用户订单。 
+- 测试通过，Flutter端和接口均能正确查到当前用户订单。
+
+## 测试账号
+
+### 默认测试账号
+- **工厂账号**: `gongchang` / `123456`
+- **设计师账号**: `testuser1` / `test123`
+- **管理员账号**: `admin` / `admin123`
+
+### 账号说明
+- 工厂账号用于测试职工管理、接单管理、进度管理等工厂相关功能
+- 设计师账号用于测试订单创建、布料管理等设计师相关功能
+- 所有账号都支持JWT认证，用于API接口测试 
+
+## 发布流程
+
+### 发布脚本说明
+
+项目根目录下的 `publish.sh` 是标准的发布脚本，用于自动化发布流程。
+
+#### 脚本功能
+- 更新开发文档
+- 更新开发日志  
+- 执行Git提交和推送
+- 记录发布时间和内容
+
+#### 使用方法
+```bash
+# 执行发布流程
+./publish.sh
+```
+
+#### 脚本内容
+```bash
+#!/bin/bash
+
+# 设置颜色输出
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}开始发布流程...${NC}"
+
+# 1. 更新开发文档
+echo -e "${GREEN}正在更新开发文档...${NC}"
+current_date=$(date "+%Y-%m-%d")
+echo -e "\n## 更新记录 ($current_date)\n- 更新了开发文档\n- 更新了开发日志\n- 提交了代码更新" >> 开发文档.md
+
+# 2. 更新开发日志
+echo -e "${GREEN}正在更新开发日志...${NC}"
+echo -e "\n## $current_date\n- 完成了代码更新\n- 更新了相关文档" >> 开发日志.md
+
+# 3. Git 操作
+echo -e "${GREEN}正在执行 Git 操作...${NC}"
+if [ -f last_publish_message.txt ]; then
+  commit_msg=$(cat last_publish_message.txt)
+else
+  commit_msg="docs: 更新开发文档和日志 ($current_date)"
+fi
+git add .
+git commit -m "$commit_msg"
+git push
+
+echo -e "${GREEN}发布流程完成！${NC}"
+```
+
+#### 注意事项
+- 当对话中提到"发布"、"发布一下"等指令时，就是执行 `./publish.sh` 脚本
+- 发布前请确保所有代码和文档都已更新完成
+- 脚本会自动记录发布时间和内容到开发文档中
+
+## 开发环境设置

@@ -46,6 +46,8 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	fileService := services.NewFileService(db, "./uploads")
 	fabricService := services.NewFabricService(db)
 	jiedanService := services.NewJiedanService(db)
+	progressService := services.NewProgressService(db)
+	employeeService := services.NewEmployeeService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
@@ -55,6 +57,8 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	factoryController := &controllers.FactoryController{DB: db}
 	fabricController := controllers.NewFabricController(fabricService)
 	jiedanController := controllers.NewJiedanController(jiedanService)
+	progressController := controllers.NewProgressController(progressService)
+	employeeController := controllers.NewEmployeeController(employeeService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -131,6 +135,12 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.POST("/:id/add-file", fileController.AddFileToOrder)
 				orderGroup.DELETE("/:id/remove-file", orderController.RemoveFileFromOrder)
 				orderGroup.GET("/:id/jiedans", jiedanController.GetJiedansByOrderID)
+				
+				// 进度管理路由
+				orderGroup.POST("/:id/progress", progressController.CreateProgress)
+				orderGroup.GET("/:id/progress", progressController.GetProgressByOrderID)
+				orderGroup.PUT("/:id/progress/:progressId", progressController.UpdateProgress)
+				orderGroup.DELETE("/:id/progress/:progressId", progressController.DeleteProgress)
 			}
 
 			// 工厂订单路由
@@ -181,6 +191,23 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			// 工厂接单相关路由
 			authRequiredGroup.GET("/factories/:factoryId/jiedans", jiedanController.GetJiedansByFactoryID)
 			authRequiredGroup.GET("/factories/:factoryId/jiedan-statistics", jiedanController.GetJiedanStatistics)
+			
+			// 工厂进度管理路由
+			authRequiredGroup.GET("/factories/:factoryId/progress", progressController.GetProgressByFactoryID)
+			authRequiredGroup.GET("/factories/:factoryId/progress-statistics", progressController.GetProgressStatistics)
+			
+			// 职工管理路由（仅工厂角色）
+			employeeGroup := authRequiredGroup.Group("/employees")
+			employeeGroup.Use(middleware.FactoryRoleMiddleware())
+			{
+				employeeGroup.POST("", employeeController.CreateEmployee)
+				employeeGroup.GET("", employeeController.GetEmployees)
+				employeeGroup.GET("/statistics", employeeController.GetEmployeeStatistics)
+				employeeGroup.GET("/search", employeeController.SearchEmployees)
+				employeeGroup.GET("/:id", employeeController.GetEmployee)
+				employeeGroup.PUT("/:id", employeeController.UpdateEmployee)
+				employeeGroup.DELETE("/:id", employeeController.DeleteEmployee)
+			}
 		}
 	}
 

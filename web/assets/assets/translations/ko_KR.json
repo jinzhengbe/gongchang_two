@@ -28,11 +28,14 @@
       "select": "언어 선택",
       "chinese": "中文",
       "english": "English",
+      "japanese": "日本語",
       "korean": "한국어",
       "vietnamese": "Tiếng Việt"
     },
     "language_change_title": "언어 변경",
     "language_change_message": "언어를 변경하시겠습니까? 변경을 완전히 적용하려면 앱을 재시작해야 합니다.",
+    "language_changed": "언어가 성공적으로 변경되었습니다",
+    "language_change_failed": "언어 변경에 실패했습니다",
     "contact": "연락처",
     "view_details": "상세 보기"
   },
@@ -226,6 +229,49 @@
     "detail": {
       "title": "주문 상세",
       "basic_info": "기본 정보",
+      "progress": "주문 진행 상황",
+      "add_progress": "진행 상황 추가",
+      "edit_progress": "진행 상황 편집",
+      "delete_progress": "진행 상황 삭제",
+      "progress_type": "진행 유형",
+      "progress_status": "상태",
+      "progress_description": "설명",
+      "start_time": "시작 시간",
+      "completed_time": "완료 시간",
+      "progress_success": "진행 상황 기록이 성공적으로 저장되었습니다",
+      "progress_error": "진행 상황 기록 저장에 실패했습니다",
+      "progress_confirm_delete": "삭제 확인",
+      "progress_confirm_delete_message": "진행 상황 기록 \"{type}\"을(를) 삭제하시겠습니까?",
+      "progress_add_success": "진행 상황 기록이 성공적으로 추가되었습니다",
+      "progress_edit_success": "진행 상황 기록이 성공적으로 업데이트되었습니다",
+      "progress_delete_success": "진행 상황 기록이 성공적으로 삭제되었습니다",
+      "progress_local_mode": "진행 상황 기록이 성공적으로 추가되었습니다 (로컬 모드)",
+      "progress_no_records": "진행 상황 기록이 없습니다",
+      "progress_select_type": "진행 유형을 선택하세요",
+      "progress_select_status": "상태를 선택하세요",
+      "progress_enter_description": "진행 상황 설명을 입력하세요",
+      "progress_select_start_time": "시작 시간 선택",
+      "progress_select_completed_time": "완료 시간 선택",
+      "progress_types": {
+        "design": "디자인 단계",
+        "material": "재료 준비",
+        "production": "생산 단계",
+        "quality": "품질 검사",
+        "packaging": "포장 단계",
+        "shipping": "배송 단계",
+        "custom": "사용자 정의 단계"
+      },
+      "progress_statuses": {
+        "not_started": "시작하지 않음",
+        "in_progress": "진행 중",
+        "completed": "완료됨",
+        "delayed": "지연됨",
+        "on_hold": "보류"
+      },
+      "progress_time_info": {
+        "start": "시작",
+        "completed": "완료"
+      },
       "order_id": "주문 ID",
       "title": "주문 제목",
       "description": "주문 설명",
@@ -285,7 +331,13 @@
     "view_more": "더 보기",
     "no_factories": "공장이 없습니다",
     "no_orders": "주문이 없습니다",
-    "load_more": "더 불러오기"
+    "load_more": "더 불러오기",
+    "role_select": {
+      "title": "신원을 선택하세요",
+      "designer": "디자이너",
+      "factory": "공장",
+      "supplier": "공급업체"
+    }
   },
   "errors": {
     "network": "네트워크 오류, 잠시 후 다시 시도하세요",
@@ -364,7 +416,25 @@
   },
   "common": {
     "cancel": "취소",
+    "save": "저장",
+    "success": "성공",
+    "error": "오류",
+    "loading": "로딩 중...",
+    "confirm": "확인",
+    "delete": "삭제",
+    "edit": "편집",
+    "add": "추가",
+    "search": "검색",
+    "filter": "필터",
+    "refresh": "새로고침",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "submit": "제출",
     "close": "닫기",
+    "yes": "예",
+    "no": "아니오",
+    "ok": "확인",
     "load_more": "더 보기"
   }
 } 

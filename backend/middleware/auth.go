@@ -120,4 +120,27 @@ func ValidateToken(tokenString string) (*Claims, error) {
 	}
 
 	return nil, jwt.ErrSignatureInvalid
+}
+
+// FactoryRoleMiddleware 工厂角色验证中间件
+func FactoryRoleMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 先执行认证中间件
+		AuthMiddleware()(c)
+		
+		// 如果认证失败，直接返回
+		if c.IsAborted() {
+			return
+		}
+		
+		// 检查用户角色
+		userRole := c.GetString("user_role")
+		if userRole != string(models.RoleFactory) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "仅工厂角色可以访问此功能"})
+			c.Abort()
+			return
+		}
+		
+		c.Next()
+	}
 } 

@@ -34,6 +34,8 @@
     },
     "language_change_title": "Thay đổi ngôn ngữ",
     "language_change_message": "Bạn có chắc chắn muốn thay đổi ngôn ngữ? Ứng dụng cần khởi động lại để áp dụng thay đổi.",
+    "language_changed": "Thay đổi ngôn ngữ thành công",
+    "language_change_failed": "Thay đổi ngôn ngữ thất bại",
     "contact": "Liên hệ",
     "view_details": "Xem chi tiết"
   },
@@ -241,6 +243,49 @@
     "detail": {
       "title": "Chi tiết đơn hàng",
       "basic_info": "Thông tin cơ bản",
+      "progress": "Tiến độ đơn hàng",
+      "add_progress": "Thêm tiến độ",
+      "edit_progress": "Sửa tiến độ",
+      "delete_progress": "Xóa tiến độ",
+      "progress_type": "Loại tiến độ",
+      "progress_status": "Trạng thái",
+      "progress_description": "Mô tả",
+      "start_time": "Thời gian bắt đầu",
+      "completed_time": "Thời gian hoàn thành",
+      "progress_success": "Ghi tiến độ đã được lưu thành công",
+      "progress_error": "Lưu ghi tiến độ thất bại",
+      "progress_confirm_delete": "Xác nhận xóa",
+      "progress_confirm_delete_message": "Bạn có chắc chắn muốn xóa ghi tiến độ \"{type}\"?",
+      "progress_add_success": "Thêm ghi tiến độ thành công",
+      "progress_edit_success": "Cập nhật ghi tiến độ thành công",
+      "progress_delete_success": "Xóa ghi tiến độ thành công",
+      "progress_local_mode": "Thêm ghi tiến độ thành công (Chế độ cục bộ)",
+      "progress_no_records": "Không có ghi tiến độ",
+      "progress_select_type": "Vui lòng chọn loại tiến độ",
+      "progress_select_status": "Vui lòng chọn trạng thái",
+      "progress_enter_description": "Vui lòng nhập mô tả tiến độ",
+      "progress_select_start_time": "Chọn thời gian bắt đầu",
+      "progress_select_completed_time": "Chọn thời gian hoàn thành",
+      "progress_types": {
+        "design": "Giai đoạn thiết kế",
+        "material": "Chuẩn bị vật liệu",
+        "production": "Giai đoạn sản xuất",
+        "quality": "Kiểm tra chất lượng",
+        "packaging": "Giai đoạn đóng gói",
+        "shipping": "Giai đoạn vận chuyển",
+        "custom": "Giai đoạn tùy chỉnh"
+      },
+      "progress_statuses": {
+        "not_started": "Chưa bắt đầu",
+        "in_progress": "Đang tiến hành",
+        "completed": "Hoàn thành",
+        "delayed": "Bị trì hoãn",
+        "on_hold": "Tạm dừng"
+      },
+      "progress_time_info": {
+        "start": "Bắt đầu",
+        "completed": "Hoàn thành"
+      },
       "order_id": "ID đơn hàng",
       "title": "Tiêu đề đơn hàng",
       "description": "Mô tả đơn hàng",
@@ -253,7 +298,50 @@
       "attachments": "Tệp đính kèm",
       "images": "Hình ảnh",
       "models": "Mô hình",
-      "videos": "Video"
+      "videos": "Video",
+      "no_fabrics": "Không có thông tin vải",
+      "fabric": {
+        "name": "Tên",
+        "material": "Chất liệu",
+        "price": "Giá",
+        "supplier": "Nhà cung cấp",
+        "unknown": "Không xác định"
+      },
+      "file": {
+        "size": "Kích thước"
+      },
+      "preview": {
+        "title": "Thông báo",
+        "not_supported": "Loại tệp này không hỗ trợ xem trước"
+      },
+      "accept_order": {
+        "title": "Nhận đơn hàng",
+        "pending": "Đang chờ",
+        "accepted": "Đã chấp nhận",
+        "rejected": "Đã từ chối",
+        "cancelled": "Đã hủy",
+        "unknown": "Trạng thái không xác định",
+        "success": {
+          "title": "Nhận đơn hàng thành công",
+          "message": "Yêu cầu nhận đơn hàng đã được gửi, chờ xác nhận của nhà thiết kế"
+        },
+        "error": {
+          "title": "Nhận đơn hàng thất bại",
+          "message": "Nhận đơn hàng thất bại, vui lòng thử lại sau",
+          "no_user": "Không thể lấy thông tin người dùng"
+        },
+        "confirm": {
+          "title": "Xác nhận nhận đơn hàng",
+          "message": "Bạn có chắc chắn muốn nhận đơn hàng này?",
+          "yes": "Xác nhận nhận"
+        },
+        "message": "Tin nhắn chấp nhận",
+        "message_hint": "Vui lòng nhập tin nhắn chấp nhận...",
+        "price_quote": "Báo giá",
+        "price_quote_hint": "Vui lòng nhập báo giá",
+        "delivery_date": "Ngày giao hàng dự kiến",
+        "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến"
+      }
     }
   },
   "home": {
@@ -272,7 +360,13 @@
     "orders": "Đơn hàng mới nhất",
     "view_more": "Xem thêm",
     "no_factories": "Không có nhà máy",
-    "no_orders": "Không có đơn hàng"
+    "no_orders": "Không có đơn hàng",
+    "role_select": {
+      "title": "Vui lòng chọn vai trò của bạn",
+      "designer": "Nhà thiết kế",
+      "factory": "Nhà máy",
+      "supplier": "Nhà cung cấp"
+    }
   },
   "errors": {
     "network": "Lỗi mạng, vui lòng thử lại sau",
@@ -318,6 +412,49 @@
       "detail": {
         "title": "Chi tiết đơn hàng",
         "basic_info": "Thông tin cơ bản",
+        "progress": "Tiến độ đơn hàng",
+        "add_progress": "Thêm tiến độ",
+        "edit_progress": "Sửa tiến độ",
+        "delete_progress": "Xóa tiến độ",
+        "progress_type": "Loại tiến độ",
+        "progress_status": "Trạng thái",
+        "progress_description": "Mô tả",
+        "start_time": "Thời gian bắt đầu",
+        "completed_time": "Thời gian hoàn thành",
+        "progress_success": "Ghi tiến độ đã được lưu thành công",
+        "progress_error": "Lưu ghi tiến độ thất bại",
+        "progress_confirm_delete": "Xác nhận xóa",
+        "progress_confirm_delete_message": "Bạn có chắc chắn muốn xóa ghi tiến độ \"{type}\"?",
+        "progress_add_success": "Thêm ghi tiến độ thành công",
+        "progress_edit_success": "Cập nhật ghi tiến độ thành công",
+        "progress_delete_success": "Xóa ghi tiến độ thành công",
+        "progress_local_mode": "Thêm ghi tiến độ thành công (Chế độ cục bộ)",
+        "progress_no_records": "Không có ghi tiến độ",
+        "progress_select_type": "Vui lòng chọn loại tiến độ",
+        "progress_select_status": "Vui lòng chọn trạng thái",
+        "progress_enter_description": "Vui lòng nhập mô tả tiến độ",
+        "progress_select_start_time": "Chọn thời gian bắt đầu",
+        "progress_select_completed_time": "Chọn thời gian hoàn thành",
+        "progress_types": {
+          "design": "Giai đoạn thiết kế",
+          "material": "Chuẩn bị vật liệu",
+          "production": "Giai đoạn sản xuất",
+          "quality": "Kiểm tra chất lượng",
+          "packaging": "Giai đoạn đóng gói",
+          "shipping": "Giai đoạn vận chuyển",
+          "custom": "Giai đoạn tùy chỉnh"
+        },
+        "progress_statuses": {
+          "not_started": "Chưa bắt đầu",
+          "in_progress": "Đang tiến hành",
+          "completed": "Hoàn thành",
+          "delayed": "Bị trì hoãn",
+          "on_hold": "Tạm dừng"
+        },
+        "progress_time_info": {
+          "start": "Bắt đầu",
+          "completed": "Hoàn thành"
+        },
         "order_id": "ID đơn hàng",
         "title": "Tiêu đề đơn hàng",
         "description": "Mô tả đơn hàng",
@@ -348,33 +485,56 @@
         },
         "accept_order": {
           "title": "Nhận đơn hàng",
-          "message": "Tin nhắn nhận đơn hàng",
-          "message_hint": "Vui lòng mô tả khả năng và ưu điểm của nhà máy cho đơn hàng này",
-          "price_quote": "Báo giá",
-          "price_quote_hint": "Vui lòng nhập báo giá đơn hàng",
-          "delivery_date": "Ngày giao hàng dự kiến",
-          "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến",
-          "confirm": {
-            "title": "Xác nhận nhận đơn hàng",
-            "message": "Vui lòng điền thông tin nhận đơn hàng",
-            "yes": "Nhận đơn hàng"
-          },
+          "pending": "Đang chờ",
+          "accepted": "Đã chấp nhận",
+          "rejected": "Đã từ chối",
+          "cancelled": "Đã hủy",
+          "unknown": "Trạng thái không xác định",
           "success": {
             "title": "Nhận đơn hàng thành công",
-            "message": "Đơn xin nhận đơn hàng đã được gửi, chờ xác nhận của nhà thiết kế"
+            "message": "Yêu cầu nhận đơn hàng đã được gửi, chờ xác nhận của nhà thiết kế"
           },
           "error": {
             "title": "Nhận đơn hàng thất bại",
             "message": "Nhận đơn hàng thất bại, vui lòng thử lại sau",
-            "no_user": "Người dùng chưa đăng nhập, vui lòng đăng nhập lại"
-          }
+            "no_user": "Không thể lấy thông tin người dùng"
+          },
+          "confirm": {
+            "title": "Xác nhận nhận đơn hàng",
+            "message": "Bạn có chắc chắn muốn nhận đơn hàng này?",
+            "yes": "Xác nhận nhận"
+          },
+          "message": "Tin nhắn chấp nhận",
+          "message_hint": "Vui lòng nhập tin nhắn chấp nhận...",
+          "price_quote": "Báo giá",
+          "price_quote_hint": "Vui lòng nhập báo giá",
+          "delivery_date": "Ngày giao hàng dự kiến",
+          "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến"
         }
       }
     }
   },
   "common": {
     "cancel": "Hủy",
+    "save": "Lưu",
+    "success": "Thành công",
+    "error": "Lỗi",
+    "loading": "Đang tải...",
+    "confirm": "Xác nhận",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "add": "Thêm",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "refresh": "Làm mới",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "submit": "Gửi",
     "close": "Đóng",
+    "yes": "Có",
+    "no": "Không",
+    "ok": "OK",
     "load_more": "Tải thêm"
   }
 } 

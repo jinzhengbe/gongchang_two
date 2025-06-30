@@ -48,4 +48,51 @@ CREATE TABLE IF NOT EXISTS `jiedan` (
   KEY `idx_jiedan_deleted_at` (`deleted_at`),
   CONSTRAINT `fk_jiedan_order_id` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   UNIQUE KEY `uk_order_factory` (`order_id`, `factory_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='接单表'; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='接单表';
+
+-- 订单进度表
+CREATE TABLE IF NOT EXISTS `order_progress` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint unsigned NOT NULL COMMENT '订单ID',
+  `factory_id` varchar(191) NOT NULL COMMENT '工厂ID',
+  `progress_type` varchar(50) NOT NULL COMMENT '进度类型：design-设计阶段, material-材料准备, production-生产阶段, quality-质检阶段, packaging-包装阶段, shipping-发货阶段, custom-自定义阶段',
+  `percentage` int DEFAULT NULL COMMENT '完成百分比(0-100)',
+  `status` varchar(50) NOT NULL DEFAULT 'not_started' COMMENT '进度状态：not_started-未开始, in_progress-进行中, completed-已完成, delayed-延期, on_hold-暂停',
+  `description` text COMMENT '进度描述',
+  `estimated_completion_time` datetime(3) DEFAULT NULL COMMENT '预计完成时间',
+  `actual_completion_time` datetime(3) DEFAULT NULL COMMENT '实际完成时间',
+  `creator_id` varchar(191) NOT NULL COMMENT '创建者ID',
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_order_progress_order_id` (`order_id`),
+  KEY `idx_order_progress_factory_id` (`factory_id`),
+  KEY `idx_order_progress_status` (`status`),
+  KEY `idx_order_progress_deleted_at` (`deleted_at`),
+  CONSTRAINT `fk_order_progress_order_id` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='订单进度表';
+
+-- 工厂职工管理表
+CREATE TABLE IF NOT EXISTS `factory_employees` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL COMMENT '职工姓名',
+  `position` varchar(100) NOT NULL COMMENT '职位',
+  `grade` varchar(50) DEFAULT NULL COMMENT '年级/级别',
+  `work_years` int DEFAULT 0 COMMENT '工龄(年)',
+  `factory_id` varchar(191) NOT NULL COMMENT '工厂ID',
+  `hire_date` date NOT NULL COMMENT '入职时间',
+  `phone` varchar(20) DEFAULT NULL COMMENT '联系电话',
+  `email` varchar(100) DEFAULT NULL COMMENT '邮箱',
+  `department` varchar(100) DEFAULT NULL COMMENT '部门',
+  `salary` decimal(10,2) DEFAULT NULL COMMENT '薪资',
+  `status` varchar(20) DEFAULT 'active' COMMENT '状态：active-在职，inactive-离职',
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_factory_employees_factory_id` (`factory_id`),
+  KEY `idx_factory_employees_status` (`status`),
+  KEY `idx_factory_employees_deleted_at` (`deleted_at`),
+  CONSTRAINT `fk_factory_employees_factory_id` FOREIGN KEY (`factory_id`) REFERENCES `factory_profiles` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='工厂职工管理表'; 

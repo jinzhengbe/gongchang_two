@@ -435,7 +435,9 @@ func (c *OrderController) GetRecentOrders(ctx *gin.Context) {
 		limit = 5
 	}
 
-	orders, err := c.orderService.GetRecentOrders(limit)
+	status := ctx.Query("status")
+
+	orders, err := c.orderService.GetRecentOrders(limit, status)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

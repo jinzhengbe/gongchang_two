@@ -91,17 +91,6 @@ type PublicOrderResponse struct {
 	TotalPages int          `json:"totalPages"`
 }
 
-type OrderProgress struct {
-	gorm.Model
-	OrderID     uint      `gorm:"not null"`
-	Status      string    `gorm:"not null"`
-	Description string    `gorm:"type:text"`
-	CreatedAt   time.Time `gorm:"not null"`
-	CreatedBy   uint      `gorm:"not null"`
-	Order       Order     `gorm:"foreignKey:OrderID"`
-	User        User      `gorm:"foreignKey:CreatedBy"`
-}
-
 type OrderAttachment struct {
 	gorm.Model
 	OrderID     uint   `gorm:"not null"`

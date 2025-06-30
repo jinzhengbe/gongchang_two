@@ -156,10 +156,17 @@ func (s *OrderService) GetOrderStatistics(factoryID string) (*models.OrderStatis
 	return &stats, nil
 }
 
-func (s *OrderService) GetRecentOrders(limit int) ([]models.Order, error) {
+func (s *OrderService) GetRecentOrders(limit int, status string) ([]models.Order, error) {
 	var orders []models.Order
-	err := s.db.Preload("Factory").Order("id desc").Limit(limit).Find(&orders).Error
-	return orders, err
+	query := s.db.Preload("Factory").Order("id desc").Limit(limit)
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	// 兼容老用法
+	if err := query.Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
 
 func (s *OrderService) GetOrdersByUserID(userID string, status string, page int, pageSize int) ([]models.Order, error) {
