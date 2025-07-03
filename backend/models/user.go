@@ -27,10 +27,13 @@ type User struct {
 type DesignerProfile struct {
 	gorm.Model
 	UserID      string `gorm:"uniqueIndex;type:varchar(191)"`
+	User        User   `gorm:"foreignKey:UserID"`
 	CompanyName string
 	Address     string
 	Website     string
 	Bio         string
+	Rating      float64 `gorm:"default:0"` // 设计师评分
+	Status      int     `gorm:"default:1"` // 设计师状态：1-正常，0-停用
 }
 
 type FactoryProfile struct {

@@ -50,6 +50,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	employeeService := services.NewEmployeeService(db)
 	orderSearchService := services.NewOrderSearchService(db)
 	factorySearchService := services.NewFactorySearchService(db)
+	designerSearchService := services.NewDesignerSearchService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
@@ -63,6 +64,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	employeeController := controllers.NewEmployeeController(employeeService)
 	orderSearchController := controllers.NewOrderSearchController(orderSearchService)
 	factorySearchController := controllers.NewFactorySearchController(factorySearchService)
+	designerSearchController := controllers.NewDesignerSearchController(designerSearchService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -101,6 +103,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		// 工厂搜索路由（公开）
 		api.GET("/factories/search", factorySearchController.SearchFactories)
 		api.GET("/factories/search/suggestions", factorySearchController.GetSearchSuggestions)
+
+		// 设计师搜索路由（公开）
+		api.GET("/designers/search", designerSearchController.SearchDesigners)
+		api.GET("/designers/search/suggestions", designerSearchController.GetSearchSuggestions)
 
 		// 获取最近订单（公开路由）
 		api.GET("/orders/recent", orderController.GetRecentOrders)
@@ -216,6 +222,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			// 工厂专业领域和评分管理路由（需要认证）
 			authRequiredGroup.POST("/factories/:factory_id/specialties", factorySearchController.CreateFactorySpecialty)
 			authRequiredGroup.POST("/factories/:factory_id/ratings", factorySearchController.CreateFactoryRating)
+			
+			// 设计师专业领域和评分管理路由（需要认证）
+			authRequiredGroup.POST("/designers/:designer_id/specialties", designerSearchController.CreateDesignerSpecialty)
+			authRequiredGroup.POST("/designers/:designer_id/ratings", designerSearchController.CreateDesignerRating)
 			
 			// 职工管理路由（仅工厂角色）
 			employeeGroup := authRequiredGroup.Group("/employees")
