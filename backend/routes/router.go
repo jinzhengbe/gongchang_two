@@ -48,6 +48,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	jiedanService := services.NewJiedanService(db)
 	progressService := services.NewProgressService(db)
 	employeeService := services.NewEmployeeService(db)
+	orderSearchService := services.NewOrderSearchService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
@@ -59,6 +60,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	jiedanController := controllers.NewJiedanController(jiedanService)
 	progressController := controllers.NewProgressController(progressService)
 	employeeController := controllers.NewEmployeeController(employeeService)
+	orderSearchController := controllers.NewOrderSearchController(orderSearchService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -121,6 +123,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				productGroup.DELETE("/:id", productController.DeleteProduct)
 			}
 
+			// 订单搜索路由（高级搜索功能）- 使用不同的路径避免冲突
+			authRequiredGroup.GET("/order-search", orderSearchController.SearchOrders)
+			authRequiredGroup.GET("/order-search/suggestions", orderSearchController.GetSearchSuggestions)
+			authRequiredGroup.GET("/order-search/statistics", orderSearchController.GetSearchStatistics)
+
 			// 订单路由（完整的CRUD操作）
 			orderGroup := authRequiredGroup.Group("/orders")
 			{
@@ -130,7 +137,6 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.PUT("/:id", orderController.UpdateOrder)
 				orderGroup.DELETE("/:id", orderController.DeleteOrder)
 				orderGroup.PUT("/:id/status", orderController.UpdateOrderStatus)
-				orderGroup.GET("/search", orderController.SearchOrders)
 				orderGroup.GET("/statistics", orderController.GetOrderStatistics)
 				orderGroup.POST("/:id/add-fabric", orderController.AddFabricToOrder)
 				orderGroup.DELETE("/:id/remove-fabric", orderController.RemoveFabricFromOrder)
@@ -197,6 +203,9 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			// 工厂进度管理路由
 			authRequiredGroup.GET("/factories/:factoryId/progress", progressController.GetProgressByFactoryID)
 			authRequiredGroup.GET("/factories/:factoryId/progress-statistics", progressController.GetProgressStatistics)
+			
+			// 根据工厂ID获取工厂详情（需要认证）
+			authRequiredGroup.GET("/factory/:id", factoryController.GetFactoryByID)
 			
 			// 职工管理路由（仅工厂角色）
 			employeeGroup := authRequiredGroup.Group("/employees")

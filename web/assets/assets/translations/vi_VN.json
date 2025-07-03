@@ -401,11 +401,17 @@
       },
       "accept_order": {
         "title": "Nhận đơn hàng",
-        "pending": "Đang chờ",
-        "accepted": "Đã chấp nhận",
-        "rejected": "Đã từ chối",
-        "cancelled": "Đã hủy",
-        "unknown": "Trạng thái không xác định",
+        "message": "Tin nhắn chấp nhận",
+        "message_hint": "Vui lòng nhập tin nhắn chấp nhận...",
+        "price_quote": "Báo giá",
+        "price_quote_hint": "Vui lòng nhập báo giá",
+        "delivery_date": "Ngày giao hàng dự kiến",
+        "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến",
+        "confirm": {
+          "title": "Xác nhận nhận đơn hàng",
+          "message": "Bạn có chắc chắn muốn nhận đơn hàng này?",
+          "yes": "Xác nhận nhận"
+        },
         "success": {
           "title": "Nhận đơn hàng thành công",
           "message": "Yêu cầu nhận đơn hàng đã được gửi, chờ xác nhận của nhà thiết kế"
@@ -414,19 +420,10 @@
           "title": "Nhận đơn hàng thất bại",
           "message": "Nhận đơn hàng thất bại, vui lòng thử lại sau",
           "no_user": "Không thể lấy thông tin người dùng"
-        },
-        "confirm": {
-          "title": "Xác nhận nhận đơn hàng",
-          "message": "Bạn có chắc chắn muốn nhận đơn hàng này?",
-          "yes": "Xác nhận nhận"
-        },
-        "message": "Tin nhắn chấp nhận",
-        "message_hint": "Vui lòng nhập tin nhắn chấp nhận...",
-        "price_quote": "Báo giá",
-        "price_quote_hint": "Vui lòng nhập báo giá",
-        "delivery_date": "Ngày giao hàng dự kiến",
-        "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến"
-      }
+        }
+      },
+      "add_staff": "Thêm nhân viên",
+      "no_data": "Không có dữ liệu"
     }
   },
   "home": {
@@ -571,11 +568,17 @@
         },
         "accept_order": {
           "title": "Nhận đơn hàng",
-          "pending": "Đang chờ",
-          "accepted": "Đã chấp nhận",
-          "rejected": "Đã từ chối",
-          "cancelled": "Đã hủy",
-          "unknown": "Trạng thái không xác định",
+          "message": "Tin nhắn chấp nhận",
+          "message_hint": "Vui lòng nhập tin nhắn chấp nhận...",
+          "price_quote": "Báo giá",
+          "price_quote_hint": "Vui lòng nhập báo giá",
+          "delivery_date": "Ngày giao hàng dự kiến",
+          "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến",
+          "confirm": {
+            "title": "Xác nhận nhận đơn hàng",
+            "message": "Bạn có chắc chắn muốn nhận đơn hàng này?",
+            "yes": "Xác nhận nhận"
+          },
           "success": {
             "title": "Nhận đơn hàng thành công",
             "message": "Yêu cầu nhận đơn hàng đã được gửi, chờ xác nhận của nhà thiết kế"
@@ -584,19 +587,42 @@
             "title": "Nhận đơn hàng thất bại",
             "message": "Nhận đơn hàng thất bại, vui lòng thử lại sau",
             "no_user": "Không thể lấy thông tin người dùng"
-          },
-          "confirm": {
-            "title": "Xác nhận nhận đơn hàng",
-            "message": "Bạn có chắc chắn muốn nhận đơn hàng này?",
-            "yes": "Xác nhận nhận"
-          },
-          "message": "Tin nhắn chấp nhận",
-          "message_hint": "Vui lòng nhập tin nhắn chấp nhận...",
-          "price_quote": "Báo giá",
-          "price_quote_hint": "Vui lòng nhập báo giá",
-          "delivery_date": "Ngày giao hàng dự kiến",
-          "delivery_date_hint": "Vui lòng chọn ngày giao hàng dự kiến"
+          }
         }
+      }
+    },
+    "detail": {
+      "title": "Chi tiết nhà máy",
+      "basic_info": "Thông tin cơ bản",
+      "name": "Tên nhà máy",
+      "address": "Địa chỉ nhà máy",
+      "phone": "Số điện thoại liên hệ",
+      "description": "Mô tả nhà máy",
+      "production_capacity": "Năng lực sản xuất",
+      "capacity": "Năng lực hàng tháng",
+      "employee_count": "Số lượng nhân viên",
+      "completed_orders": "Đơn hàng đã hoàn thành",
+      "rating": "Đánh giá",
+      "specialties": "Lĩnh vực chuyên môn",
+      "status": "Trạng thái",
+      "create_time": "Thời gian tạo",
+      "update_time": "Thời gian cập nhật",
+      "not_found": "Không tìm thấy thông tin nhà máy",
+      "load_failed": "Tải thông tin nhà máy thất bại"
+    },
+    "click": {
+      "login_required": "Vui lòng đăng nhập trước để xem chi tiết nhà máy",
+      "own_factory_only": "Chỉ có thể xem thông tin nhà máy của mình",
+      "role_not_supported": "Vai trò hiện tại không hỗ trợ thao tác này"
+    },
+    "employees": {
+      "title": "Thông tin nhân viên",
+      "no_employees": "Không có thông tin nhân viên",
+      "loading": "Đang tải thông tin nhân viên...",
+      "load_failed": "Tải thông tin nhân viên thất bại",
+      "status": {
+        "active": "Đang làm việc",
+        "inactive": "Đã nghỉ việc"
       }
     }
   },
@@ -621,6 +647,7 @@
     "yes": "Có",
     "no": "Không",
     "ok": "OK",
-    "load_more": "Tải thêm"
+    "load_more": "Tải thêm",
+    "retry": "Thử lại"
   }
 } 

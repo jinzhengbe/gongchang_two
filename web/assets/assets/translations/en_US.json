@@ -350,7 +350,30 @@
       "attachments": "Attachments",
       "images": "Images",
       "models": "Models",
-      "videos": "Videos"
+      "videos": "Videos",
+      "accept_order": {
+        "title": "Accept Order",
+        "message": "Acceptance message",
+        "message_hint": "Please describe your factory's capabilities and advantages for this order",
+        "price_quote": "Price Quote",
+        "price_quote_hint": "Please enter the price quote for the order",
+        "delivery_date": "Expected Delivery Date",
+        "delivery_date_hint": "Please select the expected delivery date",
+        "confirm": {
+          "title": "Accept Order Confirmation",
+          "message": "Please enter acceptance information",
+          "yes": "Accept Order"
+        },
+        "success": {
+          "title": "Order Accepted Successfully",
+          "message": "Acceptance request submitted, waiting for designer confirmation"
+        },
+        "error": {
+          "title": "Order Acceptance Failed",
+          "message": "Order acceptance failed, please try again later",
+          "no_user": "User not logged in, please log in again"
+        }
+      }
     }
   },
   "home": {
@@ -461,11 +484,6 @@
           "delayed": "Delayed",
           "on_hold": "On Hold"
         },
-        "progress_time_info": {
-          "start": "Start",
-          "completed": "Completed"
-        },
-        "files": "File Information",
         "order_id": "Order ID",
         "title": "Order Title",
         "description": "Order Description",
@@ -474,37 +492,36 @@
         "create_time": "Create Time",
         "update_time": "Update Time",
         "factory": "Factory",
+        "files": "Files",
+        "attachments": "Attachments",
+        "images": "Images",
+        "models": "Models",
+        "videos": "Videos",
         "no_fabrics": "No fabric information",
-        "edit_order": "Edit Order",
-        "add_images": "Add Images",
         "add_staff": "Add Staff",
+        "no_data": "No data available",
         "accept_order": {
           "title": "Accept Order",
-          "pending": "Pending",
-          "accepted": "Accepted",
-          "rejected": "Rejected",
-          "cancelled": "Cancelled",
-          "unknown": "Unknown Status",
+          "message": "Acceptance message",
+          "message_hint": "Please describe your factory's capabilities and advantages for this order",
+          "price_quote": "Price Quote",
+          "price_quote_hint": "Please enter the price quote for the order",
+          "delivery_date": "Expected Delivery Date",
+          "delivery_date_hint": "Please select the expected delivery date",
+          "confirm": {
+            "title": "Accept Order Confirmation",
+            "message": "Please enter acceptance information",
+            "yes": "Accept Order"
+          },
           "success": {
             "title": "Order Accepted Successfully",
-            "message": "Your order acceptance request has been submitted, waiting for designer confirmation"
+            "message": "Acceptance request submitted, waiting for designer confirmation"
           },
           "error": {
-            "title": "Failed to Accept Order",
-            "message": "Failed to accept order, please try again later",
-            "no_user": "Failed to get user information"
-          },
-          "confirm": {
-            "title": "Confirm Accept Order",
-            "message": "Are you sure you want to accept this order?",
-            "yes": "Confirm Accept"
-          },
-          "message": "Acceptance Message",
-          "message_hint": "Please enter acceptance message...",
-          "price_quote": "Price Quote",
-          "price_quote_hint": "Please enter price quote",
-          "delivery_date": "Estimated Delivery Date",
-          "delivery_date_hint": "Please select estimated delivery date"
+            "title": "Order Acceptance Failed",
+            "message": "Order acceptance failed, please try again later",
+            "no_user": "User not logged in, please log in again"
+          }
         }
       },
       "edit": {
@@ -523,6 +540,40 @@
         "priority": "Production Priority",
         "priority_low": "Low",
         "priority_medium": "Medium"
+      }
+    },
+    "detail": {
+      "title": "Factory Details",
+      "basic_info": "Basic Information",
+      "name": "Factory Name",
+      "address": "Factory Address",
+      "phone": "Contact Phone",
+      "description": "Factory Description",
+      "production_capacity": "Production Capacity",
+      "capacity": "Monthly Capacity",
+      "employee_count": "Number of Employees",
+      "completed_orders": "Completed Orders",
+      "rating": "Rating",
+      "specialties": "Specialties",
+      "status": "Status",
+      "create_time": "Create Time",
+      "update_time": "Update Time",
+      "not_found": "Factory information not found",
+      "load_failed": "Failed to load factory information"
+    },
+    "click": {
+      "login_required": "Please login first to view factory details",
+      "own_factory_only": "Can only view your own factory information",
+      "role_not_supported": "Current role does not support this operation"
+    },
+    "employees": {
+      "title": "Employee Information",
+      "no_employees": "No employee information",
+      "loading": "Loading employee information...",
+      "load_failed": "Failed to load employee information",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
       }
     }
   },
@@ -548,6 +599,7 @@
     "no": "No",
     "ok": "OK",
     "upload": "Upload",
-    "warning": "Warning"
+    "warning": "Warning",
+    "retry": "Retry"
   }
 } 
