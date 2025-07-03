@@ -49,6 +49,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	progressService := services.NewProgressService(db)
 	employeeService := services.NewEmployeeService(db)
 	orderSearchService := services.NewOrderSearchService(db)
+	factorySearchService := services.NewFactorySearchService(db)
 
 	// 创建控制器实例
 	userController := controllers.NewUserController(userService)
@@ -61,6 +62,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	progressController := controllers.NewProgressController(progressService)
 	employeeController := controllers.NewEmployeeController(employeeService)
 	orderSearchController := controllers.NewOrderSearchController(orderSearchService)
+	factorySearchController := controllers.NewFactorySearchController(factorySearchService)
 
 	// API 路由组
 	api := r.Group("/api")
@@ -95,6 +97,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		api.GET("/factories", factoryController.GetFactoryList)
 		// 根据用户ID获取单个工厂信息（公开）
 		api.GET("/factories/user/:userId", factoryController.GetFactoryByUserID)
+		
+		// 工厂搜索路由（公开）
+		api.GET("/factories/search", factorySearchController.SearchFactories)
+		api.GET("/factories/search/suggestions", factorySearchController.GetSearchSuggestions)
 
 		// 获取最近订单（公开路由）
 		api.GET("/orders/recent", orderController.GetRecentOrders)
@@ -206,6 +212,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			
 			// 根据工厂ID获取工厂详情（需要认证）
 			authRequiredGroup.GET("/factory/:id", factoryController.GetFactoryByID)
+			
+			// 工厂专业领域和评分管理路由（需要认证）
+			authRequiredGroup.POST("/factories/:factory_id/specialties", factorySearchController.CreateFactorySpecialty)
+			authRequiredGroup.POST("/factories/:factory_id/ratings", factorySearchController.CreateFactoryRating)
 			
 			// 职工管理路由（仅工厂角色）
 			employeeGroup := authRequiredGroup.Group("/employees")

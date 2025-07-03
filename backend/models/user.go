@@ -42,6 +42,8 @@ type FactoryProfile struct {
 	Capacity    int
 	Equipment   string
 	Certificates string
+	Rating      float64 `gorm:"default:0"` // 工厂评分
+	Status      int     `gorm:"default:1"` // 工厂状态：1-正常，0-停用
 }
 
 type SupplierProfile struct {

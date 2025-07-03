@@ -22,6 +22,8 @@ func MigrateData(db *gorm.DB) error {
 		&models.FabricCategory{},
 		&models.Jiedan{},
 		&models.FactoryEmployee{},
+		&models.FactorySpecialty{},
+		&models.FactoryRating{},
 	)
 	if err != nil {
 		return err
