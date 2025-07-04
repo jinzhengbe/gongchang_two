@@ -245,13 +245,13 @@ func (c *ProgressController) DeleteProgress(ctx *gin.Context) {
 // @Tags 进度管理
 // @Accept json
 // @Produce json
-// @Param factoryId path string true "工厂ID"
+// @Param factory_id path string true "工厂ID"
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(10)
 // @Success 200 {object} models.ProgressListResponse
-// @Router /api/factories/{factoryId}/progress [get]
+// @Router /api/factories/{factory_id}/progress [get]
 func (c *ProgressController) GetProgressByFactoryID(ctx *gin.Context) {
-	factoryID := ctx.Param("factoryId")
+	factoryID := ctx.Param("factory_id")
 	
 	// 获取分页参数
 	pageStr := ctx.DefaultQuery("page", "1")
@@ -323,11 +323,11 @@ func (c *ProgressController) GetProgressByFactoryID(ctx *gin.Context) {
 // @Tags 进度管理
 // @Accept json
 // @Produce json
-// @Param factoryId path string true "工厂ID"
+// @Param factory_id path string true "工厂ID"
 // @Success 200 {object} map[string]int64
-// @Router /api/factories/{factoryId}/progress-statistics [get]
+// @Router /api/factories/{factory_id}/progress-statistics [get]
 func (c *ProgressController) GetProgressStatistics(ctx *gin.Context) {
-	factoryID := ctx.Param("factoryId")
+	factoryID := ctx.Param("factory_id")
 
 	// 获取当前用户ID
 	userID := ctx.GetString("user_id")

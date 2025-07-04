@@ -306,4 +306,98 @@ func (s *DesignerSearchService) CreateDesignerRating(designerID uint, rating flo
 		RaterID:    raterID,
 	}
 	return s.db.Create(&ratingRecord).Error
+}
+
+// GetDesignerRatings 获取设计师评分列表
+func (s *DesignerSearchService) GetDesignerRatings(designerID uint, page, pageSize int) ([]map[string]interface{}, int64, error) {
+	var ratings []models.DesignerRating
+	var total int64
+
+	// 获取总数
+	if err := s.db.Model(&models.DesignerRating{}).Where("designer_id = ?", designerID).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 分页查询
+	offset := (page - 1) * pageSize
+	if err := s.db.Where("designer_id = ?", designerID).
+		Order("created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&ratings).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 转换为响应格式
+	result := make([]map[string]interface{}, 0, len(ratings))
+	for _, rating := range ratings {
+		// 获取评分者信息
+		var user models.User
+		s.db.Where("id = ?", rating.RaterID).First(&user)
+
+		result = append(result, map[string]interface{}{
+			"id":         rating.ID,
+			"rating":     rating.Rating,
+			"comment":    rating.Comment,
+			"rater": map[string]interface{}{
+				"id":       user.ID,
+				"username": user.Username,
+				"role":     user.Role,
+			},
+			"created_at": rating.CreatedAt,
+		})
+	}
+
+	return result, total, nil
+}
+
+// GetDesignerRatingStats 获取设计师评分统计
+func (s *DesignerSearchService) GetDesignerRatingStats(designerID uint) (map[string]interface{}, error) {
+	var stats struct {
+		TotalRatings   int64   `json:"total_ratings"`
+		AverageRating  float64 `json:"average_rating"`
+		MaxRating      float64 `json:"max_rating"`
+		MinRating      float64 `json:"min_rating"`
+		RatingCounts   map[int]int `json:"rating_counts"`
+	}
+
+	// 基础统计
+	if err := s.db.Model(&models.DesignerRating{}).
+		Where("designer_id = ?", designerID).
+		Select("COUNT(*) as total_ratings, AVG(rating) as average_rating, MAX(rating) as max_rating, MIN(rating) as min_rating").
+		Scan(&stats).Error; err != nil {
+		return nil, err
+	}
+
+	// 评分分布统计
+	stats.RatingCounts = make(map[int]int)
+	for i := 1; i <= 5; i++ {
+		var count int64
+		s.db.Model(&models.DesignerRating{}).
+			Where("designer_id = ? AND rating = ?", designerID, float64(i)).
+			Count(&count)
+		stats.RatingCounts[i] = int(count)
+	}
+
+	// 计算评分等级
+	var ratingLevel string
+	switch {
+	case stats.AverageRating >= 4.5:
+		ratingLevel = "优秀"
+	case stats.AverageRating >= 4.0:
+		ratingLevel = "良好"
+	case stats.AverageRating >= 3.0:
+		ratingLevel = "一般"
+	default:
+		ratingLevel = "较差"
+	}
+
+	return map[string]interface{}{
+		"total_ratings":  stats.TotalRatings,
+		"average_rating": stats.AverageRating,
+		"max_rating":     stats.MaxRating,
+		"min_rating":     stats.MinRating,
+		"rating_level":   ratingLevel,
+		"rating_counts":  stats.RatingCounts,
+	}, nil
 } 

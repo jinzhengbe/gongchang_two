@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"gongChang/models"
 	"gongChang/services"
 
@@ -216,5 +217,121 @@ func (c *DesignerSearchController) CreateDesignerRating(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "评分创建成功",
+	})
+}
+
+// GetDesignerRatings 获取设计师评分列表
+// @Summary 获取设计师评分列表
+// @Description 获取指定设计师的所有评分和评价
+// @Tags 设计师搜索
+// @Accept json
+// @Produce json
+// @Param designer_id path int true "设计师ID"
+// @Param page query int false "页码" default(1)
+// @Param page_size query int false "每页数量" default(20)
+// @Success 200 {object} map[string]interface{}
+// @Router /api/designers/{designer_id}/ratings [get]
+func (c *DesignerSearchController) GetDesignerRatings(ctx *gin.Context) {
+	// 获取设计师ID
+	designerIDStr := ctx.Param("designer_id")
+	if designerIDStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "设计师ID不能为空",
+		})
+		return
+	}
+
+	// 解析设计师ID
+	var designerID uint
+	if _, err := fmt.Sscanf(designerIDStr, "%d", &designerID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "无效的设计师ID",
+		})
+		return
+	}
+
+	// 获取分页参数
+	pageStr := ctx.DefaultQuery("page", "1")
+	pageSizeStr := ctx.DefaultQuery("page_size", "20")
+	
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	// 调用服务层获取评分列表
+	ratings, total, err := c.designerSearchService.GetDesignerRatings(designerID, page, pageSize)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "获取评分列表失败: " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"ratings": ratings,
+			"total":   total,
+			"page":    page,
+			"page_size": pageSize,
+		},
+	})
+}
+
+// GetDesignerRatingStats 获取设计师评分统计
+// @Summary 获取设计师评分统计
+// @Description 获取指定设计师的评分统计信息
+// @Tags 设计师搜索
+// @Accept json
+// @Produce json
+// @Param designer_id path int true "设计师ID"
+// @Success 200 {object} map[string]interface{}
+// @Router /api/designers/{designer_id}/ratings/stats [get]
+func (c *DesignerSearchController) GetDesignerRatingStats(ctx *gin.Context) {
+	// 获取设计师ID
+	designerIDStr := ctx.Param("designer_id")
+	if designerIDStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "设计师ID不能为空",
+		})
+		return
+	}
+
+	// 解析设计师ID
+	var designerID uint
+	if _, err := fmt.Sscanf(designerIDStr, "%d", &designerID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "无效的设计师ID",
+		})
+		return
+	}
+
+	// 调用服务层获取评分统计
+	stats, err := c.designerSearchService.GetDesignerRatingStats(designerID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "获取评分统计失败: " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": stats,
 	})
 } 

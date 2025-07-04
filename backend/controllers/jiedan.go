@@ -120,13 +120,13 @@ func (c *JiedanController) GetJiedansByOrderID(ctx *gin.Context) {
 // @Tags 接单管理
 // @Accept json
 // @Produce json
-// @Param factoryId path string true "工厂ID"
+// @Param factory_id path string true "工厂ID"
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(10)
 // @Success 200 {object} models.JiedanListResponse
-// @Router /api/factories/{factoryId}/jiedans [get]
+// @Router /api/factories/{factory_id}/jiedans [get]
 func (c *JiedanController) GetJiedansByFactoryID(ctx *gin.Context) {
-	factoryID := ctx.Param("factoryId")
+	factoryID := ctx.Param("factory_id")
 	
 	// 获取分页参数
 	pageStr := ctx.DefaultQuery("page", "1")
@@ -303,11 +303,11 @@ func (c *JiedanController) DeleteJiedan(ctx *gin.Context) {
 // @Tags 接单管理
 // @Accept json
 // @Produce json
-// @Param factoryId path string true "工厂ID"
+// @Param factory_id path string true "工厂ID"
 // @Success 200 {object} map[string]int64
-// @Router /api/factories/{factoryId}/jiedan-statistics [get]
+// @Router /api/factories/{factory_id}/jiedan-statistics [get]
 func (c *JiedanController) GetJiedanStatistics(ctx *gin.Context) {
-	factoryID := ctx.Param("factoryId")
+	factoryID := ctx.Param("factory_id")
 
 	stats, err := c.jiedanService.GetJiedanStatistics(factoryID)
 	if err != nil {

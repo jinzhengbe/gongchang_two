@@ -209,12 +209,12 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			}
 
 			// 工厂接单相关路由
-			authRequiredGroup.GET("/factories/:factoryId/jiedans", jiedanController.GetJiedansByFactoryID)
-			authRequiredGroup.GET("/factories/:factoryId/jiedan-statistics", jiedanController.GetJiedanStatistics)
+			authRequiredGroup.GET("/factories/:factory_id/jiedans", jiedanController.GetJiedansByFactoryID)
+			authRequiredGroup.GET("/factories/:factory_id/jiedan-statistics", jiedanController.GetJiedanStatistics)
 			
 			// 工厂进度管理路由
-			authRequiredGroup.GET("/factories/:factoryId/progress", progressController.GetProgressByFactoryID)
-			authRequiredGroup.GET("/factories/:factoryId/progress-statistics", progressController.GetProgressStatistics)
+			authRequiredGroup.GET("/factories/:factory_id/progress", progressController.GetProgressByFactoryID)
+			authRequiredGroup.GET("/factories/:factory_id/progress-statistics", progressController.GetProgressStatistics)
 			
 			// 根据工厂ID获取工厂详情（需要认证）
 			authRequiredGroup.GET("/factory/:id", factoryController.GetFactoryByID)
@@ -222,10 +222,14 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			// 工厂专业领域和评分管理路由（需要认证）
 			authRequiredGroup.POST("/factories/:factory_id/specialties", factorySearchController.CreateFactorySpecialty)
 			authRequiredGroup.POST("/factories/:factory_id/ratings", factorySearchController.CreateFactoryRating)
+			authRequiredGroup.GET("/factories/:factory_id/ratings", factorySearchController.GetFactoryRatings)
+			authRequiredGroup.GET("/factories/:factory_id/ratings/stats", factorySearchController.GetFactoryRatingStats)
 			
 			// 设计师专业领域和评分管理路由（需要认证）
 			authRequiredGroup.POST("/designers/:designer_id/specialties", designerSearchController.CreateDesignerSpecialty)
 			authRequiredGroup.POST("/designers/:designer_id/ratings", designerSearchController.CreateDesignerRating)
+			authRequiredGroup.GET("/designers/:designer_id/ratings", designerSearchController.GetDesignerRatings)
+			authRequiredGroup.GET("/designers/:designer_id/ratings/stats", designerSearchController.GetDesignerRatingStats)
 			
 			// 职工管理路由（仅工厂角色）
 			employeeGroup := authRequiredGroup.Group("/employees")

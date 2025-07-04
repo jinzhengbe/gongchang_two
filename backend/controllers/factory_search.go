@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"gongChang/models"
 	"gongChang/services"
 
@@ -237,5 +238,121 @@ func (c *FactorySearchController) CreateFactoryRating(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "评分创建成功",
+	})
+}
+
+// GetFactoryRatings 获取工厂评分列表
+// @Summary 获取工厂评分列表
+// @Description 获取指定工厂的所有评分和评价
+// @Tags 工厂搜索
+// @Accept json
+// @Produce json
+// @Param factory_id path int true "工厂ID"
+// @Param page query int false "页码" default(1)
+// @Param page_size query int false "每页数量" default(20)
+// @Success 200 {object} map[string]interface{}
+// @Router /api/factories/{factory_id}/ratings [get]
+func (c *FactorySearchController) GetFactoryRatings(ctx *gin.Context) {
+	// 获取工厂ID
+	factoryIDStr := ctx.Param("factory_id")
+	if factoryIDStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "工厂ID不能为空",
+		})
+		return
+	}
+
+	// 解析工厂ID
+	var factoryID uint
+	if _, err := fmt.Sscanf(factoryIDStr, "%d", &factoryID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "无效的工厂ID",
+		})
+		return
+	}
+
+	// 获取分页参数
+	pageStr := ctx.DefaultQuery("page", "1")
+	pageSizeStr := ctx.DefaultQuery("page_size", "20")
+	
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	// 调用服务层获取评分列表
+	ratings, total, err := c.factorySearchService.GetFactoryRatings(factoryID, page, pageSize)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "获取评分列表失败: " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"ratings": ratings,
+			"total":   total,
+			"page":    page,
+			"page_size": pageSize,
+		},
+	})
+}
+
+// GetFactoryRatingStats 获取工厂评分统计
+// @Summary 获取工厂评分统计
+// @Description 获取指定工厂的评分统计信息
+// @Tags 工厂搜索
+// @Accept json
+// @Produce json
+// @Param factory_id path int true "工厂ID"
+// @Success 200 {object} map[string]interface{}
+// @Router /api/factories/{factory_id}/ratings/stats [get]
+func (c *FactorySearchController) GetFactoryRatingStats(ctx *gin.Context) {
+	// 获取工厂ID
+	factoryIDStr := ctx.Param("factory_id")
+	if factoryIDStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "工厂ID不能为空",
+		})
+		return
+	}
+
+	// 解析工厂ID
+	var factoryID uint
+	if _, err := fmt.Sscanf(factoryIDStr, "%d", &factoryID); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "无效的工厂ID",
+		})
+		return
+	}
+
+	// 调用服务层获取评分统计
+	stats, err := c.factorySearchService.GetFactoryRatingStats(factoryID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "获取评分统计失败: " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": stats,
 	})
 } 
