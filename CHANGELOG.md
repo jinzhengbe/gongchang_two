@@ -1,5 +1,65 @@
 # 更新日志
 
+## [v1.0.0] - 2025-07-04 - 完整的工厂和设计师搜索评分系统
+
+### 🎉 重大功能发布
+- **工厂搜索系统**: 完整的工厂搜索、筛选和评分功能
+- **设计师搜索系统**: 完整的设计师搜索、筛选和评分功能
+- **智能搜索建议**: 提供智能搜索提示，提升用户体验
+- **专业领域管理**: 支持为工厂和设计师添加专业领域标签
+- **评分系统**: 完整的评分和评价功能，支持统计分析
+
+### 新增功能
+
+#### 工厂搜索模块
+- `GET /api/factories/search` - 工厂搜索（支持关键词、地区、专业领域、评分筛选）
+- `GET /api/factories/search/suggestions` - 搜索建议
+- `POST /api/factories/{factory_id}/specialties` - 创建专业领域
+- `POST /api/factories/{factory_id}/ratings` - 创建评分
+- `GET /api/factories/{factory_id}/ratings` - 获取评分列表
+- `GET /api/factories/{factory_id}/ratings/stats` - 获取评分统计
+
+#### 设计师搜索模块
+- `GET /api/designers/search` - 设计师搜索（支持关键词、地区、专业领域、评分筛选）
+- `GET /api/designers/search/suggestions` - 搜索建议
+- `POST /api/designers/{designer_id}/specialties` - 创建专业领域
+- `POST /api/designers/{designer_id}/ratings` - 创建评分
+- `GET /api/designers/{designer_id}/ratings` - 获取评分列表
+- `GET /api/designers/{designer_id}/ratings/stats` - 获取评分统计
+
+### 技术实现
+- 创建 `FactorySearchService` 和 `DesignerSearchService` 服务层
+- 创建 `FactorySearchController` 和 `DesignerSearchController` 控制器
+- 新增 `FactorySpecialty`、`FactoryRating`、`DesignerSpecialty`、`DesignerRating` 数据模型
+- 为 `FactoryProfile` 和 `DesignerProfile` 模型添加评分和状态字段
+- 创建数据库索引优化搜索性能
+- 实现智能搜索建议功能
+
+### 性能优化
+- 创建15个数据库索引优化搜索性能
+- 支持分页查询，默认每页20条记录
+- 使用子查询优化评分筛选和排序
+- 实现智能搜索建议，提升用户体验
+
+### 测试验证
+- 创建完整的API测试脚本
+- 支持基础搜索、高级搜索、搜索建议测试
+- 包含错误处理和性能测试
+- 提供cURL和JavaScript使用示例
+- 验证登录认证、权限控制、数据验证
+
+### 文档更新
+- 更新开发文档，添加完整的API文档
+- 创建详细的使用示例和测试脚本
+- 完善Docker Compose使用说明
+- 添加数据库索引和性能优化说明
+
+### 部署说明
+- 支持Docker Compose一键部署
+- 包含完整的数据库初始化脚本
+- 提供详细的开发环境配置说明
+- 包含常见问题排查指南
+
 ## [2025-05-16] - 订单系统优化与文件关联修复
 
 ### 功能优化
