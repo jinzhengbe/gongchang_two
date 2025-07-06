@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"gongChang/models"
@@ -27,7 +28,7 @@ func NewProgressController(progressService *services.ProgressService) *ProgressC
 // @Produce json
 // @Param orderId path int true "订单ID"
 // @Param request body models.CreateProgressRequest true "创建进度请求"
-// @Success 201 {object} models.OrderProgress
+// @Success 201 {object} gin.H
 // @Router /api/orders/{orderId}/progress [post]
 func (c *ProgressController) CreateProgress(ctx *gin.Context) {
 	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
@@ -68,16 +69,39 @@ func (c *ProgressController) CreateProgress(ctx *gin.Context) {
 		return
 	}
 
-	// 设置创建者ID
-	req.CreatorID = userID
-
 	progress, err := c.progressService.CreateProgress(&req)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, progress)
+	// 处理图片数组
+	var images []string
+	if progress.Images != "" {
+		if err := json.Unmarshal([]byte(progress.Images), &images); err != nil {
+			images = []string{}
+		}
+	}
+
+	// 返回符合要求文档的格式
+	responseData := gin.H{
+		"id":            progress.ID,
+		"order_id":      progress.OrderID,
+		"factory_id":    progress.FactoryID,
+		"type":          progress.Type,
+		"status":        progress.Status,
+		"description":   progress.Description,
+		"start_time":    progress.StartTime,
+		"completed_time": progress.CompletedTime,
+		"images":        images,
+		"created_at":    progress.CreatedAt,
+		"updated_at":    progress.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"data":    responseData,
+	})
 }
 
 // GetProgressByOrderID 获取订单进度列表
@@ -87,7 +111,7 @@ func (c *ProgressController) CreateProgress(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param orderId path int true "订单ID"
-// @Success 200 {array} models.OrderProgress
+// @Success 200 {object} gin.H
 // @Router /api/orders/{orderId}/progress [get]
 func (c *ProgressController) GetProgressByOrderID(ctx *gin.Context) {
 	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
@@ -96,13 +120,42 @@ func (c *ProgressController) GetProgressByOrderID(ctx *gin.Context) {
 		return
 	}
 
-	progress, err := c.progressService.GetProgressByOrderID(uint(orderID))
+	progressList, err := c.progressService.GetProgressByOrderID(uint(orderID))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, progress)
+	// 转换为符合要求文档的格式
+	var responseData []gin.H
+	for _, progress := range progressList {
+		// 处理图片数组
+		var images []string
+		if progress.Images != "" {
+			if err := json.Unmarshal([]byte(progress.Images), &images); err != nil {
+				images = []string{}
+			}
+		}
+
+		responseData = append(responseData, gin.H{
+			"id":            progress.ID,
+			"order_id":      progress.OrderID,
+			"factory_id":    progress.FactoryID,
+			"type":          progress.Type,
+			"status":        progress.Status,
+			"description":   progress.Description,
+			"start_time":    progress.StartTime,
+			"completed_time": progress.CompletedTime,
+			"images":        images,
+			"created_at":    progress.CreatedAt,
+			"updated_at":    progress.UpdatedAt,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    responseData,
+	})
 }
 
 // UpdateProgress 更新进度记录
@@ -173,7 +226,33 @@ func (c *ProgressController) UpdateProgress(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, updatedProgress)
+	// 处理图片数组
+	var images []string
+	if updatedProgress.Images != "" {
+		if err := json.Unmarshal([]byte(updatedProgress.Images), &images); err != nil {
+			images = []string{}
+		}
+	}
+
+	// 返回符合要求文档的格式
+	responseData := gin.H{
+		"id":            updatedProgress.ID,
+		"order_id":      updatedProgress.OrderID,
+		"factory_id":    updatedProgress.FactoryID,
+		"type":          updatedProgress.Type,
+		"status":        updatedProgress.Status,
+		"description":   updatedProgress.Description,
+		"start_time":    updatedProgress.StartTime,
+		"completed_time": updatedProgress.CompletedTime,
+		"images":        images,
+		"created_at":    updatedProgress.CreatedAt,
+		"updated_at":    updatedProgress.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    responseData,
+	})
 }
 
 // DeleteProgress 删除进度记录
@@ -289,21 +368,28 @@ func (c *ProgressController) GetProgressByFactoryID(ctx *gin.Context) {
 	// 转换为响应格式
 	var progressResponses []models.ProgressResponse
 	for _, p := range progress {
+		// 处理图片数组
+		var images []string
+		if p.Images != "" {
+			if err := json.Unmarshal([]byte(p.Images), &images); err != nil {
+				images = []string{}
+			}
+		}
+
 		progressResponses = append(progressResponses, models.ProgressResponse{
-			ID:                      p.ID,
-			OrderID:                 p.OrderID,
-			FactoryID:               p.FactoryID,
-			ProgressType:            p.ProgressType,
-			Percentage:              p.Percentage,
-			Status:                  p.Status,
-			Description:             p.Description,
-			EstimatedCompletionTime: p.EstimatedCompletionTime,
-			ActualCompletionTime:    p.ActualCompletionTime,
-			CreatorID:               p.CreatorID,
-			CreatedAt:               p.CreatedAt,
-			UpdatedAt:               p.UpdatedAt,
-			Order:                   &p.Order,
-			Factory:                 &p.Factory,
+			ID:            p.ID,
+			OrderID:       p.OrderID,
+			FactoryID:     p.FactoryID,
+			Type:          p.Type,
+			Status:        p.Status,
+			Description:   p.Description,
+			StartTime:     p.StartTime,
+			CompletedTime: p.CompletedTime,
+			Images:        images,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+			Order:         &p.Order,
+			Factory:       &p.Factory,
 		})
 	}
 
@@ -319,12 +405,12 @@ func (c *ProgressController) GetProgressByFactoryID(ctx *gin.Context) {
 
 // GetProgressStatistics 获取进度统计信息
 // @Summary 获取进度统计信息
-// @Description 获取工厂的进度统计信息
+// @Description 获取指定工厂的进度统计信息
 // @Tags 进度管理
 // @Accept json
 // @Produce json
 // @Param factory_id path string true "工厂ID"
-// @Success 200 {object} map[string]int64
+// @Success 200 {object} models.ProgressStatistics
 // @Router /api/factories/{factory_id}/progress-statistics [get]
 func (c *ProgressController) GetProgressStatistics(ctx *gin.Context) {
 	factoryID := ctx.Param("factory_id")
@@ -348,5 +434,15 @@ func (c *ProgressController) GetProgressStatistics(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, stats)
+	// 转换为统计响应格式
+	response := models.ProgressStatistics{
+		NotStarted: stats["not_started"],
+		InProgress: stats["in_progress"],
+		Completed:  stats["completed"],
+		Delayed:    stats["delayed"],
+		OnHold:     stats["on_hold"],
+		Total:      stats["not_started"] + stats["in_progress"] + stats["completed"] + stats["delayed"] + stats["on_hold"],
+	}
+
+	ctx.JSON(http.StatusOK, response)
 } 

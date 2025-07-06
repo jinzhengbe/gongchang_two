@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 	"gongChang/models"
@@ -28,19 +29,28 @@ func (s *ProgressService) CreateProgress(req *models.CreateProgressRequest) (*mo
 		return nil, err
 	}
 
+	// 处理图片数组
+	imagesJSON := ""
+	if len(req.Images) > 0 {
+		imagesBytes, err := json.Marshal(req.Images)
+		if err != nil {
+			return nil, fmt.Errorf("图片数据格式错误: %v", err)
+		}
+		imagesJSON = string(imagesBytes)
+	}
+
 	// 创建进度记录
 	now := time.Now()
 	progress := &models.OrderProgress{
-		OrderID:     req.OrderID,
-		FactoryID:   req.FactoryID,
-		ProgressType: req.ProgressType,
-		Percentage:  req.Percentage,
-		Status:      req.Status,
-		Description: req.Description,
-		EstimatedCompletionTime: req.EstimatedCompletionTime,
-		ActualCompletionTime:   req.ActualCompletionTime,
-		CreatorID:   req.CreatorID,
-		CreatedAt:   &now,
+		OrderID:       req.OrderID,
+		FactoryID:     req.FactoryID,
+		Type:          req.Type,
+		Status:        req.Status,
+		Description:   req.Description,
+		StartTime:     req.StartTime,
+		CompletedTime: req.CompletedTime,
+		Images:        imagesJSON,
+		CreatedAt:     &now,
 	}
 
 	if err := s.db.Create(progress).Error; err != nil {
@@ -106,11 +116,8 @@ func (s *ProgressService) UpdateProgress(id uint, req *models.UpdateProgressRequ
 
 	// 更新字段
 	updates := make(map[string]interface{})
-	if req.ProgressType != "" {
-		updates["progress_type"] = req.ProgressType
-	}
-	if req.Percentage != nil {
-		updates["percentage"] = req.Percentage
+	if req.Type != "" {
+		updates["type"] = req.Type
 	}
 	if req.Status != "" {
 		updates["status"] = req.Status
@@ -118,11 +125,24 @@ func (s *ProgressService) UpdateProgress(id uint, req *models.UpdateProgressRequ
 	if req.Description != "" {
 		updates["description"] = req.Description
 	}
-	if req.EstimatedCompletionTime != nil {
-		updates["estimated_completion_time"] = req.EstimatedCompletionTime
+	if req.StartTime != nil {
+		updates["start_time"] = req.StartTime
 	}
-	if req.ActualCompletionTime != nil {
-		updates["actual_completion_time"] = req.ActualCompletionTime
+	if req.CompletedTime != nil {
+		updates["completed_time"] = req.CompletedTime
+	}
+	
+	// 处理图片数组
+	if req.Images != nil {
+		imagesJSON := ""
+		if len(req.Images) > 0 {
+			imagesBytes, err := json.Marshal(req.Images)
+			if err != nil {
+				return nil, fmt.Errorf("图片数据格式错误: %v", err)
+			}
+			imagesJSON = string(imagesBytes)
+		}
+		updates["images"] = imagesJSON
 	}
 
 	if len(updates) > 0 {

@@ -29,21 +29,20 @@ const (
 	ProgressStatusOnHold     ProgressStatus = "on_hold"     // 暂停
 )
 
-// OrderProgress 订单进度模型（扩展版）
+// OrderProgress 订单进度模型（符合要求文档）
 type OrderProgress struct {
-	ID                      uint           `json:"id" gorm:"primaryKey"`
-	OrderID                 uint           `json:"order_id" gorm:"not null;index"`
-	FactoryID               string         `json:"factory_id" gorm:"type:varchar(191);not null;index"`
-	ProgressType            ProgressType   `json:"progress_type" gorm:"type:varchar(50);not null;comment:进度类型"`
-	Percentage              *int           `json:"percentage" gorm:"comment:完成百分比(0-100)"`
-	Status                  ProgressStatus `json:"status" gorm:"type:varchar(50);not null;default:'not_started';comment:进度状态"`
-	Description             string         `json:"description" gorm:"type:text;comment:进度描述"`
-	EstimatedCompletionTime *time.Time     `json:"estimated_completion_time" gorm:"comment:预计完成时间"`
-	ActualCompletionTime    *time.Time     `json:"actual_completion_time" gorm:"comment:实际完成时间"`
-	CreatorID               string         `json:"creator_id" gorm:"type:varchar(191);not null;comment:创建者ID"`
-	CreatedAt               *time.Time     `json:"created_at" gorm:"autoCreateTime:false"`
-	UpdatedAt               *time.Time     `json:"updated_at" gorm:"autoUpdateTime:false"`
-	DeletedAt               gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	ID            uint           `json:"id" gorm:"primaryKey"`
+	OrderID       uint           `json:"order_id" gorm:"not null;index"`
+	FactoryID     string         `json:"factory_id" gorm:"type:varchar(191);not null;index"`
+	Type          ProgressType   `json:"type" gorm:"type:varchar(50);not null;comment:进度类型"`
+	Status        ProgressStatus `json:"status" gorm:"type:varchar(50);not null;default:'not_started';comment:进度状态"`
+	Description   string         `json:"description" gorm:"type:text;comment:进度描述"`
+	StartTime     *time.Time     `json:"start_time" gorm:"comment:开始时间"`
+	CompletedTime *time.Time     `json:"completed_time" gorm:"comment:完成时间"`
+	Images        string         `json:"images" gorm:"type:text;comment:图片URL数组(JSON格式)"`
+	CreatedAt     *time.Time     `json:"created_at" gorm:"autoCreateTime:false"`
+	UpdatedAt     *time.Time     `json:"updated_at" gorm:"autoUpdateTime:false"`
+	DeletedAt     gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	
 	// 关联关系
 	Order   Order          `json:"order" gorm:"foreignKey:OrderID"`
@@ -55,43 +54,41 @@ func (OrderProgress) TableName() string {
 	return "order_progress"
 }
 
-// CreateProgressRequest 创建进度请求
+// CreateProgressRequest 创建进度请求（符合要求文档）
 type CreateProgressRequest struct {
-	OrderID                 uint         `json:"order_id" binding:"required"`
-	FactoryID               string       `json:"factory_id" binding:"required"`
-	ProgressType            ProgressType `json:"progress_type" binding:"required"`
-	Percentage              *int         `json:"percentage"`
-	Status                  ProgressStatus `json:"status" binding:"required"`
-	Description             string       `json:"description"`
-	EstimatedCompletionTime *time.Time   `json:"estimated_completion_time"`
-	ActualCompletionTime    *time.Time   `json:"actual_completion_time"`
-	CreatorID               string       `json:"creator_id" binding:"required"`
+	OrderID       uint         `json:"order_id" binding:"required"`
+	FactoryID     string       `json:"factory_id" binding:"required"`
+	Type          ProgressType `json:"type" binding:"required"`
+	Status        ProgressStatus `json:"status" binding:"required"`
+	Description   string       `json:"description"`
+	StartTime     *time.Time   `json:"start_time"`
+	CompletedTime *time.Time   `json:"completed_time"`
+	Images        []string     `json:"images"`
 }
 
-// UpdateProgressRequest 更新进度请求
+// UpdateProgressRequest 更新进度请求（符合要求文档）
 type UpdateProgressRequest struct {
-	ProgressType            ProgressType `json:"progress_type"`
-	Percentage              *int         `json:"percentage"`
-	Status                  ProgressStatus `json:"status"`
-	Description             string       `json:"description"`
-	EstimatedCompletionTime *time.Time   `json:"estimated_completion_time"`
-	ActualCompletionTime    *time.Time   `json:"actual_completion_time"`
+	Type          ProgressType `json:"type"`
+	Status        ProgressStatus `json:"status"`
+	Description   string       `json:"description"`
+	StartTime     *time.Time   `json:"start_time"`
+	CompletedTime *time.Time   `json:"completed_time"`
+	Images        []string     `json:"images"`
 }
 
-// ProgressResponse 进度响应
+// ProgressResponse 进度响应（符合要求文档）
 type ProgressResponse struct {
-	ID                      uint         `json:"id"`
-	OrderID                 uint         `json:"order_id"`
-	FactoryID               string       `json:"factory_id"`
-	ProgressType            ProgressType `json:"progress_type"`
-	Percentage              *int         `json:"percentage"`
-	Status                  ProgressStatus `json:"status"`
-	Description             string       `json:"description"`
-	EstimatedCompletionTime *time.Time   `json:"estimated_completion_time"`
-	ActualCompletionTime    *time.Time   `json:"actual_completion_time"`
-	CreatorID               string       `json:"creator_id"`
-	CreatedAt               *time.Time   `json:"created_at"`
-	UpdatedAt               *time.Time   `json:"updated_at"`
+	ID            uint         `json:"id"`
+	OrderID       uint         `json:"order_id"`
+	FactoryID     string       `json:"factory_id"`
+	Type          ProgressType `json:"type"`
+	Status        ProgressStatus `json:"status"`
+	Description   string       `json:"description"`
+	StartTime     *time.Time   `json:"start_time"`
+	CompletedTime *time.Time   `json:"completed_time"`
+	Images        []string     `json:"images"`
+	CreatedAt     *time.Time   `json:"created_at"`
+	UpdatedAt     *time.Time   `json:"updated_at"`
 	
 	// 关联数据
 	Order   *Order          `json:"order,omitempty"`
