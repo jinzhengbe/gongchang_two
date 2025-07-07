@@ -120,6 +120,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			{
 				userGroup.GET("/profile", userController.GetUserProfile)
 				userGroup.PUT("/profile", userController.UpdateUserProfile)
+				userGroup.POST("/change-password", userController.ChangePassword)
 				userGroup.GET("/:id", userController.GetUser)
 				userGroup.PUT("/:id", userController.UpdateUser)
 				userGroup.DELETE("/:id", userController.DeleteUser)

@@ -217,4 +217,44 @@ func (c *UserController) RefreshToken(ctx *gin.Context) {
 		"message": "Token刷新成功",
 		"token":   newToken,
 	})
+}
+
+// ChangePassword 修改密码
+// @Summary 修改用户密码
+// @Description 用户修改自己的密码
+// @Tags 用户管理
+// @Accept json
+// @Produce json
+// @Param request body models.ChangePasswordRequest true "修改密码请求"
+// @Success 200 {object} gin.H
+// @Router /api/users/change-password [post]
+func (c *UserController) ChangePassword(ctx *gin.Context) {
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	var req models.ChangePasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "请求参数错误: " + err.Error()})
+		return
+	}
+
+	// 验证新密码长度
+	if len(req.NewPassword) < 6 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "新密码长度不能少于6位"})
+		return
+	}
+
+	// 调用服务层修改密码
+	err := c.userService.ChangePassword(userID, req.OldPassword, req.NewPassword)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "密码修改成功",
+	})
 } 

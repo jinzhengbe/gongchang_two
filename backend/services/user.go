@@ -165,4 +165,34 @@ func HashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hashedPassword), nil
+}
+
+// ChangePassword 修改用户密码
+func (s *UserService) ChangePassword(userID, oldPassword, newPassword string) error {
+	// 获取用户信息
+	var user models.User
+	if err := s.db.Where("id = ?", userID).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("用户不存在")
+		}
+		return err
+	}
+
+	// 验证旧密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
+		return errors.New("旧密码错误")
+	}
+
+	// 哈希新密码
+	hashedNewPassword, err := HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	// 更新密码
+	if err := s.db.Model(&user).Update("password", hashedNewPassword).Error; err != nil {
+		return err
+	}
+
+	return nil
 } 
