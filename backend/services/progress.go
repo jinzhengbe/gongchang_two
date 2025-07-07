@@ -29,6 +29,20 @@ func (s *ProgressService) CreateProgress(req *models.CreateProgressRequest) (*mo
 		return nil, err
 	}
 
+	// 检查工厂是否已接单（从接单表验证）
+	var jiedan models.Jiedan
+	if err := s.db.Where("order_id = ? AND factory_id = ?", req.OrderID, req.FactoryID).First(&jiedan).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("该工厂未接此订单，无法创建进度记录")
+		}
+		return nil, err
+	}
+
+	// 检查接单状态，只有已接单的工厂才能创建进度
+	if jiedan.Status != models.JiedanStatusAccepted {
+		return nil, fmt.Errorf("只有已接单的工厂才能创建进度记录")
+	}
+
 	// 处理图片数组
 	imagesJSON := ""
 	if len(req.Images) > 0 {

@@ -86,4 +86,15 @@ type AcceptJiedanRequest struct {
 // RejectJiedanRequest 拒绝接单请求
 type RejectJiedanRequest struct {
 	Reason string `json:"reason"`
+}
+
+// AcceptOrderRequest 接受订单请求
+type AcceptOrderRequest struct {
+	OrderID       uint      `json:"order_id" binding:"required"`
+	FactoryID     string    `json:"factory_id" binding:"required"`
+	Status        string    `json:"status" binding:"required"`
+	AcceptedAt    time.Time `json:"accepted_at"`
+	Action        string    `json:"action" binding:"required"`
+	PriceQuote    *float64  `json:"price_quote"`
+	Message       string    `json:"message"`
 } 

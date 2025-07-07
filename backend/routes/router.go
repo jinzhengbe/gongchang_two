@@ -154,13 +154,19 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				orderGroup.DELETE("/:id/remove-fabric", orderController.RemoveFabricFromOrder)
 				orderGroup.POST("/:id/add-file", fileController.AddFileToOrder)
 				orderGroup.DELETE("/:id/remove-file", orderController.RemoveFileFromOrder)
+				orderGroup.GET("/:id/jiedan", jiedanController.GetJiedanByOrderIDAndFactoryID)
 				orderGroup.GET("/:id/jiedans", jiedanController.GetJiedansByOrderID)
+				orderGroup.POST("/:id/accept", orderController.AcceptOrder)
 				
 				// 进度管理路由
 				orderGroup.POST("/:id/progress", progressController.CreateProgress)
 				orderGroup.GET("/:id/progress", progressController.GetProgressByOrderID)
 				orderGroup.PUT("/:id/progress/:progressId", progressController.UpdateProgress)
 				orderGroup.DELETE("/:id/progress/:progressId", progressController.DeleteProgress)
+				
+				// 兼容路由（支持前端使用的复数形式）
+				orderGroup.POST("/:id/progresses", progressController.CreateProgress)
+				orderGroup.GET("/:id/progresses", progressController.GetProgressByOrderID)
 			}
 
 			// 工厂订单路由

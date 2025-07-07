@@ -220,4 +220,18 @@ func (s *JiedanService) GetJiedanStatistics(factoryID string) (map[string]int64,
 	}
 
 	return stats, nil
+}
+
+// GetJiedanByOrderIDAndFactoryID 根据订单ID和工厂ID获取接单记录
+func (s *JiedanService) GetJiedanByOrderIDAndFactoryID(orderID uint, factoryID string) (*models.Jiedan, error) {
+	var jiedan models.Jiedan
+	if err := s.db.Where("order_id = ? AND factory_id = ?", orderID, factoryID).
+		Preload("Order").Preload("Factory").
+		First(&jiedan).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil // 返回nil表示没有找到记录
+		}
+		return nil, err
+	}
+	return &jiedan, nil
 } 

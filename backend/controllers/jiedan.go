@@ -96,7 +96,7 @@ func (c *JiedanController) GetJiedanByID(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "订单ID"
-// @Success 200 {array} models.Jiedan
+// @Success 200 {object} gin.H
 // @Router /api/orders/{id}/jiedans [get]
 func (c *JiedanController) GetJiedansByOrderID(ctx *gin.Context) {
 	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
@@ -111,7 +111,27 @@ func (c *JiedanController) GetJiedansByOrderID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, jiedans)
+	// 转换为符合文档要求的格式
+	var responseData []gin.H
+	for _, jiedan := range jiedans {
+		responseData = append(responseData, gin.H{
+			"id":                    jiedan.ID,
+			"order_id":              jiedan.OrderID,
+			"factory_id":            jiedan.FactoryID,
+			"status":                jiedan.Status,
+			"price_quote":           jiedan.Price,
+			"jiedan_time":           jiedan.JiedanTime,
+			"agree_time":            jiedan.AgreeTime,
+			"agree_user_id":         jiedan.AgreeUserID,
+			"created_at":            jiedan.CreatedAt,
+			"updated_at":            jiedan.UpdatedAt,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    responseData,
+	})
 }
 
 // GetJiedansByFactoryID 根据工厂ID获取接单记录列表
@@ -316,4 +336,62 @@ func (c *JiedanController) GetJiedanStatistics(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, stats)
+}
+
+// GetJiedanByOrderIDAndFactoryID 根据订单ID和工厂ID获取接单记录
+// @Summary 获取订单下指定工厂的接单记录
+// @Description 根据订单ID和工厂ID获取该工厂对该订单的接单记录
+// @Tags 接单管理
+// @Accept json
+// @Produce json
+// @Param id path int true "订单ID"
+// @Param factory_id query string true "工厂ID"
+// @Success 200 {object} gin.H
+// @Router /api/orders/{id}/jiedan [get]
+func (c *JiedanController) GetJiedanByOrderIDAndFactoryID(ctx *gin.Context) {
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		return
+	}
+
+	factoryID := ctx.Query("factory_id")
+	if factoryID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "工厂ID不能为空"})
+		return
+	}
+
+	jiedan, err := c.jiedanService.GetJiedanByOrderIDAndFactoryID(uint(orderID), factoryID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 如果没有找到记录，返回null
+	if jiedan == nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"data":    nil,
+		})
+		return
+	}
+
+	// 转换为符合文档要求的格式
+	responseData := gin.H{
+		"id":                    jiedan.ID,
+		"order_id":              jiedan.OrderID,
+		"factory_id":            jiedan.FactoryID,
+		"status":                jiedan.Status,
+		"price_quote":           jiedan.Price,
+		"jiedan_time":           jiedan.JiedanTime,
+		"agree_time":            jiedan.AgreeTime,
+		"agree_user_id":         jiedan.AgreeUserID,
+		"created_at":            jiedan.CreatedAt,
+		"updated_at":            jiedan.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    responseData,
+	})
 } 

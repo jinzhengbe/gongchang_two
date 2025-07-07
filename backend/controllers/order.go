@@ -815,4 +815,90 @@ func (c *OrderController) RemoveFileFromOrder(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
+}
+
+// AcceptOrder 工厂接受订单
+// @Summary 工厂接受订单
+// @Description 工厂接受指定订单，创建接单记录
+// @Tags 订单管理
+// @Accept json
+// @Produce json
+// @Param orderId path int true "订单ID"
+// @Param request body models.AcceptOrderRequest true "接受订单请求"
+// @Success 200 {object} gin.H
+// @Router /api/orders/{orderId}/accept [post]
+func (c *OrderController) AcceptOrder(ctx *gin.Context) {
+	// 获取订单ID
+	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
+		return
+	}
+
+	// 绑定请求数据
+	var req models.AcceptOrderRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 验证订单ID一致性
+	if uint(orderID) != req.OrderID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "URL中的订单ID与请求体中的订单ID不一致"})
+		return
+	}
+
+	// 获取当前用户ID
+	userID := ctx.GetString("user_id")
+	if userID == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	// 验证用户角色
+	userRole := ctx.GetString("user_role")
+	if userRole != "factory" {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "只有工厂用户可以接受订单"})
+		return
+	}
+
+	// 验证工厂ID是否与当前用户匹配
+	if req.FactoryID != userID {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "只能以自己的工厂身份接受订单"})
+		return
+	}
+
+	// 创建接单服务实例
+	jiedanService := services.NewJiedanService(c.DB)
+
+	// 创建接单记录
+	createReq := &models.CreateJiedanRequest{
+		OrderID:   uint(orderID),
+		FactoryID: req.FactoryID,
+		Price:     req.PriceQuote,
+	}
+
+	jiedan, err := jiedanService.CreateJiedan(createReq)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 返回成功响应
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "订单接受成功",
+		"data": gin.H{
+			"id":                    jiedan.ID,
+			"order_id":              jiedan.OrderID,
+			"factory_id":            jiedan.FactoryID,
+			"status":                jiedan.Status,
+			"price_quote":           jiedan.Price,
+			"jiedan_time":           jiedan.JiedanTime,
+			"agree_time":            jiedan.AgreeTime,
+			"agree_user_id":         jiedan.AgreeUserID,
+			"created_at":            jiedan.CreatedAt,
+			"updated_at":            jiedan.UpdatedAt,
+		},
+	})
 } 

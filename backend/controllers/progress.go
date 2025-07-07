@@ -31,7 +31,7 @@ func NewProgressController(progressService *services.ProgressService) *ProgressC
 // @Success 201 {object} gin.H
 // @Router /api/orders/{orderId}/progress [post]
 func (c *ProgressController) CreateProgress(ctx *gin.Context) {
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
@@ -114,7 +114,7 @@ func (c *ProgressController) CreateProgress(ctx *gin.Context) {
 // @Success 200 {object} gin.H
 // @Router /api/orders/{orderId}/progress [get]
 func (c *ProgressController) GetProgressByOrderID(ctx *gin.Context) {
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
@@ -170,7 +170,7 @@ func (c *ProgressController) GetProgressByOrderID(ctx *gin.Context) {
 // @Success 200 {object} models.OrderProgress
 // @Router /api/orders/{orderId}/progress/{progressId} [put]
 func (c *ProgressController) UpdateProgress(ctx *gin.Context) {
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
@@ -266,7 +266,7 @@ func (c *ProgressController) UpdateProgress(ctx *gin.Context) {
 // @Success 200 {object} gin.H
 // @Router /api/orders/{orderId}/progress/{progressId} [delete]
 func (c *ProgressController) DeleteProgress(ctx *gin.Context) {
-	orderID, err := strconv.ParseUint(ctx.Param("orderId"), 10, 32)
+	orderID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "无效的订单ID"})
 		return
