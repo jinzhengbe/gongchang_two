@@ -165,7 +165,7 @@ func HashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hashedPassword), nil
-}
+} 
 
 // ChangePassword 修改用户密码
 func (s *UserService) ChangePassword(userID, oldPassword, newPassword string) error {

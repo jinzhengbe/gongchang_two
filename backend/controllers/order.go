@@ -815,7 +815,7 @@ func (c *OrderController) RemoveFileFromOrder(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
-}
+} 
 
 // AcceptOrder 工厂接受订单
 // @Summary 工厂接受订单

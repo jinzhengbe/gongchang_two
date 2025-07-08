@@ -217,7 +217,7 @@ func (c *UserController) RefreshToken(ctx *gin.Context) {
 		"message": "Token刷新成功",
 		"token":   newToken,
 	})
-}
+} 
 
 // ChangePassword 修改密码
 // @Summary 修改用户密码

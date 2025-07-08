@@ -220,7 +220,7 @@ func (s *JiedanService) GetJiedanStatistics(factoryID string) (map[string]int64,
 	}
 
 	return stats, nil
-}
+} 
 
 // GetJiedanByOrderIDAndFactoryID 根据订单ID和工厂ID获取接单记录
 func (s *JiedanService) GetJiedanByOrderIDAndFactoryID(orderID uint, factoryID string) (*models.Jiedan, error) {

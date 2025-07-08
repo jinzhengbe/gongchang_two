@@ -86,7 +86,7 @@ type AcceptJiedanRequest struct {
 // RejectJiedanRequest 拒绝接单请求
 type RejectJiedanRequest struct {
 	Reason string `json:"reason"`
-}
+} 
 
 // AcceptOrderRequest 接受订单请求
 type AcceptOrderRequest struct {
