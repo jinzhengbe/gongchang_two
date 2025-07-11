@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"strings"
 	"mime"
+	"mime/multipart"
+	"encoding/json"
 )
 
 const (
@@ -269,6 +271,310 @@ func (s *FileService) GetFilesByIDs(fileIDs []string) ([]models.File, error) {
 // GetDB 获取数据库连接
 func (s *FileService) GetDB() *gorm.DB {
 	return s.db
+}
+
+// 工厂图片相关方法
+
+// BatchUploadFactoryPhotos 批量上传工厂图片
+func (s *FileService) BatchUploadFactoryPhotos(files []*multipart.FileHeader, factoryID string, category string) (*models.BatchUploadFactoryPhotosResponse, error) {
+	log.Printf("Starting batch upload for factory: %s, category: %s, files count: %d", factoryID, category, len(files))
+	
+	response := &models.BatchUploadFactoryPhotosResponse{
+		Success:      true,
+		Message:      "批量上传成功",
+		UploadedCount: 0,
+		FailedCount:  0,
+		Photos:       make([]*models.FactoryPhotoInfo, 0),
+		FailedFiles:  make([]*models.FailedFileInfo, 0),
+	}
+
+	// 验证工厂是否存在
+	var factory models.FactoryProfile
+	if err := s.db.Where("user_id = ?", factoryID).First(&factory).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("工厂不存在")
+		}
+		return nil, fmt.Errorf("验证工厂失败: %v", err)
+	}
+
+	// 批量处理文件
+	for _, fileHeader := range files {
+		photoInfo, err := s.processFactoryPhoto(fileHeader, factoryID, category)
+		if err != nil {
+			log.Printf("Failed to process file %s: %v", fileHeader.Filename, err)
+			response.FailedCount++
+			response.FailedFiles = append(response.FailedFiles, &models.FailedFileInfo{
+				Name:  fileHeader.Filename,
+				Error: err.Error(),
+			})
+			continue
+		}
+		
+		response.UploadedCount++
+		response.Photos = append(response.Photos, photoInfo)
+	}
+
+	// 更新工厂信息中的photos字段
+	if err := s.updateFactoryPhotos(factoryID, response.Photos); err != nil {
+		log.Printf("Failed to update factory photos: %v", err)
+		// 不返回错误，因为文件已经上传成功
+	}
+
+	return response, nil
+}
+
+// processFactoryPhoto 处理单个工厂图片
+func (s *FileService) processFactoryPhoto(fileHeader *multipart.FileHeader, factoryID string, category string) (*models.FactoryPhotoInfo, error) {
+	// 打开文件
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, fmt.Errorf("无法打开文件: %v", err)
+	}
+	defer file.Close()
+
+	// 检查文件大小
+	if fileHeader.Size > 10*1024*1024 { // 10MB限制
+		return nil, fmt.Errorf("文件大小超过限制 (最大 10MB)")
+	}
+
+	// 验证文件类型
+	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+	supportedImageExts := []string{".jpg", ".jpeg", ".png", ".webp"}
+	supported := false
+	for _, supportedExt := range supportedImageExts {
+		if ext == supportedExt {
+			supported = true
+			break
+		}
+	}
+	if !supported {
+		return nil, fmt.Errorf("不支持的文件格式: %s (支持: JPG, PNG, WebP)", ext)
+	}
+
+	// 生成唯一文件名
+	fileID := uuid.New().String()
+	newFilename := fileID + ext
+
+	// 保存文件
+	finalPath := filepath.Join(s.uploadPath, newFilename)
+	dst, err := os.Create(finalPath)
+	if err != nil {
+		return nil, fmt.Errorf("创建文件失败: %v", err)
+	}
+	defer dst.Close()
+
+	// 复制文件内容
+	written, err := io.Copy(dst, file)
+	if err != nil {
+		os.Remove(finalPath) // 清理失败的文件
+		return nil, fmt.Errorf("保存文件失败: %v", err)
+	}
+
+	// 创建文件记录
+	fileRecord := &models.File{
+		ID:        fileID,
+		Name:      fileHeader.Filename,
+		Path:      newFilename,
+		Type:      "image",
+		FactoryID: factoryID,
+		Category:  category,
+		Size:      written,
+	}
+
+	// 保存到数据库
+	if err := s.db.Create(fileRecord).Error; err != nil {
+		os.Remove(finalPath) // 清理失败的文件
+		return nil, fmt.Errorf("保存文件记录失败: %v", err)
+	}
+
+	// 生成缩略图（可选）
+	thumbnailURL := ""
+	if written > 1024*1024 { // 大于1MB的图片生成缩略图
+		thumbnailPath, err := s.generateThumbnail(finalPath, fileID)
+		if err == nil {
+			thumbnailURL = "/uploads/thumbnails/" + filepath.Base(thumbnailPath)
+		}
+	}
+
+	return &models.FactoryPhotoInfo{
+		ID:           fileID,
+		Name:         fileHeader.Filename,
+		URL:          "/uploads/" + newFilename,
+		ThumbnailURL: thumbnailURL,
+		Category:     category,
+		Size:         written,
+		FactoryID:    factoryID,
+		Status:       "success",
+		CreatedAt:    fileRecord.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}, nil
+}
+
+// GetFactoryPhotos 获取工厂图片列表
+func (s *FileService) GetFactoryPhotos(factoryID string, category string, page, pageSize int) (*models.GetFactoryPhotosResponse, error) {
+	query := s.db.Model(&models.File{}).Where("factory_id = ? AND type = ?", factoryID, "image")
+	
+	// 按分类筛选
+	if category != "" {
+		query = query.Where("category = ?", category)
+	}
+
+	// 获取总数
+	var total int64
+	query.Count(&total)
+
+	// 分页查询
+	var files []models.File
+	offset := (page - 1) * pageSize
+	query.Offset(offset).Limit(pageSize).Order("created_at DESC").Find(&files)
+
+	// 转换为响应格式
+	photos := make([]*models.FactoryPhotoInfo, 0, len(files))
+	for _, file := range files {
+		thumbnailURL := ""
+		if file.Size > 1024*1024 {
+			thumbnailURL = "/uploads/thumbnails/" + strings.TrimSuffix(file.Path, filepath.Ext(file.Path)) + "_thumb" + filepath.Ext(file.Path)
+		}
+
+		photos = append(photos, &models.FactoryPhotoInfo{
+			ID:           file.ID,
+			Name:         file.Name,
+			URL:          "/uploads/" + file.Path,
+			ThumbnailURL: thumbnailURL,
+			Category:     file.Category,
+			Size:         file.Size,
+			FactoryID:    file.FactoryID,
+			Status:       "success",
+			CreatedAt:    file.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+
+	// 获取分类统计
+	categories, err := s.getPhotoCategories(factoryID)
+	if err != nil {
+		log.Printf("Failed to get photo categories: %v", err)
+	}
+
+	return &models.GetFactoryPhotosResponse{
+		Success:    true,
+		Total:      total,
+		Photos:     photos,
+		Categories: categories,
+	}, nil
+}
+
+// DeleteFactoryPhoto 删除单张工厂图片
+func (s *FileService) DeleteFactoryPhoto(photoID string, factoryID string) error {
+	var file models.File
+	if err := s.db.Where("id = ? AND factory_id = ? AND type = ?", photoID, factoryID, "image").First(&file).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("图片不存在")
+		}
+		return err
+	}
+
+	// 删除物理文件
+	filePath := filepath.Join(s.uploadPath, file.Path)
+	if err := os.Remove(filePath); err != nil && !os.IsNotExist(err) {
+		log.Printf("Failed to remove file %s: %v", filePath, err)
+	}
+
+	// 删除缩略图（如果存在）
+	thumbnailPath := filepath.Join(s.uploadPath, "thumbnails", strings.TrimSuffix(file.Path, filepath.Ext(file.Path))+"_thumb"+filepath.Ext(file.Path))
+	os.Remove(thumbnailPath)
+
+	// 删除数据库记录
+	return s.db.Delete(&file).Error
+}
+
+// BatchDeleteFactoryPhotos 批量删除工厂图片
+func (s *FileService) BatchDeleteFactoryPhotos(photoIDs []string, factoryID string) (*models.BatchDeleteFactoryPhotosResponse, error) {
+	response := &models.BatchDeleteFactoryPhotosResponse{
+		Success:        true,
+		Message:        "批量删除成功",
+		DeletedCount:   0,
+		FailedCount:    0,
+		FailedPhotoIDs: make([]string, 0),
+	}
+
+	for _, photoID := range photoIDs {
+		if err := s.DeleteFactoryPhoto(photoID, factoryID); err != nil {
+			response.FailedCount++
+			response.FailedPhotoIDs = append(response.FailedPhotoIDs, photoID)
+			log.Printf("Failed to delete photo %s: %v", photoID, err)
+		} else {
+			response.DeletedCount++
+		}
+	}
+
+	return response, nil
+}
+
+// updateFactoryPhotos 更新工厂信息中的photos字段
+func (s *FileService) updateFactoryPhotos(factoryID string, photos []*models.FactoryPhotoInfo) error {
+	// 获取现有的photos字段
+	var factory models.FactoryProfile
+	if err := s.db.Where("user_id = ?", factoryID).First(&factory).Error; err != nil {
+		return err
+	}
+
+	// 解析现有的photos
+	var existingPhotos []string
+	if factory.Photos != "" {
+		if err := json.Unmarshal([]byte(factory.Photos), &existingPhotos); err != nil {
+			log.Printf("Failed to unmarshal existing photos: %v", err)
+			existingPhotos = []string{}
+		}
+	}
+
+	// 添加新的图片URL
+	for _, photo := range photos {
+		existingPhotos = append(existingPhotos, photo.URL)
+	}
+
+	// 去重
+	uniquePhotos := make([]string, 0)
+	seen := make(map[string]bool)
+	for _, photo := range existingPhotos {
+		if !seen[photo] {
+			seen[photo] = true
+			uniquePhotos = append(uniquePhotos, photo)
+		}
+	}
+
+	// 更新工厂信息
+	photosJSON, err := json.Marshal(uniquePhotos)
+	if err != nil {
+		return err
+	}
+
+	return s.db.Model(&factory).Update("photos", string(photosJSON)).Error
+}
+
+// getPhotoCategories 获取图片分类统计
+func (s *FileService) getPhotoCategories(factoryID string) ([]*models.PhotoCategory, error) {
+	// 这里可以扩展为从数据库查询分类，目前返回默认分类
+	defaultCategories := []*models.PhotoCategory{
+		{ID: 1, FactoryID: factoryID, Name: "workshop", Color: "#FF5733", Count: 0},
+		{ID: 2, FactoryID: factoryID, Name: "equipment", Color: "#33FF57", Count: 0},
+		{ID: 3, FactoryID: factoryID, Name: "products", Color: "#3357FF", Count: 0},
+		{ID: 4, FactoryID: factoryID, Name: "certificates", Color: "#F3FF33", Count: 0},
+	}
+
+	// 统计每个分类的图片数量
+	for _, category := range defaultCategories {
+		var count int64
+		s.db.Model(&models.File{}).Where("factory_id = ? AND type = ? AND category = ?", factoryID, "image", category.Name).Count(&count)
+		category.Count = int(count)
+	}
+
+	return defaultCategories, nil
+}
+
+// generateThumbnail 生成缩略图
+func (s *FileService) generateThumbnail(imagePath, fileID string) (string, error) {
+	// 这里可以集成图片处理库（如imaging）来生成缩略图
+	// 目前返回原图路径
+	return imagePath, nil
 }
 
 // validateFileContent 验证文件内容

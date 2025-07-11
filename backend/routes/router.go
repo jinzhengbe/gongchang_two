@@ -226,6 +226,19 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			// 根据工厂ID获取工厂详情（需要认证）
 			authRequiredGroup.GET("/factory/:id", factoryController.GetFactoryByID)
 			
+			// 工厂信息管理路由（需要认证）
+			authRequiredGroup.GET("/factories/profile", factoryController.GetFactoryProfile)
+			authRequiredGroup.PUT("/factories/profile", factoryController.UpdateFactoryProfile)
+			
+			// 工厂图片管理路由（需要认证）
+			factoryPhotoGroup := authRequiredGroup.Group("/factories/:factory_id/photos")
+			{
+				factoryPhotoGroup.POST("/batch", factoryController.BatchUploadPhotos)
+				factoryPhotoGroup.GET("", factoryController.GetFactoryPhotos)
+				factoryPhotoGroup.DELETE("/:photoId", factoryController.DeleteFactoryPhoto)
+				factoryPhotoGroup.DELETE("/batch", factoryController.BatchDeletePhotos)
+			}
+			
 			// 工厂专业领域和评分管理路由（需要认证）
 			authRequiredGroup.POST("/factories/:factory_id/specialties", factorySearchController.CreateFactorySpecialty)
 			authRequiredGroup.POST("/factories/:factory_id/ratings", factorySearchController.CreateFactoryRating)

@@ -62,6 +62,45 @@ func MigrateData(db *gorm.DB) error {
 		log.Printf("Warning: Failed to create factory_id index: %v", err)
 	}
 
+	// 修复factory_profiles表的photos和videos字段
+	if err := db.Exec("ALTER TABLE factory_profiles MODIFY COLUMN photos JSON NULL").Error; err != nil {
+		log.Printf("Warning: Failed to modify photos column: %v", err)
+	}
+	
+	if err := db.Exec("ALTER TABLE factory_profiles ADD COLUMN IF NOT EXISTS videos JSON NULL").Error; err != nil {
+		log.Printf("Warning: Failed to add videos column: %v", err)
+	}
+
+	// 为files表添加工厂图片相关字段
+	if err := db.Exec("ALTER TABLE files ADD COLUMN IF NOT EXISTS type VARCHAR(50) NULL").Error; err != nil {
+		log.Printf("Warning: Failed to add type column: %v", err)
+	}
+	
+	if err := db.Exec("ALTER TABLE files ADD COLUMN IF NOT EXISTS factory_id VARCHAR(191) NULL").Error; err != nil {
+		log.Printf("Warning: Failed to add factory_id column: %v", err)
+	}
+	
+	if err := db.Exec("ALTER TABLE files ADD COLUMN IF NOT EXISTS category VARCHAR(100) NULL").Error; err != nil {
+		log.Printf("Warning: Failed to add category column: %v", err)
+	}
+	
+	if err := db.Exec("ALTER TABLE files ADD COLUMN IF NOT EXISTS size BIGINT NULL").Error; err != nil {
+		log.Printf("Warning: Failed to add size column: %v", err)
+	}
+	
+	// 为files表添加索引
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_files_factory_id ON files(factory_id)").Error; err != nil {
+		log.Printf("Warning: Failed to create factory_id index: %v", err)
+	}
+	
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_files_type ON files(type)").Error; err != nil {
+		log.Printf("Warning: Failed to create type index: %v", err)
+	}
+	
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_files_category ON files(category)").Error; err != nil {
+		log.Printf("Warning: Failed to create category index: %v", err)
+	}
+
 	log.Println("SQL migrations completed")
 
 	return nil
