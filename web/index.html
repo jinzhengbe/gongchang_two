@@ -5,172 +5,42 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="app.appDescription">
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="app.appName">
-  
-  <!-- 预加载关键资源 -->
-  <link rel="preload" href="flutter.js" as="script">
-  <link rel="preload" href="main.dart.js" as="script">
-  <link rel="preload" href="manifest.json" as="fetch" crossorigin>
-  
-  <!-- 缓存控制 -->
-  <meta http-equiv="Cache-Control" content="public, max-age=31536000">
-  <meta http-equiv="Expires" content="31536000">
-  
+  <meta name="apple-mobile-web-app-title" content="factiories">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-  <link rel="icon" type="image/png" href="favicon.png" />
-  <title>app.appName</title>
-  <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-  
-  <!-- 性能监控 -->
-  <script>
-    // 性能监控
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        var timing = window.performance.timing;
-        var loadTime = timing.loadEventEnd - timing.navigationStart;
-        console.log('页面加载时间:', loadTime + 'ms');
-        
-        // 发送性能数据到服务器
-        if (window._flutter && window._flutter.loader) {
-          window._flutter.loader.performanceData = {
-            loadTime: loadTime,
-            firstPaint: timing.responseEnd - timing.navigationStart,
-            domReady: timing.domComplete - timing.navigationStart
-          };
-        }
-      }, 0);
-    });
-  </script>
-  
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>factiories</title>
+  <link rel="manifest" href="manifest.json">
+
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = '"4223054469"';
+    const serviceWorkerVersion = "857332951";
   </script>
+  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
-  <style>
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      -ms-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-    }
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 4px solid #2196F3;
-      width: 40px;
-      height: 40px;
-      -webkit-animation: spin 1s linear infinite;
-      animation: spin 1s linear infinite;
-    }
-    @-webkit-keyframes spin {
-      0% { -webkit-transform: rotate(0deg); }
-      100% { -webkit-transform: rotate(360deg); }
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    #flutter_target {
-      width: 100vw;
-      height: 100vh;
-    }
-    .error-message {
-      color: #d32f2f;
-      text-align: center;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
-  </style>
 </head>
 <body>
-  <div id="flutter_target"></div>
-  <div class="loading">
-    <div class="loader"></div>
-  </div>
   <script>
     window.addEventListener('load', function(ev) {
-      var loading = document.querySelector('.loading');
-      window._flutter = window._flutter || {};
-      window._flutter.buildConfig = {
-        builds: [
-          {
-            mainJsPath: "main.dart.js",
-            renderer: "html"
-          }
-        ],
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
-        assetsBase: "./"
-      };
-
-      // 添加错误处理
-      window.addEventListener('error', function(e) {
-        console.error('Global error:', e);
-        if (loading) {
-          loading.innerHTML = '<div class="error-message">加载失败，请刷新页面重试</div>';
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
         }
-      });
-
-      // 确保 Flutter 加载器存在
-      if (!window._flutter.loader) {
-        console.error('Flutter loader not found');
-        loading.innerHTML = '<div class="error-message">Flutter 加载器未找到，请刷新页面重试</div>';
-        return;
-      }
-
-      // 添加资源加载超时处理
-      var loadTimeout = setTimeout(function() {
-        if (loading) {
-          loading.innerHTML = '<div class="error-message">加载超时，请刷新页面重试</div>';
-        }
-      }, 30000); // 30秒超时
-
-      window._flutter.loader.load({
-        onEntrypointLoaded: async function(engineInitializer) {
-          try {
-            console.log('Flutter engine initializer loaded');
-            let appRunner = await engineInitializer.initializeEngine({
-              hostElement: document.querySelector('#flutter_target'),
-              renderer: "html",
-              useColorEmoji: true,
-              assetBase: "./"
-            });
-            console.log('Flutter engine initialized');
-            await appRunner.runApp();
-            console.log('Flutter app running');
-            clearTimeout(loadTimeout);
-            loading.remove();
-          } catch (error) {
-            console.error('Failed to initialize Flutter app:', error);
-            loading.innerHTML = '<div class="error-message">应用加载失败，请刷新页面重试</div>';
-            clearTimeout(loadTimeout);
-          }
-        }
-      }).catch(function(error) {
-        console.error('Failed to load Flutter app:', error);
-        loading.innerHTML = '<div class="error-message">应用加载失败，请刷新页面重试</div>';
-        clearTimeout(loadTimeout);
       });
     });
-  </script>
-  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-  <script>
-    new VConsole();
   </script>
 </body>
 </html> 

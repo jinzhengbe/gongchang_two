@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -82,10 +83,44 @@ func (fc *FactoryController) GetFactoryByUserID(c *gin.Context) {
 	fc.DB.Where("id = ?", factory.UserID).First(&user)
 	factory.User = user
 
+	// 解析Photos字段为图片数组
+	var images []map[string]string
+	if factory.Photos != "" {
+		var photoURLs []string
+		if err := json.Unmarshal([]byte(factory.Photos), &photoURLs); err == nil {
+			// 将URL数组转换为包含url字段的对象数组
+			for _, url := range photoURLs {
+				images = append(images, map[string]string{
+					"url": url,
+				})
+			}
+		}
+	}
+
+	// 构建响应数据
+	responseData := gin.H{
+		"id":             factory.ID,
+		"user_id":        factory.UserID,
+		"company_name":   factory.CompanyName,
+		"address":        factory.Address,
+		"capacity":       factory.Capacity,
+		"equipment":      factory.Equipment,
+		"certificates":   factory.Certificates,
+		"photos":         factory.Photos, // 保持原有的photos字段
+		"videos":         factory.Videos,
+		"employee_count": factory.EmployeeCount,
+		"rating":         factory.Rating,
+		"status":         factory.Status,
+		"created_at":     factory.CreatedAt,
+		"updated_at":     factory.UpdatedAt,
+		"user":           factory.User,
+		"images":         images, // 新增的images字段
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
-		"data": factory,
+		"data": responseData,
 	})
 }
 
@@ -132,10 +167,44 @@ func (fc *FactoryController) GetFactoryByID(c *gin.Context) {
 	fc.DB.Where("id = ?", factory.UserID).First(&user)
 	factory.User = user
 
+	// 解析Photos字段为图片数组
+	var images []map[string]string
+	if factory.Photos != "" {
+		var photoURLs []string
+		if err := json.Unmarshal([]byte(factory.Photos), &photoURLs); err == nil {
+			// 将URL数组转换为包含url字段的对象数组
+			for _, url := range photoURLs {
+				images = append(images, map[string]string{
+					"url": url,
+				})
+			}
+		}
+	}
+
+	// 构建响应数据
+	responseData := gin.H{
+		"id":             factory.ID,
+		"user_id":        factory.UserID,
+		"company_name":   factory.CompanyName,
+		"address":        factory.Address,
+		"capacity":       factory.Capacity,
+		"equipment":      factory.Equipment,
+		"certificates":   factory.Certificates,
+		"photos":         factory.Photos, // 保持原有的photos字段
+		"videos":         factory.Videos,
+		"employee_count": factory.EmployeeCount,
+		"rating":         factory.Rating,
+		"status":         factory.Status,
+		"created_at":     factory.CreatedAt,
+		"updated_at":     factory.UpdatedAt,
+		"user":           factory.User,
+		"images":         images, // 新增的images字段
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
-		"data": factory,
+		"data": responseData,
 	})
 } 
 
@@ -172,10 +241,44 @@ func (fc *FactoryController) GetFactoryProfile(c *gin.Context) {
 	fc.DB.Where("id = ?", factory.UserID).First(&user)
 	factory.User = user
 
+	// 解析Photos字段为图片数组
+	var images []map[string]string
+	if factory.Photos != "" {
+		var photoURLs []string
+		if err := json.Unmarshal([]byte(factory.Photos), &photoURLs); err == nil {
+			// 将URL数组转换为包含url字段的对象数组
+			for _, url := range photoURLs {
+				images = append(images, map[string]string{
+					"url": url,
+				})
+			}
+		}
+	}
+
+	// 构建响应数据
+	responseData := gin.H{
+		"id":             factory.ID,
+		"user_id":        factory.UserID,
+		"company_name":   factory.CompanyName,
+		"address":        factory.Address,
+		"capacity":       factory.Capacity,
+		"equipment":      factory.Equipment,
+		"certificates":   factory.Certificates,
+		"photos":         factory.Photos, // 保持原有的photos字段
+		"videos":         factory.Videos,
+		"employee_count": factory.EmployeeCount,
+		"rating":         factory.Rating,
+		"status":         factory.Status,
+		"created_at":     factory.CreatedAt,
+		"updated_at":     factory.UpdatedAt,
+		"user":           factory.User,
+		"images":         images, // 新增的images字段
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
-		"data": factory,
+		"data": responseData,
 	})
 }
 
@@ -311,7 +414,30 @@ func (fc *FactoryController) BatchUploadPhotos(c *gin.Context) {
 	}
 
 	// 验证用户是否有权限操作此工厂
-	if userID != factoryID {
+	// 检查该工厂是否属于当前用户
+	var factory models.FactoryProfile
+	err := fc.DB.Where("user_id = ?", userID).First(&factory).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"error":   "无权限操作此工厂",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "服务器内部错误",
+		})
+		return
+	}
+
+	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
+	// 将factoryID转换为字符串进行比较
+	factoryIDStr := fmt.Sprintf("%v", factoryID)
+	factoryIDNum := fmt.Sprintf("%v", factory.ID)
+	
+	if factoryIDStr != userID && factoryIDStr != factoryIDNum {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限操作此工厂",
@@ -343,7 +469,7 @@ func (fc *FactoryController) BatchUploadPhotos(c *gin.Context) {
 
 	// 调用服务层处理批量上传
 	fileService := services.NewFileService(fc.DB, "./uploads")
-	response, err := fileService.BatchUploadFactoryPhotos(files, factoryID, category)
+	response, err := fileService.BatchUploadFactoryPhotos(files, factory.ID, category)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -378,7 +504,30 @@ func (fc *FactoryController) GetFactoryPhotos(c *gin.Context) {
 	}
 
 	// 验证用户是否有权限查看此工厂
-	if userID != factoryID {
+	// 检查该工厂是否属于当前用户
+	var factory models.FactoryProfile
+	err := fc.DB.Where("user_id = ?", userID).First(&factory).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"error":   "无权限查看此工厂",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "服务器内部错误",
+		})
+		return
+	}
+
+	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
+	// 将factoryID转换为字符串进行比较
+	factoryIDStr := fmt.Sprintf("%v", factoryID)
+	factoryIDNum := fmt.Sprintf("%v", factory.ID)
+	
+	if factoryIDStr != userID && factoryIDStr != factoryIDNum {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限查看此工厂",
@@ -430,7 +579,25 @@ func (fc *FactoryController) DeleteFactoryPhoto(c *gin.Context) {
 	}
 
 	// 验证用户是否有权限操作此工厂
-	if userID != factoryID {
+	var factory models.FactoryProfile
+	err := fc.DB.Where("user_id = ?", userID).First(&factory).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"error":   "无权限操作此工厂",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "服务器内部错误",
+		})
+		return
+	}
+
+	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
+	if factoryID != userID && factoryID != factory.ID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限操作此工厂",
@@ -440,7 +607,7 @@ func (fc *FactoryController) DeleteFactoryPhoto(c *gin.Context) {
 
 	// 调用服务层删除图片
 	fileService := services.NewFileService(fc.DB, "./uploads")
-	err := fileService.DeleteFactoryPhoto(photoID, factoryID)
+	err = fileService.DeleteFactoryPhoto(photoID, factoryID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -478,7 +645,26 @@ func (fc *FactoryController) BatchDeletePhotos(c *gin.Context) {
 	}
 
 	// 验证用户是否有权限操作此工厂
-	if userID != factoryID {
+	// 检查该工厂是否属于当前用户
+	var factory models.FactoryProfile
+	err := fc.DB.Where("user_id = ?", userID).First(&factory).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"error":   "无权限操作此工厂",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "服务器内部错误",
+		})
+		return
+	}
+
+	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
+	if factoryID != userID && factoryID != factory.ID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限操作此工厂",

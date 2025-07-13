@@ -290,7 +290,7 @@ func (s *FileService) BatchUploadFactoryPhotos(files []*multipart.FileHeader, fa
 
 	// 验证工厂是否存在
 	var factory models.FactoryProfile
-	if err := s.db.Where("user_id = ?", factoryID).First(&factory).Error; err != nil {
+	if err := s.db.Where("id = ?", factoryID).First(&factory).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("工厂不存在")
 		}
@@ -513,7 +513,7 @@ func (s *FileService) BatchDeleteFactoryPhotos(photoIDs []string, factoryID stri
 func (s *FileService) updateFactoryPhotos(factoryID string, photos []*models.FactoryPhotoInfo) error {
 	// 获取现有的photos字段
 	var factory models.FactoryProfile
-	if err := s.db.Where("user_id = ?", factoryID).First(&factory).Error; err != nil {
+	if err := s.db.Where("id = ?", factoryID).First(&factory).Error; err != nil {
 		return err
 	}
 
