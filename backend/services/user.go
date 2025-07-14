@@ -167,6 +167,11 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 } 
 
+// GetDB 获取数据库连接
+func (s *UserService) GetDB() *gorm.DB {
+	return s.db
+}
+
 // ChangePassword 修改用户密码
 func (s *UserService) ChangePassword(userID, oldPassword, newPassword string) error {
 	// 获取用户信息

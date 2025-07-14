@@ -126,6 +126,14 @@ func SetupRouter(db *gorm.DB, cfg *config.Config) *gin.Engine {
 				userGroup.DELETE("/:id", userController.DeleteUser)
 			}
 
+			// 设计师管理路由
+			designerGroup := authRequiredGroup.Group("/designers")
+			{
+				designerGroup.GET("/profile", userController.GetDesignerProfile)
+				designerGroup.PUT("/profile", userController.UpdateDesignerProfile)
+				designerGroup.POST("/avatar", userController.UploadAvatar)
+			}
+
 			// 产品路由
 			productGroup := authRequiredGroup.Group("/products")
 			{

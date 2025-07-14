@@ -32,6 +32,7 @@ type DesignerProfile struct {
 	Address     string
 	Website     string
 	Bio         string
+	Avatar      string `gorm:"default:''"` // 新增：头像URL
 	Rating      float64 `gorm:"default:0"` // 设计师评分
 	Status      int     `gorm:"default:1"` // 设计师状态：1-正常，0-停用
 }
@@ -98,4 +99,22 @@ type UpdateFactoryProfileRequest struct {
 	Photos        []string `json:"photos"` // 工厂照片URL数组
 	Videos        []string `json:"videos"` // 工厂视频URL数组
 	EmployeeCount *int     `json:"employee_count"`
+}
+
+// UpdateDesignerProfileRequest 更新设计师信息请求
+type UpdateDesignerProfileRequest struct {
+	CompanyName string `json:"company_name"`
+	Address     string `json:"address"`
+	Website     string `json:"website"`
+	Bio         string `json:"bio"`
+	Avatar      string `json:"avatar"` // 头像URL
+}
+
+// UploadAvatarResponse 头像上传响应
+type UploadAvatarResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Data    struct {
+		URL string `json:"url"`
+	} `json:"data"`
 } 

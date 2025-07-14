@@ -435,9 +435,8 @@ func (fc *FactoryController) BatchUploadPhotos(c *gin.Context) {
 	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
 	// 将factoryID转换为字符串进行比较
 	factoryIDStr := fmt.Sprintf("%v", factoryID)
-	factoryIDNum := fmt.Sprintf("%v", factory.ID)
 	
-	if factoryIDStr != userID && factoryIDStr != factoryIDNum {
+	if factoryIDStr != userID && factoryIDStr != fmt.Sprintf("%d", factory.ID) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限操作此工厂",
@@ -469,7 +468,7 @@ func (fc *FactoryController) BatchUploadPhotos(c *gin.Context) {
 
 	// 调用服务层处理批量上传
 	fileService := services.NewFileService(fc.DB, "./uploads")
-	response, err := fileService.BatchUploadFactoryPhotos(files, factory.ID, category)
+	response, err := fileService.BatchUploadFactoryPhotos(files, fmt.Sprintf("%d", factory.ID), category)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -525,9 +524,8 @@ func (fc *FactoryController) GetFactoryPhotos(c *gin.Context) {
 	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
 	// 将factoryID转换为字符串进行比较
 	factoryIDStr := fmt.Sprintf("%v", factoryID)
-	factoryIDNum := fmt.Sprintf("%v", factory.ID)
 	
-	if factoryIDStr != userID && factoryIDStr != factoryIDNum {
+	if factoryIDStr != userID && factoryIDStr != fmt.Sprintf("%d", factory.ID) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限查看此工厂",
@@ -597,7 +595,7 @@ func (fc *FactoryController) DeleteFactoryPhoto(c *gin.Context) {
 	}
 
 	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
-	if factoryID != userID && factoryID != factory.ID {
+	if factoryID != userID && factoryID != fmt.Sprintf("%d", factory.ID) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限操作此工厂",
@@ -664,7 +662,7 @@ func (fc *FactoryController) BatchDeletePhotos(c *gin.Context) {
 	}
 
 	// 验证工厂ID是否匹配（允许使用用户ID或工厂ID）
-	if factoryID != userID && factoryID != factory.ID {
+	if factoryID != userID && factoryID != fmt.Sprintf("%d", factory.ID) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"error":   "无权限操作此工厂",
